@@ -16,12 +16,32 @@ import stud.ntnu.no.idatt2105.Findigo.service.CustomUserDetailsService;
 
 import java.io.IOException;
 
+/**
+ * Filter responsible for handling JWT authorization.
+ *
+ * <p>This filter intercepts incoming HTTP requests, extracts and validates the JWT token
+ * from the Authorization header, and sets the security context if the token is valid.</p>
+ *
+ * <p>It extends {@link OncePerRequestFilter} to ensure execution only once per request.</p>
+ */
 @Component
 @RequiredArgsConstructor
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
 
+  /**
+   * Performs JWT authentication filtering for each request.
+   *
+   * <p>Extracts the JWT token from the {@code Authorization} header, validates it,
+   * and sets the security context with the authenticated user if the token is valid.</p>
+   *
+   * @param request  the HTTP request
+   * @param response the HTTP response
+   * @param chain    the filter chain
+   * @throws ServletException if an error occurs during filtering
+   * @throws IOException      if an input or output error occurs
+   */
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {

@@ -21,12 +21,33 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Security configuration class for setting up authentication, authorization,
+ * CORS, and other security-related settings in the application.
+ *
+ * <p>This class configures:
+ * <ul>
+ *     <li>Cross-Origin Resource Sharing (CORS) settings</li>
+ *     <li>JWT authentication filter</li>
+ *     <li>Session management</li>
+ *     <li>Password encoding</li>
+ *     <li>Authentication and authorization rules</li>
+ * </ul>
+ * </p>
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
   private final JWTAuthorizationFilter jwtAuthFilter;
   private final UserDetailsService userDetailsService;
 
+  /**
+   * Configures Cross-Origin Resource Sharing (CORS) settings.
+   *
+   * <p>Allows requests from the frontend running on <code>http://localhost:5173</code>.</p>
+   *
+   * @return a {@link CorsConfigurationSource} with the defined CORS rules.
+   */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
@@ -40,6 +61,24 @@ public class SecurityConfig {
     return source;
   }
 
+  /**
+   * Configures the security filter chain.
+   *
+   * <p>This method:
+   * <ul>
+   *     <li>Disables CSRF protection (not needed for stateless JWT authentication).</li>
+   *     <li>Applies CORS configuration.</li>
+   *     <li>Allows unauthenticated access to authentication endpoints.</li>
+   *     <li>Requires authentication for all other endpoints.</li>
+   *     <li>Uses a stateless session management policy.</li>
+   *     <li>Registers the JWT authentication filter before Spring Security's default authentication filter.</li>
+   * </ul>
+   * </p>
+   *
+   * @param http the {@link HttpSecurity} instance for configuring security settings.
+   * @return the configured {@link SecurityFilterChain}.
+   * @throws Exception if an error occurs during configuration.
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
@@ -54,12 +93,24 @@ public class SecurityConfig {
         .build();
   }
 
+  /**
+   * Configures the password encoder used for hashing and verifying passwords.
+   *
+   * @return a {@link PasswordEncoder} using the BCrypt hashing algorithm.
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
-  // 📌 Setter opp authentication manager med password encoder og user details service
+  /**
+   * Configures and provides an {@link AuthenticationManager}.
+   *
+   * <p>The authentication manager is responsible for handling authentication requests
+   * using the provided {@link UserDetailsService} and password encoder.</p>
+   *
+   * @return an {@link AuthenticationManager} instance.
+   */
   @Bean
   public AuthenticationManager authenticationManager() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -68,7 +119,14 @@ public class SecurityConfig {
     return new ProviderManager(provider);
   }
 
-  // 📌 Oppretter AuthenticationProvider for Spring Security
+  /**
+   * Configures and provides an {@link AuthenticationProvider} for Spring Security.
+   *
+   * <p>The authentication provider verifies user credentials using the {@link UserDetailsService}
+   * and password encoder.</p>
+   *
+   * @return an {@link AuthenticationProvider} instance.
+   */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
