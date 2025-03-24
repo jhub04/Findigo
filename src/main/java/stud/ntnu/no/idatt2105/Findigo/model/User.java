@@ -14,7 +14,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 
-
+/**
+ * Represents a user in the system.
+ * Implements {@link UserDetails} for integration with Spring Security.
+ */
 @Data
 @Entity
 @Accessors(chain = true)
@@ -47,6 +50,12 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
 
+  /**
+   * Returns the authorities granted to the user.
+   * Converts {@link Role} enums to Spring Security's {@link GrantedAuthority}.
+   *
+   * @return a collection of granted authorities.
+   */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles.stream()
@@ -54,21 +63,45 @@ public class User implements UserDetails {
         .toList();
   }
 
+  /**
+   * Indicates whether the user's account has expired.
+   * Always returns {@code true}, meaning accounts do not expire.
+   *
+   * @return {@code true} since the account never expires.
+   */
   @Override
   public boolean isAccountNonExpired() {
     return true;
   }
 
+  /**
+   * Indicates whether the user's account is locked.
+   * Always returns {@code true}, meaning accounts are never locked.
+   *
+   * @return {@code true} since the account is never locked.
+   */
   @Override
   public boolean isAccountNonLocked() {
     return true;
   }
 
+  /**
+   * Indicates whether the user's credentials (password) have expired.
+   * Always returns {@code true}, meaning credentials never expire.
+   *
+   * @return {@code true} since credentials never expire.
+   */
   @Override
   public boolean isCredentialsNonExpired() {
     return true;
   }
 
+  /**
+   * Indicates whether the user is enabled.
+   * Always returns {@code true}, meaning all users are enabled.
+   *
+   * @return {@code true} since all users are enabled by default.
+   */
   @Override
   public boolean isEnabled() {
     return true;
