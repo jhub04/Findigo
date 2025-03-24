@@ -10,5 +10,4 @@ public class FindigoApplication {
 		System.out.println("Hello world!");
 		SpringApplication.run(FindigoApplication.class, args);
 	}
-
 }
