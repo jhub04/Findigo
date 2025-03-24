@@ -25,5 +25,9 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+    - name: Set environment variables
+      run: |
+          echo "findigo_db_pass=${{ secrets.FINDIGO_DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "findigo_secret_key=${{ secrets.FINDIGO_SECRET_KEY }}" >> $GITHUB_ENV
     - name: Build with Maven
       run: mvn -B package --file pom.xml
