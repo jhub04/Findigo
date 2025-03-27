@@ -85,7 +85,12 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll() // kan logge inn + registerer uten token
+            .requestMatchers(
+                "/api/auth/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/swagger-ui.html"
+            ).permitAll() // kan logge inn + registerer uten token
             .anyRequest().authenticated()
         )
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
