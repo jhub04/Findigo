@@ -1,6 +1,7 @@
-package stud.ntnu.no.idatt2105.Findigo.model;
+package stud.ntnu.no.idatt2105.Findigo.dtos.auth;
 
 import lombok.Data;
+import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 
 import java.util.Set;
 

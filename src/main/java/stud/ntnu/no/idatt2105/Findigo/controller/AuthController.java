@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import stud.ntnu.no.idatt2105.Findigo.model.AuthRequest;
-import stud.ntnu.no.idatt2105.Findigo.model.AuthResponse;
-import stud.ntnu.no.idatt2105.Findigo.model.RegisterRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 
 
