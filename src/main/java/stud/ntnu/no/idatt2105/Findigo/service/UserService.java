@@ -3,15 +3,19 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
-import stud.ntnu.no.idatt2105.Findigo.model.AuthRequest;
-import stud.ntnu.no.idatt2105.Findigo.model.AuthResponse;
-import stud.ntnu.no.idatt2105.Findigo.model.RegisterRequest;
-import stud.ntnu.no.idatt2105.Findigo.model.User;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
+import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service class for handling user authentication and registration.
@@ -62,5 +66,36 @@ public class UserService {
     String token = jwtUtil.generateToken(userDetails);
 
     return new AuthResponse(token);
+  }
+
+  // Get all users (Admin Only)
+  public List<User> getAllUsers() {
+    return userRepository.findAll();
+  }
+
+  // Get user by ID (Admin Only)
+  public Optional<User> getUserById(Long id) {
+    return userRepository.findById(id);
+  }
+
+  // Get user by username (Admin Only)
+  public Optional<User> getUserByUsername(String username) {
+    return userRepository.findByUsername(username);
+  }
+
+  // Get profile of the logged-in user
+  public UserResponse getCurrentUser() {
+    String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+    return mapToDTO(user);
+  }
+
+  private UserResponse mapToDTO(User user) {
+    List<Long> calculationIds = user.getCalculations().stream()
+            .map(CalculationEntity::getId)
+            .toList();
+
+    return new UserResponse(user.getId(), user.getUsername(), calculationIds);
   }
 }
