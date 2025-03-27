@@ -61,10 +61,13 @@ public class UserService {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
     );
+    System.out.println("Auth1");
 
     UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+    System.out.println("Auth2");
 
     String token = jwtUtil.generateToken(userDetails);
+    System.out.println("Auth3");
 
     return new AuthResponse(token);
   }
