@@ -1,6 +1,5 @@
-package stud.ntnu.no.idatt2105.Findigo.model;
+package stud.ntnu.no.idatt2105.Findigo.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

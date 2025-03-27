@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
-import stud.ntnu.no.idatt2105.Findigo.model.AuthRequest;
-import stud.ntnu.no.idatt2105.Findigo.model.AuthResponse;
-import stud.ntnu.no.idatt2105.Findigo.model.RegisterRequest;
-import stud.ntnu.no.idatt2105.Findigo.model.User;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
+import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 /**

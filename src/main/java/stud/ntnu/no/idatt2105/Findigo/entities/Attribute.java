@@ -1,8 +1,7 @@
-package stud.ntnu.no.idatt2105.Findigo.model;
+package stud.ntnu.no.idatt2105.Findigo.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.web.service.annotation.GetExchange;
 
 @Data
 @Entity

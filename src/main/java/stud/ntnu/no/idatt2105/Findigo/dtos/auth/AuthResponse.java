@@ -1,4 +1,4 @@
-package stud.ntnu.no.idatt2105.Findigo.model;
+package stud.ntnu.no.idatt2105.Findigo.dtos.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
