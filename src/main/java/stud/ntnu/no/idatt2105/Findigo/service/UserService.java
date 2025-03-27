@@ -11,6 +11,7 @@ import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
@@ -92,10 +93,6 @@ public class UserService {
   }
 
   private UserResponse mapToDTO(User user) {
-    List<Long> calculationIds = user.getCalculations().stream()
-            .map(CalculationEntity::getId)
-            .toList();
-
-    return new UserResponse(user.getId(), user.getUsername(), calculationIds);
+    return new UserResponse(user.getUsername(), user.getId());
   }
 }
