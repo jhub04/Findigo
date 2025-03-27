@@ -1,5 +1,9 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,20 +24,19 @@ import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentications", description = "Endpoints for user registration and login")
 public class AuthController {
   private final UserService userService;
 
   /**
-   * Handles user registration requests.
-   *
-   * <p>Accepts a {@link RegisterRequest} object containing user details
-   * and registers the user in the system.</p>
-   *
-   * <p>Returns an HTTP 500 response if an error occurs during registration.</p>
-   *
-   * @param registerRequest the user registration request containing necessary details.
-   * @return a {@link ResponseEntity} containing a success message or an error message.
+   * Register a new user.
    */
+  @Operation(summary = "Register new user", description = "Creates a new user account based on " +
+      "provided details")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User registered successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error during registration")
+  })
   @PostMapping("/register")
   public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
     try {
@@ -44,14 +47,14 @@ public class AuthController {
   }
 
   /**
-   * Handles user login requests.
-   *
-   * <p>Accepts an {@link AuthRequest} object containing login credentials
-   * and authenticates the user.</p>
-   *
-   * @param authRequest the authentication request containing user credentials.
-   * @return a {@link ResponseEntity} containing an authentication token if successful.
+   * Authenticate and return JWT token.
    */
+  @Operation(summary = "Login", description = "Authenticates user credentials and returns a JWT " +
+      "token if valid")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Login successful"),
+      @ApiResponse(responseCode = "401", description = "Invalid username or password")
+  })
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest authRequest) {
     return ResponseEntity.ok(userService.authenticate(authRequest));
