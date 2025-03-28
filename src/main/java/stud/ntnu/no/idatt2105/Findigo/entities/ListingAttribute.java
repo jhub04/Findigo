@@ -1,7 +1,10 @@
 package stud.ntnu.no.idatt2105.Findigo.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Represents an association between a listing and an attribute.
@@ -9,6 +12,9 @@ import lombok.Data;
  */
 @Data
 @Entity
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "listing_attribute")
 public class ListingAttribute {
 

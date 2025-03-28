@@ -3,6 +3,11 @@ package stud.ntnu.no.idatt2105.Findigo.dtos.listing;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
+
+import java.util.List;
 
 /**
  * Represents an authentication request data transfer object containing user credentials.
@@ -12,5 +17,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListingResponse {
-  private String id;
-}
+  private Long id;
+  private String briefDescription;
+  private String fullDescription;
+  private double latitude;
+  private double longitude;
+  private List<String> imageUrls;
+  private CategoryResponse category;
+  private UserResponse user;
+  private List<ListingAttributeResponse> attributes;}
