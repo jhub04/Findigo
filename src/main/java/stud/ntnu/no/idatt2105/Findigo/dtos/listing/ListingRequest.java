@@ -1,4 +1,4 @@
-package stud.ntnu.no.idatt2105.Findigo.dtos.user;
+package stud.ntnu.no.idatt2105.Findigo.dtos.listing;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
-  private Long id;
-  private String username;
+public class ListingRequest {
+  private String id;
 }
