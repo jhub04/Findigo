@@ -98,7 +98,6 @@ public class UserService {
   public UserResponse getCurrentUser() {
     String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
     User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-
     return mapToDTO(user);
   }
 
