@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
@@ -24,7 +25,7 @@ public class ListingService {
 
   public Listing addListing(String username, ListingRequest req) {
     User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     Category category = categoryRepository.findById(req.getCategoryId())
             .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -41,7 +42,7 @@ public class ListingService {
 
   public List<Listing> getUserListings(String username) {
     User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     return listingRepository.findListingByUser(user);
   }

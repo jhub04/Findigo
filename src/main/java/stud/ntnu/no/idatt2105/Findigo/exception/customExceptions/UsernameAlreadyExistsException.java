@@ -1,4 +1,4 @@
-package stud.ntnu.no.idatt2105.Findigo.exception;
+package stud.ntnu.no.idatt2105.Findigo.exception.customExceptions;
 
 /**
  * The class represents a custom exception to indicate that a user with given username
