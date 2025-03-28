@@ -44,6 +44,18 @@ public class Listing {
   private String fullDescription;
 
   /**
+   * Longitude of the place of the listing
+   */
+  @Column(nullable = false)
+  private double longitude;
+
+  /**
+   * Longitude of the place of the listing
+   */
+  @Column(nullable = false)
+  private double latitude;
+
+  /**
    * The category this listing belongs to.
    * Cannot be null.
    */
