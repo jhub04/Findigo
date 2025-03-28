@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 /src/main/resources/pictures
+/src/main/resources/keystore.jks
 
 ### STS ###
 .apt_generated
