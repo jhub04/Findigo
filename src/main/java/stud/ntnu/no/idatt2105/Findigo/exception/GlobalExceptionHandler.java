@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 
 import java.time.LocalDateTime;
 
@@ -58,6 +60,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetail> handleUsernameNotFoundException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
   }
+
+  @ExceptionHandler(CategoryNotFoundException.class)
+  public ResponseEntity<ErrorDetail> handleCategoryNotFoundException(@NonNull Exception e, WebRequest request) {
+    return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
+  }
+
 
   /**
    * Handles the {@link InvalidKeyException} and returns a custom error response.

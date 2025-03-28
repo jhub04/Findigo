@@ -21,14 +21,14 @@ public class ListingController {
   @PostMapping("/{username}")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<Listing> addListing(
-          @PathVariable String username,
-          @Valid @RequestBody ListingRequest request) {
+      @PathVariable String username,
+      @Valid @RequestBody ListingRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED).body(listingService.addListing(username, request));
   }
 
   @GetMapping("/{username}")
-public ResponseEntity<List<Listing>> getUserListings(
-        @PathVariable String username
+  public ResponseEntity<List<Listing>> getUserListings(
+      @PathVariable String username
   ) {
     return ResponseEntity.ok(listingService.getUserListings(username));
   }

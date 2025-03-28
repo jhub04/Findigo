@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
-import stud.ntnu.no.idatt2105.Findigo.exception.UsernameAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
