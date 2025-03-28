@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,7 @@ import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 @RequiredArgsConstructor
 @Tag(name = "Authentications", description = "Endpoints for user registration and login")
 public class AuthController {
+  private static final Logger logger = LogManager.getLogger(AuthController.class);
   private final UserService userService;
 
   /**
@@ -39,7 +42,10 @@ public class AuthController {
   })
   @PostMapping("/register")
   public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
-    return ResponseEntity.ok(userService.register(registerRequest));
+    logger.info("Trying to register new user with username " + registerRequest.getUsername());
+    String registerStatus = userService.register(registerRequest);
+    logger.info("User with username " + registerRequest.getUsername() + " registered successfully");
+    return ResponseEntity.ok(registerStatus);
   }
 
   /**
@@ -54,6 +60,9 @@ public class AuthController {
   })
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest authRequest) {
-    return ResponseEntity.ok(userService.authenticate(authRequest));
+    logger.info("Logging in user with username "+ authRequest.getUsername());
+    AuthResponse response = userService.authenticate(authRequest);
+    logger.info("Authenticated " +authRequest.getUsername() + " successfully");
+    return ResponseEntity.ok(response);
   }
 }

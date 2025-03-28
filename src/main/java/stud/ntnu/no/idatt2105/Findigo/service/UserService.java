@@ -1,6 +1,8 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
+import stud.ntnu.no.idatt2105.Findigo.controller.AuthController;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
@@ -30,6 +33,7 @@ public class UserService {
   private final AuthenticationManager authenticationManager;
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
+  private static final Logger logger = LogManager.getLogger(UserService.class);
 
   /**
    * Registers a new user in the system.
@@ -40,6 +44,7 @@ public class UserService {
    */
   public String register(RegisterRequest request) {
     if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+      logger.error("Couldn't register " + request.getUsername() + ". Username already taken");
       throw new UsernameAlreadyExistsException("User with username " + request.getUsername() + " already exists");
     }
 
@@ -59,13 +64,17 @@ public class UserService {
    * @return An {@link AuthResponse} containing the generated JWT token.
    */
   public AuthResponse authenticate(AuthRequest request) {
+    logger.info("Authenticating user " + request.getUsername());
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
     );
+    logger.info(request.getUsername() + " credentials authenticated");
 
     UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
 
+    logger.info("Trying to create jwt token for " + request.getUsername());
     String token = jwtUtil.generateToken(userDetails);
+    logger.info("Token created successfully for " + request.getUsername());
 
     return new AuthResponse(token);
   }
