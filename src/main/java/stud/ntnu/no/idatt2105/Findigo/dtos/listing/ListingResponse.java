@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
-import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 
 import java.util.List;
 

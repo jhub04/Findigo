@@ -1,5 +1,6 @@
 package stud.ntnu.no.idatt2105.Findigo.dtos.mappers;
 
+import lombok.NoArgsConstructor;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
@@ -9,6 +10,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 public class ListingMapper {
 
   public static Listing toEntity(ListingRequest request, User user, Category category, List<Attribute> attributeDefinitions) {

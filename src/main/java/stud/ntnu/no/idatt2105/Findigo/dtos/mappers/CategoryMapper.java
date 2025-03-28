@@ -1,11 +1,13 @@
 package stud.ntnu.no.idatt2105.Findigo.dtos.mappers;
 
+import lombok.NoArgsConstructor;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeDefinitionDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 
 import java.util.List;
 
+@NoArgsConstructor
 public class CategoryMapper {
 
   public static CategoryResponse toDto(Category category) {
