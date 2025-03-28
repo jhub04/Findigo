@@ -103,6 +103,6 @@ public class UserService {
   }
 
   private UserResponse mapToDTO(User user) {
-    return new UserResponse(user.getUsername(), user.getId());
+    return new UserResponse(user.getId(), user.getUsername());
   }
 }
