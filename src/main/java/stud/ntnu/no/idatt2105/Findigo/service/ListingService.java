@@ -1,9 +1,11 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
@@ -23,6 +25,7 @@ public class ListingService {
   private final CategoryRepository categoryRepository;
 
 
+  @Transactional
   public Listing addListing(String username, ListingRequest req) {
     User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -40,11 +43,16 @@ public class ListingService {
     return listingRepository.save(listing);
   }
 
-  public List<Listing> getUserListings(String username) {
+  @Transactional
+  public List<ListingResponse> getUserListings(String username) {
     User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    return listingRepository.findListingByUser(user);
+    List<Listing> listings = listingRepository.findListingByUser(user);
+
+    return listings.stream()
+        .map(ListingMapper::toDto)
+        .toList();
   }
 
 }

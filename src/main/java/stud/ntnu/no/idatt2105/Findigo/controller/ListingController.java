@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 
@@ -27,7 +28,7 @@ public class ListingController {
   }
 
   @GetMapping("/{username}")
-  public ResponseEntity<List<Listing>> getUserListings(
+  public ResponseEntity<List<ListingResponse>> getUserListings(
       @PathVariable String username
   ) {
     return ResponseEntity.ok(listingService.getUserListings(username));
