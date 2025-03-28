@@ -12,7 +12,7 @@ public class ListingAttribute {
   private long Id;
 
   @Column(nullable = false)
-  private String value;
+  private String attributeValue;
 
   @ManyToOne
   @JoinColumn(name = "listing_id", nullable = false)
