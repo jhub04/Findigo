@@ -13,6 +13,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.exception.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class UserService {
    */
   public String register(RegisterRequest request) {
     if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-      throw new RuntimeException("User already exists!");
+      throw new UsernameAlreadyExistsException("User with username " + request.getUsername() + " already exists");
     }
 
     User user = new User()
@@ -61,13 +62,10 @@ public class UserService {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
     );
-    System.out.println("Auth1");
 
     UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-    System.out.println("Auth2");
 
     String token = jwtUtil.generateToken(userDetails);
-    System.out.println("Auth3");
 
     return new AuthResponse(token);
   }

@@ -35,7 +35,7 @@ public class AuthController {
       "provided details")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "User registered successfully"),
-      @ApiResponse(responseCode = "500", description = "Internal server error during registration")
+      @ApiResponse(responseCode = "409", description = "User with the given username already exists")
   })
   @PostMapping("/register")
   public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
@@ -49,7 +49,8 @@ public class AuthController {
       "token if valid")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Login successful"),
-      @ApiResponse(responseCode = "401", description = "Invalid username or password")
+      @ApiResponse(responseCode = "401", description = "Invalid username or password"),
+      @ApiResponse(responseCode = "500", description = "Invalid signing key for signing JWT token")
   })
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest authRequest) {
