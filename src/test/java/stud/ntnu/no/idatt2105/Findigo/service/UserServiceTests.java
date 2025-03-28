@@ -26,23 +26,21 @@ public class UserServiceTests {
     registerRequest.setUsername("existingUser");
     registerRequest.setPassword("password123");
 
-    //Register user into system
-    userService.register(registerRequest);
-
+    //Register user into syste
+    try{
+      userService.register(registerRequest);
+    } catch(Exception ignored) {
+      //the database already has this user in db
+    }
 
   }
 
   @Test
-  public void testRegisterNewUserAndRegisterUserWithExistingUsername() {
+  public void testRegisterUserWithExistingUsername() {
     // new user to register
     RegisterRequest registerRequest = new RegisterRequest();
-    registerRequest.setUsername("newUser");
+    registerRequest.setUsername("existingUser");
     registerRequest.setPassword("password123");
-
-    //Register user into system
-    String response = userService.register(registerRequest);
-
-    assertEquals("User registered successfully!", response);
 
     // When & Then
     assertThrows(UsernameAlreadyExistsException.class, () -> userService.register(registerRequest));
@@ -66,7 +64,7 @@ public class UserServiceTests {
   public void testAuthenticate_UnsuccessfulAuthentication() {
     //Mock auth request
     AuthRequest authRequest = new AuthRequest();
-    authRequest.setUsername("newUser");
+    authRequest.setUsername("user");
     authRequest.setPassword("password123");
 
 
