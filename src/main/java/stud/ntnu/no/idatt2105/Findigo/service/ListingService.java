@@ -4,11 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.EditListingDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingAttributeMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.ListingAttribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
@@ -31,6 +34,7 @@ public class ListingService {
   private final ListingRepository listingRepository;
   private final UserRepository userRepository;
   private final CategoryRepository categoryRepository;
+  private final ListingAttributeMapper listingAttributeMapper;
 
   /**
    * Adds a new listing for a given user.
@@ -107,5 +111,24 @@ public class ListingService {
     }
     return listings.stream()
         .map(ListingMapper::toDto).toList();
+  }
+
+
+  public ListingResponse editListing(EditListingDto editListingDto) {
+    Listing listing = listingRepository.findById(editListingDto.getId())
+        .orElseThrow(() -> new NoSuchElementException("No listing found with id " + editListingDto.getId()));
+
+    listing.setBriefDescription(editListingDto.getBriefDescription())
+        .setFullDescription(editListingDto.getFullDescription())
+        .setLatitude(editListingDto.getLatitude())
+        .setLongitude(editListingDto.getLongitude())
+        .setCategory(categoryRepository.findById(
+            editListingDto.getCategoryId())
+            .orElseThrow(() -> new NoSuchElementException("No category with id " + editListingDto.getCategoryId())))
+        .setListingAttributes(editListingDto.getAttributes().stream()
+            .map(listingAttributeRequest -> listingAttributeMapper.fromRequestToEntity(listingAttributeRequest, editListingDto.getId())).toList())
+        .setImageUrls(editListingDto.getImageUrls());
+
+    return ListingMapper.toDto(listing);
   }
 }
