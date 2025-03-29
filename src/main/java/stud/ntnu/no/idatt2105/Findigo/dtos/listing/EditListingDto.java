@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class EditListingDto {
+  //TODO javadoc
   private Long id;
   private String briefDescription;
   private String fullDescription;

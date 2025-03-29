@@ -114,6 +114,17 @@ public class ListingService {
   }
 
 
+  /**
+   * Edits an existing listing in the database.
+   * <p>
+   * This method updates the details of an existing listing, including its description,
+   * location, category, attributes, and image URLs.
+   * </p>
+   *
+   * @param editListingDto The DTO containing the updated listing details.
+   * @return A {@link ListingResponse} containing the updated listing details.
+   * @throws NoSuchElementException If the listing or category is not found.
+   */
   public ListingResponse editListing(EditListingDto editListingDto) {
     Listing listing = listingRepository.findById(editListingDto.getId())
         .orElseThrow(() -> new NoSuchElementException("No listing found with id " + editListingDto.getId()));
@@ -123,12 +134,30 @@ public class ListingService {
         .setLatitude(editListingDto.getLatitude())
         .setLongitude(editListingDto.getLongitude())
         .setCategory(categoryRepository.findById(
-            editListingDto.getCategoryId())
+                editListingDto.getCategoryId())
             .orElseThrow(() -> new NoSuchElementException("No category with id " + editListingDto.getCategoryId())))
+
         .setListingAttributes(editListingDto.getAttributes().stream()
             .map(listingAttributeRequest -> listingAttributeMapper.fromRequestToEntity(listingAttributeRequest, editListingDto.getId())).toList())
         .setImageUrls(editListingDto.getImageUrls());
 
     return ListingMapper.toDto(listing);
   }
+
+  /**
+   * Deletes a listing from the database.
+   * <p>
+   * If the listing exists, it will be removed; otherwise, an exception is thrown.
+   * </p>
+   *
+   * @param listingId The ID of the listing to delete.
+   * @throws NoSuchElementException If no listing with the given ID exists.
+   */
+  public void deleteListing(long listingId) {
+    if (!listingRepository.existsById(listingId)) {
+      throw new NoSuchElementException("There is no listing with id " + listingId);
+    }
+    listingRepository.deleteById(listingId);
+  }
+
 }

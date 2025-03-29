@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryResponse {
+  //TODO javadoc
   private Long id;
   private String name;
   private List<AttributeDefinitionDto> attributes;

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttributeDefinitionDto {
+  //TODO javadoc
   private Long id;
   private String name;
   private String type;

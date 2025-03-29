@@ -6,4 +6,5 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 
 @Repository
 public interface AttributeRepository extends JpaRepository<Attribute, Long> {
+  //TODO javadoc
 }
