@@ -1,5 +1,8 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +31,6 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-  //TODO swagger doc
 
   private static final Logger logger = LogManager.getLogger(UserController.class);
   private final UserService userService;
@@ -41,6 +43,11 @@ public class UserController {
    *
    * @return A {@link ResponseEntity} containing a list of users.
    */
+  @Operation(summary = "Get all users", description = "Fetches all users in the system. Accessible only by admins.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully fetched all users"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - Access denied")
+  })
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<User>> getAllUsers() {
@@ -59,17 +66,18 @@ public class UserController {
    * @param id The unique ID of the user.
    * @return A {@link ResponseEntity} containing the user, if found.
    */
+  @Operation(summary = "Get user by ID", description = "Fetches a user by their unique ID. Accessible only by admins.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User found"),
+      @ApiResponse(responseCode = "404", description = "User not found"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - Access denied")
+  })
   @GetMapping("/id/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Optional<User>> getUserById(@PathVariable Long id) {
-    //TODO add better exception hamdling here
+  public ResponseEntity<User> getUserById(@PathVariable Long id) {
     logger.info("Fetching user by ID: {}", id);
-    Optional<User> user = userService.getUserById(id);
-    if (user.isPresent()) {
-      logger.info("User found: {}", user.get().getUsername());
-    } else {
-      logger.warn("User with ID {} not found", id);
-    }
+    User user = userService.getUserById(id);
+    logger.info("User found with ID " + id);
     return ResponseEntity.ok(user);
   }
 
@@ -82,17 +90,18 @@ public class UserController {
    * @param username The username of the user.
    * @return A {@link ResponseEntity} containing the user, if found.
    */
+  @Operation(summary = "Get user by username", description = "Fetches a user by their username. Accessible only by admins.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User found"),
+      @ApiResponse(responseCode = "404", description = "User not found"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - Access denied")
+  })
   @GetMapping("/username/{username}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Optional<User>> getUserByUsername(@PathVariable String username) {
-    //TODO add better exception hamdling here
+  public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
     logger.info("Fetching user by username: {}", username);
-    Optional<User> user = userService.getUserByUsername(username);
-    if (user.isPresent()) {
-      logger.info("User found: {}", username);
-    } else {
-      logger.warn("User with username {} not found", username);
-    }
+    User user = userService.getUserByUsername(username);
+
     return ResponseEntity.ok(user);
   }
 
@@ -104,6 +113,11 @@ public class UserController {
    *
    * @return A {@link ResponseEntity} containing the profile of the logged-in user.
    */
+  @Operation(summary = "Get current user profile", description = "Fetches the profile of the currently authenticated user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully fetched user profile"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized - User is not logged in")
+  })
   @GetMapping("/profile")
   @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
   public ResponseEntity<UserResponse> getCurrentUser() {
