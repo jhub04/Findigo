@@ -10,6 +10,8 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Service class responsible for handling category-related business logic.
@@ -25,14 +27,29 @@ public class CategoryService {
    * Retrieves all categories from the database and maps them to CategoryResponse DTOs.
    *
    * @return a list of CategoryResponse objects representing all available categories.
+   * @throws NoSuchElementException if no categories are found
    */
   public List<CategoryResponse> getAllCategories() {
     List<Category> categories = categoryRepository.findAll();
     if (categories.isEmpty()) {
-      logger.info("No categories in database");
+      throw new NoSuchElementException("No categories found in database");
     }
     return categories.stream()
         .map(CategoryMapper::toDto)
         .toList();
+  }
+
+  /**
+   * Retrieves a categories associated with a category ID from the database and maps it to CategoryResponse DTOs.
+   *
+   * @return a list of CategoryResponse objects representing all available categories.
+   * @throws NoSuchElementException if no category is found
+   */
+  public CategoryResponse getCategory(long categoryID) {
+    Optional<Category> category = categoryRepository.findById(categoryID);
+    if (category.isEmpty()) {
+      throw new NoSuchElementException("Couldn't find category with ID "+ categoryID);
+    }
+    return CategoryMapper.toDto(category.get());
   }
 }
