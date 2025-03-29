@@ -15,6 +15,7 @@ import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Service class for managing listings.
@@ -74,5 +75,21 @@ public class ListingService {
     return listings.stream()
         .map(ListingMapper::toDto)
         .toList();
+  }
+
+  /**
+   * Retrieves all listings associated with a specific cateory.
+   *
+   * @param categoryID The category id of the category whose listings are to be retrieved.
+   * @return A list of {@link ListingResponse} objects containing listing details.
+   * @throws NoSuchElementException if there are no listings associated with the given category.
+   */
+  public List<ListingResponse> getListingsInCategory(Long categoryID) {
+    List<Listing> listings = listingRepository.findListingsByCategoryId(categoryID);
+    if (listings.isEmpty()) {
+      throw new NoSuchElementException("Couldn't find any listings in category with ID "+categoryID);
+    }
+    return listings.stream()
+        .map(ListingMapper::toDto).toList();
   }
 }

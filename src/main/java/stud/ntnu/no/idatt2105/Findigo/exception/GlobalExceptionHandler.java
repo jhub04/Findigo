@@ -9,10 +9,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 /**
  * Global exception handler for handling different types of exceptions
@@ -58,6 +60,11 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(UsernameNotFoundException.class)
   public ResponseEntity<ErrorDetail> handleUsernameNotFoundException(@NonNull Exception e, WebRequest request) {
+    return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
+  }
+
+  @ExceptionHandler(NoSuchElementException.class)
+  public ResponseEntity<ErrorDetail> handleNoSuchElementException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
   }
 
