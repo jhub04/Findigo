@@ -28,6 +28,8 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+  //TODO swagger doc
+
   private static final Logger logger = LogManager.getLogger(UserController.class);
   private final UserService userService;
 

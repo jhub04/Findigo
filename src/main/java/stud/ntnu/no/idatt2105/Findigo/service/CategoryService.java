@@ -11,12 +11,21 @@ import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
 
+/**
+ * Service class responsible for handling category-related business logic.
+ */
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
+
   private final CategoryRepository categoryRepository;
   private static final Logger logger = LogManager.getLogger(CategoryService.class);
 
+  /**
+   * Retrieves all categories from the database and maps them to CategoryResponse DTOs.
+   *
+   * @return a list of CategoryResponse objects representing all available categories.
+   */
   public List<CategoryResponse> getAllCategories() {
     List<Category> categories = categoryRepository.getCategories();
     if (categories.isEmpty()) {

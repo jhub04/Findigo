@@ -12,6 +12,7 @@ import java.util.List;
 
 @NoArgsConstructor
 public class ListingMapper {
+  //TODO javadoc
 
   public static Listing toEntity(ListingRequest request, User user, Category category, List<Attribute> attributeDefinitions) {
     Listing listing = new Listing()

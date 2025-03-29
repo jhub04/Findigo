@@ -12,13 +12,26 @@ import stud.ntnu.no.idatt2105.Findigo.service.CategoryService;
 
 import java.util.List;
 
+/**
+ * Controller for handling category-related operations.
+ * <p>
+ * This controller provides an endpoint to retrieve all categories available in the system.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
 public class CategoryController {
+  //TODO swagger doc
+
   private static final Logger logger = LogManager.getLogger(CategoryController.class);
   private final CategoryService categoryService;
 
+  /**
+   * Retrieves all available categories.
+   *
+   * @return a ResponseEntity containing a list of {@link CategoryResponse} objects.
+   */
   @GetMapping("")
   public ResponseEntity<List<CategoryResponse>> getAllCategories() {
     logger.info("Fetching all categories");

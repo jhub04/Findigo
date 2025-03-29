@@ -9,6 +9,7 @@ import java.util.List;
 
 @NoArgsConstructor
 public class CategoryMapper {
+  //TODO javadoc
 
   public static CategoryResponse toDto(Category category) {
     List<AttributeDefinitionDto> attributeDtos = category.getAttributes().stream()

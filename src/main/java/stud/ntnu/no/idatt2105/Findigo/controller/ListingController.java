@@ -24,6 +24,7 @@ import java.util.List;
 @RequestMapping("/api/listings")
 @RequiredArgsConstructor
 public class ListingController {
+  //TODO swagger doc
 
   private static final Logger logger = LogManager.getLogger(ListingController.class);
   private final ListingService listingService;
