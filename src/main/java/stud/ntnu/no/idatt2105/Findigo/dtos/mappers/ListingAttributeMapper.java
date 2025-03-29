@@ -9,6 +9,8 @@ import stud.ntnu.no.idatt2105.Findigo.entities.ListingAttribute;
 @NoArgsConstructor
 public class ListingAttributeMapper {
 
+  //TODO javadoc
+
   public static ListingAttribute toEntity(Attribute attribute, String value, Listing listing) {
     return new ListingAttribute()
             .setAttributeValue(value)
