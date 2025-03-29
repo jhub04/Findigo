@@ -63,11 +63,25 @@ public class GlobalExceptionHandler {
     return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
   }
 
+  /**
+   * Handles the {@link NoSuchElementException} and returns a custom error response.
+   *
+   * @param e the exception that was thrown
+   * @param request the web request that triggered the exception
+   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 404 (Not Found)
+   */
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<ErrorDetail> handleNoSuchElementException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
   }
 
+  /**
+   * Handles the {@link CategoryNotFoundException} and returns a custom error response.
+   *
+   * @param e the exception that was thrown
+   * @param request the web request that triggered the exception
+   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 404 (Not Found)
+   */
   @ExceptionHandler(CategoryNotFoundException.class)
   public ResponseEntity<ErrorDetail> handleCategoryNotFoundException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);

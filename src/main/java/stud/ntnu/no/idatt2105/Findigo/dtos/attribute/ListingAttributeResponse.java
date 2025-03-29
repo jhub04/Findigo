@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListingAttributeResponse {
+  //TODO javadoc
   private String name;
   private String value;
 }

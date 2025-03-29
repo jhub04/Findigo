@@ -95,6 +95,12 @@ public class ListingController {
     return ResponseEntity.ok(listings);
   }
 
+  /**
+   * Edits an existing listing with the provided details.
+   *
+   * @param listingDto the DTO containing the updated listing information
+   * @return a ResponseEntity containing the updated listing response
+   */
   @Operation(summary = "Edit a listing", description = "Edits the values in the database of a given listing")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Listing edited successfully"),
@@ -106,5 +112,23 @@ public class ListingController {
     ListingResponse listingResponse = listingService.editListing(listingDto);
     logger.info("Listing with listing id " + listingDto.getId() + " successfully edited");
     return ResponseEntity.ok(listingResponse);
+  }
+
+  /**
+   * Deletes a listing with the given ID.
+   *
+   * @param listingID the ID of the listing to be deleted
+   * @return a ResponseEntity indicating the result of the deletion
+   */
+  @Operation(summary = "Delete a listing", description = "Deletes the listing with the given ID from the database")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Listing deleted successfully"),
+      @ApiResponse(responseCode = "404", description = "If no listing with the given ID is found")
+  })
+  @DeleteMapping("/{listingID}")
+  public ResponseEntity<?> deleteListing(@PathVariable long listingID) {
+    logger.info("Deleting listing with id " + listingID);
+    listingService.deleteListing(listingID);
+    return ResponseEntity.ok("Listing deleted");
   }
 }
