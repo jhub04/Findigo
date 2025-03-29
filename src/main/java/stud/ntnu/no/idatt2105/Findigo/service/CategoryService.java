@@ -27,7 +27,7 @@ public class CategoryService {
    * @return a list of CategoryResponse objects representing all available categories.
    */
   public List<CategoryResponse> getAllCategories() {
-    List<Category> categories = categoryRepository.getCategories();
+    List<Category> categories = categoryRepository.findAll();
     if (categories.isEmpty()) {
       logger.info("No categories in database");
     }
