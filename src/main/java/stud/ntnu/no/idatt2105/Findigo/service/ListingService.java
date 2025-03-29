@@ -10,6 +10,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
@@ -46,7 +47,7 @@ public class ListingService {
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     Category category = categoryRepository.findById(req.getCategoryId())
-        .orElseThrow(() -> new RuntimeException("Category not found"));
+        .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
 
     Listing listing = ListingMapper.toEntity(
         req,
