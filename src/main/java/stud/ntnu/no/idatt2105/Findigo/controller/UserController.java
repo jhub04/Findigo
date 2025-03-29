@@ -8,16 +8,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Controller for handling user-related operations.
@@ -125,5 +122,18 @@ public class UserController {
     UserResponse userResponse = userService.getCurrentUser();
     logger.info("Fetched profile for user: {}", userResponse.getUsername());
     return ResponseEntity.ok(userResponse);
+  }
+
+  @Operation(summary = "Edits user profile", description = "Edits username and/or password of the given user, only accessible to the logged in user")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully edited user profile"),
+      @ApiResponse(responseCode = "403", description = "If the logged in user tries to edit profile of another user")
+  })
+  @PutMapping("/edit/{userID}")
+  public ResponseEntity<?> editUserDetails(@PathVariable long userID, @RequestBody EditUserDto userDto) {
+    logger.info("Editing user with id " + userID);
+    userService.editUserDetails(userDto);
+    logger.info("User detailt edited of user with id " + userID);
+    return ResponseEntity.ok("User updated");
   }
 }
