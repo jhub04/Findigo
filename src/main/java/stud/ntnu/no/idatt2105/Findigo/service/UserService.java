@@ -19,6 +19,7 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlready
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -84,13 +85,22 @@ public class UserService {
   }
 
   // Get user by ID (Admin Only)
-  public Optional<User> getUserById(Long id) {
-    return userRepository.findById(id);
+  public User getUserById(Long id) {
+    Optional<User> user = userRepository.findById(id);
+    if (user.isEmpty()) {
+      throw new NoSuchElementException("No user with the given id: " + id + " was found");
+    }
+    return user.get();
   }
 
   // Get user by username (Admin Only)
-  public Optional<User> getUserByUsername(String username) {
-    return userRepository.findByUsername(username);
+  public User getUserByUsername(String username) {
+    Optional<User> user = userRepository.findByUsername(username);
+    if (user.isEmpty()) {
+      throw new NoSuchElementException("No user with username '" + username + "' was found");
+    }
+
+    return user.get();
   }
 
   // Get profile of the logged-in user

@@ -1,5 +1,9 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -23,8 +27,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/listings")
 @RequiredArgsConstructor
+@Tag(name = "Listings", description = "Get listings from database")
 public class ListingController {
-  //TODO swagger doc
 
   private static final Logger logger = LogManager.getLogger(ListingController.class);
   private final ListingService listingService;
@@ -36,6 +40,11 @@ public class ListingController {
    * @param request  the details of the listing to be added
    * @return a ResponseEntity containing the created listing
    */
+  @Operation(summary = "Add a new listing", description = "Creates a new listing for a specific user")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "Listing successfully created"),
+      @ApiResponse(responseCode = "404", description = "User or category in the ListingRequest not found")
+  })
   @PostMapping("/{username}")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<Listing> addListing(
@@ -53,6 +62,11 @@ public class ListingController {
    * @param username the username of the user whose listings are being retrieved
    * @return a ResponseEntity containing a list of listing responses
    */
+  @Operation(summary = "Get listings by user", description = "Fetches all listings associated with a given username")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Listings fetched successfully"),
+      @ApiResponse(responseCode = "404", description = "User not found")
+  })
   @GetMapping("/{username}")
   public ResponseEntity<List<ListingResponse>> getUserListings(
       @PathVariable String username) {
@@ -62,6 +76,16 @@ public class ListingController {
     return ResponseEntity.ok(listings);
   }
 
+  /**
+   * Retrieves all listings available in the database.
+   *
+   * @return a ResponseEntity containing a list of all listings
+   */
+  @Operation(summary = "Get all listings", description = "Fetches all listings stored in the database")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Listings fetched successfully"),
+      @ApiResponse(responseCode = "404", description = "If no listings are found")
+  })
   @GetMapping("")
   public ResponseEntity<List<ListingResponse>> getAllListings() {
     logger.info("Fetching all listings in database");
@@ -69,6 +93,4 @@ public class ListingController {
     logger.info("Fetched all listings in database");
     return ResponseEntity.ok(listings);
   }
-
-
 }
