@@ -92,4 +92,19 @@ public class ListingService {
     return listings.stream()
         .map(ListingMapper::toDto).toList();
   }
+
+  /**
+   * Retrieves all listings in database.
+   *
+   * @return A list of {@link ListingResponse} objects containing listing details.
+   * @throws NoSuchElementException if there are no listings in database.
+   */
+  public List<ListingResponse> getAllListings() {
+    List<Listing> listings = listingRepository.findAll();
+    if (listings.isEmpty()) {
+      throw new NoSuchElementException("Couldn't find any listings in database");
+    }
+    return listings.stream()
+        .map(ListingMapper::toDto).toList();
+  }
 }
