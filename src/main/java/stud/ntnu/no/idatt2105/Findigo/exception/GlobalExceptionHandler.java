@@ -4,6 +4,7 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,6 +38,18 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(UsernameAlreadyExistsException.class)
   public ResponseEntity<ErrorDetail> handleUsernameAlreadyExistsException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.CONFLICT, e, request);
+  }
+
+  /**
+   * Handles the {@link AccessDeniedException} and returns a custom error response.
+   *
+   * @param e the exception that was thrown
+   * @param request the web request that triggered the exception
+   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 403 (Forbidden)
+   */
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ErrorDetail> handleAccessDeniedException(@NonNull Exception e, WebRequest request) {
+    return createErrorResponseEntity(HttpStatus.FORBIDDEN, e, request);
   }
 
   /**

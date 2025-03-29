@@ -120,7 +120,7 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
     provider.setUserDetailsService(userDetailsService);
-    provider.setPasswordEncoder(passwordEncoder()); // 📌 Hasher passord før lagring
+    provider.setPasswordEncoder(passwordEncoder()); //  Hasher passord før lagring
     return new ProviderManager(provider);
   }
 
@@ -136,7 +136,7 @@ public class SecurityConfig {
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
     authProvider.setUserDetailsService(userDetailsService);
-    authProvider.setPasswordEncoder(passwordEncoder()); // 📌 Sikrer at passord blir kryptert riktig
+    authProvider.setPasswordEncoder(passwordEncoder()); //  Sikrer at passord blir kryptert riktig
     return authProvider;
   }
 }

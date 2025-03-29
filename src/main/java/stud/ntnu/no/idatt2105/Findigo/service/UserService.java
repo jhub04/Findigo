@@ -1,23 +1,28 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
 import lombok.RequiredArgsConstructor;
+import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -106,11 +111,32 @@ public class UserService {
   // Get profile of the logged-in user
   public UserResponse getCurrentUser() {
     String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     return mapToDTO(user);
   }
 
   private UserResponse mapToDTO(User user) {
     return new UserResponse(user.getId(), user.getUsername());
+  }
+
+  public void editUserDetails(EditUserDto userDto) {
+    UserResponse currentUser = getCurrentUser();
+
+    User user = userRepository.findById(userDto.getId())
+        .orElseThrow(() -> new NoSuchElementException("No user with id " + userDto.getId() + " found"));
+
+    if (!currentUser.getUsername().equals(user.getUsername()) || !currentUser.getId().equals(user.getId())) {
+      throw new AccessDeniedException("The current logged in user is not the same as the user which is being edited");
+    }
+    if (user.getUsername().equals(userDto.getUsername())) {
+      logger.info("No change in username detected");
+    } else {
+      String oldUsername = user.getUsername();
+      user.setUsername(userDto.getUsername());
+      logger.info("Changed user with id " + userDto.getId() + " username from " + oldUsername + " to " + userDto.getUsername());
+    }
+
+    user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+    logger.info("New password set for user with id " + userDto.getId());
   }
 }
