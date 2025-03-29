@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.EditListingDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
@@ -92,5 +93,18 @@ public class ListingController {
     List<ListingResponse> listings = listingService.getAllListings();
     logger.info("Fetched all listings in database");
     return ResponseEntity.ok(listings);
+  }
+
+  @Operation(summary = "Edit a listing", description = "Edits the values in the database of a given listing")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Listing edited successfully"),
+      @ApiResponse(responseCode = "404", description = "If no listing, category or attributes are found")
+  })
+  @PutMapping("/edit")
+  public ResponseEntity<?> editListing(@RequestBody EditListingDto listingDto) {
+    logger.info("Editing listing with listing id " + listingDto.getId());
+    ListingResponse listingResponse = listingService.editListing(listingDto);
+    logger.info("Listing with listing id " + listingDto.getId() + " successfully edited");
+    return ResponseEntity.ok(listingResponse);
   }
 }
