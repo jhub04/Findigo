@@ -9,5 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ListingRepository extends JpaRepository<Listing, Long> {
+  //TODO javadoc
   List<Listing> findListingByUser(User user);
 }

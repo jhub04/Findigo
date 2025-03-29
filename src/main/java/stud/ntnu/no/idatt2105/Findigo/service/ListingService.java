@@ -16,6 +16,12 @@ import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.List;
 
+/**
+ * Service class for managing listings.
+ * <p>
+ * This service provides functionality for adding new listings and retrieving user-specific listings.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ListingService {
@@ -24,25 +30,40 @@ public class ListingService {
   private final UserRepository userRepository;
   private final CategoryRepository categoryRepository;
 
-
+  /**
+   * Adds a new listing for a given user.
+   *
+   * @param username The username of the user adding the listing.
+   * @param req      The listing request containing details of the listing.
+   * @return The saved {@link Listing} entity.
+   * @throws UsernameNotFoundException if the user is not found in the database.
+   * @throws RuntimeException          if the specified category does not exist.
+   */
   @Transactional
   public Listing addListing(String username, ListingRequest req) {
     User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     Category category = categoryRepository.findById(req.getCategoryId())
-            .orElseThrow(() -> new RuntimeException("Category not found"));
+        .orElseThrow(() -> new RuntimeException("Category not found"));
 
     Listing listing = ListingMapper.toEntity(
-            req,
-            user,
-            category,
-            category.getAttributes()
+        req,
+        user,
+        category,
+        category.getAttributes()
     );
 
     return listingRepository.save(listing);
   }
 
+  /**
+   * Retrieves all listings associated with a specific user.
+   *
+   * @param username The username of the user whose listings are to be retrieved.
+   * @return A list of {@link ListingResponse} objects containing listing details.
+   * @throws UsernameNotFoundException if the user is not found in the database.
+   */
   @Transactional
   public List<ListingResponse> getUserListings(String username) {
     User user = userRepository.findByUsername(username)
@@ -54,5 +75,4 @@ public class ListingService {
         .map(ListingMapper::toDto)
         .toList();
   }
-
 }

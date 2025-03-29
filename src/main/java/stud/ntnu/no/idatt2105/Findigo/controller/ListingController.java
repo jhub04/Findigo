@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ListingController {
 
-  private static final Logger logger = LogManager.getLogger(AuthController.class);
+  private static final Logger logger = LogManager.getLogger(ListingController.class);
   private final ListingService listingService;
 
   /**
