@@ -30,7 +30,7 @@ public class ListingAttribute {
    * The value assigned to the attribute for this specific listing.
    * This field is required and cannot be null.
    */
-  @Column(nullable = false)
+  @Column(name = "attribute_value", nullable = false)
   private String attributeValue;
 
   /**
