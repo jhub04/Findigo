@@ -61,4 +61,14 @@ public class ListingController {
     logger.info("Fetched listings from user " + username);
     return ResponseEntity.ok(listings);
   }
+
+  @GetMapping("")
+  public ResponseEntity<List<ListingResponse>> getAllListings() {
+    logger.info("Fetching all listings in database");
+    List<ListingResponse> listings = listingService.getAllListings();
+    logger.info("Fetched all listings in database");
+    return ResponseEntity.ok(listings);
+  }
+
+
 }
