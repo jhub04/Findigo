@@ -52,7 +52,7 @@ public class ListingController {
       @PathVariable String username,
       @Valid @RequestBody ListingRequest request) {
     logger.info("Adding listing from user " + username + " with listing description " + request.getBriefDescription());
-    Listing listing = listingService.addListing(username, request);
+    Listing listing = listingService.addListing(username, request);//TODO this should be listing response object
     logger.info("Listing with description " + request.getBriefDescription() + " added");
     return ResponseEntity.status(HttpStatus.CREATED).body(listing);
   }
