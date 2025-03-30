@@ -11,6 +11,8 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
 import stud.ntnu.no.idatt2105.Findigo.service.MessageService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
@@ -26,7 +28,13 @@ public class MessageController {
     return ResponseEntity.ok(messageResponse);
   }
 
-  @GetMapping()
+  @GetMapping("/{userId1}/{userId2}")
+  public ResponseEntity<?> getAllMessagesBetweenUsers(@PathVariable long userId1, @PathVariable long userId2) {
+    logger.info("Getting all messages between userId " + userId1 + " and " + userId2);
+    List<MessageResponse> messageResponses = messageService.getAllMessagesBetween(userId1, userId2);
+    logger.info("Successfully fetched all messages between userId " + userId1 + " and " + userId2);
+    return ResponseEntity.ok(messageResponses);
+  }
 
 
 }
