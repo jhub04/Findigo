@@ -108,4 +108,10 @@ public class ListingService {
     return listings.stream()
         .map(ListingMapper::toDto).toList();
   }
+
+  public ListingResponse getListingById(Long id) {
+    return listingRepository.findById(id)
+            .map(ListingMapper::toDto)
+            .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
+  }
 }

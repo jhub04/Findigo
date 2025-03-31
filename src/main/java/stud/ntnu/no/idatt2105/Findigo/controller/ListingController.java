@@ -93,4 +93,23 @@ public class ListingController {
     logger.info("Fetched all listings in database");
     return ResponseEntity.ok(listings);
   }
+
+  /**
+   * Retrieves a specific listing by its ID.
+   *
+   * @param id the ID of the listing to retrieve
+   * @return a ResponseEntity containing the listing if found
+   */
+  @Operation(summary = "Get listing by ID", description = "Fetches a single listing by its unique ID")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Listing fetched successfully"),
+          @ApiResponse(responseCode = "404", description = "Listing not found")
+  })
+  @GetMapping("/{id}")
+  public ResponseEntity<ListingResponse> getListingById(@PathVariable Long id) {
+    logger.info("Fetching listing in database");
+    ListingResponse listingResponse = listingService.getListingById(id);
+    logger.info("Fetched all listings in database");
+    return ResponseEntity.ok(listingResponse);
+  }
 }
