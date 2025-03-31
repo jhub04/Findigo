@@ -65,6 +65,7 @@ public class MessageController {
   public ResponseEntity<List<MessageResponse>> getAllMessagesBetweenUsers(
       @Parameter(description = "ID of the first user") @PathVariable long userId1,
       @Parameter(description = "ID of the second user") @PathVariable long userId2) {
+    //TODO read all messages
     logger.info("Getting all messages between userId {} and userId {}", userId1, userId2);
     List<MessageResponse> messageResponses = messageService.getAllMessagesBetween(userId1, userId2);
     logger.info("Successfully fetched all messages between userId {} and userId {}", userId1, userId2);

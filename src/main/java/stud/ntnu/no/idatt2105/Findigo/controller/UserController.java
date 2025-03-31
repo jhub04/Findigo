@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +73,8 @@ public class UserController {
   })
   @GetMapping("/id/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<User> getUserById(@PathVariable Long id) {
+  public ResponseEntity<User> getUserById(
+      @Parameter(description = "The unique ID of the user to be fetched") @PathVariable Long id) {
     logger.info("Fetching user by ID: {}", id);
     User user = userService.getUserById(id);
     logger.info("User found with ID " + id);
@@ -96,7 +98,8 @@ public class UserController {
   })
   @GetMapping("/username/{username}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+  public ResponseEntity<User> getUserByUsername(
+      @Parameter(description = "The username of the user to be fetched") @PathVariable String username) {
     logger.info("Fetching user by username: {}", username);
     User user = userService.getUserByUsername(username);
 
@@ -125,16 +128,29 @@ public class UserController {
     return ResponseEntity.ok(userResponse);
   }
 
+  /**
+   * Edits the profile details (username and/or password) of the given user.
+   * <p>
+   * This endpoint allows a logged-in user to update their own profile information.
+   * Users cannot edit another user's profile.
+   * </p>
+   *
+   * @param userID  the ID of the user whose details are being edited
+   * @param userDto the new details to be updated (username and/or password)
+   * @return a {@link ResponseEntity} with a success message if the update is successful
+   */
   @Operation(summary = "Edits user profile", description = "Edits username and/or password of the given user, only accessible to the logged in user")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successfully edited user profile"),
       @ApiResponse(responseCode = "403", description = "If the logged in user tries to edit profile of another user")
   })
   @PutMapping("/edit/{userID}")
-  public ResponseEntity<?> editUserDetails(@PathVariable long userID, @RequestBody EditUserDto userDto) {
+  public ResponseEntity<?> editUserDetails(
+      @Parameter(description = "The userID of the user to be edited") @PathVariable long userID,
+      @RequestBody EditUserDto userDto) {
     logger.info("Editing user with id " + userID);
     userService.editUserDetails(userDto);
-    logger.info("User detailt edited of user with id " + userID);
+    logger.info("User details edited of user with id " + userID);
     return ResponseEntity.ok("User updated");
   }
 }
