@@ -44,14 +44,15 @@ public class SecurityConfig {
   /**
    * Configures Cross-Origin Resource Sharing (CORS) settings.
    *
-   * <p>Allows requests from the frontend running on <code>http://localhost:5173</code>.</p>
+   * <p>Allows requests from the frontend running on <a href="http://localhost:5173"></a>
+   * and <a href="http://localhost:5174"></a>.</p>
    *
    * @return a {@link CorsConfigurationSource} with the defined CORS rules.
    */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:5173/", "http://localhost:5174/")); // frontend port
+    configuration.setAllowedOrigins(List.of("http://localhost:5173/", "http://localhost:5174/")); // frontend ports
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     configuration.setAllowCredentials(true);
