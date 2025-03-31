@@ -1,10 +1,14 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.controller.MessageController;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.MessageMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
@@ -22,6 +26,7 @@ public class MessageService {
   private final UserRepository userRepository;
   private final UserService userService;
   private final MessageMapper messageMapper;
+  private static final Logger logger = LogManager.getLogger(MessageController.class);
   //TODO javadoc
 
   public MessageResponse sendMessage(MessageRequest messageRequest){
@@ -45,6 +50,7 @@ public class MessageService {
     return messageMapper.toDto(message);
   }
 
+  @Transactional
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
     User currentUser = userRepository.findByUsername(((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername())
@@ -57,6 +63,19 @@ public class MessageService {
 
     List<Message> messages = messageRepository.findMessagesByFromUserAndToUser(user1, user2);
     messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
+
+    // Debugging BEFORE updating
+    messages.forEach(m -> logger.info("BEFORE: Message ID: {}, isRead: {}, from: {}, to: {}",
+        m.getId(), m.isRead(), m.getFromUser().getUsername(), m.getToUser().getUsername()));
+
+    messages.stream()
+        .filter(m -> !m.isRead() && m.getToUser().equals(currentUser))
+        .forEach(m -> m.setRead(true));
+
+    // Debugging AFTER updating
+    messages.forEach(m -> logger.info("AFTER: Message ID: {}, isRead: {}, from: {}, to: {}",
+        m.getId(), m.isRead(), m.getFromUser().getUsername(), m.getToUser().getUsername()));
+
     List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(messageMapper::toDto).toList());
     messageResponses.sort(Comparator.comparing(MessageResponse::getSentAt));
     return messageResponses.reversed();
