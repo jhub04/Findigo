@@ -82,7 +82,7 @@ public class MessageService {
 
     for (Long otherUserId:userIdsCommunicatedWith) {
       List<MessageResponse> tempList = getAllMessagesBetween(userID, otherUserId);
-      newestMessages.add(tempList.getLast());
+      newestMessages.add(tempList.get(0));
     }
 
     newestMessages.sort(Comparator.comparing(MessageResponse::getSentAt));
