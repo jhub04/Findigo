@@ -23,6 +23,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,14 +35,18 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserServiceTests {
-
+  @Autowired
+  UserRepository userRepository;
   @Autowired
   private UserService userService;
   @Autowired
   CustomUserDetailsService customUserDetailsService;
+  private long existingUserId;
+  private long anotherUserId;
 
   @BeforeEach
   public void setUp() {
+    userRepository.deleteAll();
     RegisterRequest registerRequest1 = new RegisterRequest();//Should get id 1
     registerRequest1.setUsername("existingUser");
     registerRequest1.setPassword("password123");
@@ -50,10 +55,10 @@ public class UserServiceTests {
     //Register users into system
     try{
       userService.register(registerRequest1);
-      System.out.println(userService.getUserByUsername("existingUser").getId());
     } catch(Exception ignored) {
       //the database already has this user in db
     }
+    existingUserId = userService.getUserByUsername("existingUser").getId();
 
   }
 
@@ -103,22 +108,21 @@ public class UserServiceTests {
 
   @Test
   public void testGetUserById() {
-    User user = userService.getUserById(1L);
-    System.out.println(user.getUsername());
+    User user = userService.getUserById(existingUserId);
 
-    assertEquals(1L, user.getId());
+    assertEquals(existingUserId, user.getId());
   }
 
   @Test
   public void testGetUserByIdFail() {
-    assertThrows(NoSuchElementException.class, () -> userService.getUserById(3L));
+    assertThrows(NoSuchElementException.class, () -> userService.getUserById(9999999L));
   }
 
   @Test
   public void testGetUserByUsername() {
-    User user = userService.getUserByUsername("existingUser");//Should have id 1
+    User user = userService.getUserByUsername("existingUser");
 
-    assertEquals(1L, user.getId());
+    assertEquals(existingUserId, user.getId());
   }
 
   @Test
@@ -133,8 +137,7 @@ public class UserServiceTests {
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     UserResponse user = userService.getCurrentUser();
-    System.out.println(user.getUsername());
-    assertEquals(1L, user.getId());
+    assertEquals(existingUserId, user.getId());
     assertEquals("existingUser", user.getUsername());
   }
 
@@ -158,7 +161,10 @@ public class UserServiceTests {
     try {
       userService.register(newUser);
     }catch (Exception ignored){}
-    EditUserDto editedUser = new EditUserDto(2L, "anotherUserEdited", "newPassword");
+
+    anotherUserId = userService.getUserByUsername("anotherUser").getId();
+
+    EditUserDto editedUser = new EditUserDto(anotherUserId, "anotherUserEdited", "newPassword");
 
     UserDetails userDetails = userService.getUserByUsername("anotherUser");
     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -166,14 +172,14 @@ public class UserServiceTests {
 
     userService.editUserDetails(editedUser);
 
-    User user = userService.getUserById(2L);
+    User user = userService.getUserById(anotherUserId);
 
     assertEquals("anotherUserEdited", user.getUsername());
   }
 
   @Test
   public void testEditUserDetailsFail() {
-    EditUserDto editedUser = new EditUserDto(3L, "existingUserEdited", "newPassword");
+    EditUserDto editedUser = new EditUserDto(98765434567L,"existingUserEdited", "newPassword");
 
     RegisterRequest newUser = new RegisterRequest();
     newUser.setUsername("anotherUser");
@@ -182,13 +188,15 @@ public class UserServiceTests {
       userService.register(newUser);
     }catch (Exception ignored){}
 
-    User anotherUser = userService.getUserById(2L);
+    anotherUserId = userService.getUserByUsername("anotherUser").getId();
+
+    User anotherUser = userService.getUserById(anotherUserId);
     Authentication authentication = new UsernamePasswordAuthenticationToken(anotherUser, null, anotherUser.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
     assertThrows(NoSuchElementException.class, () -> userService.editUserDetails(editedUser));
 
-    editedUser.setId(1L);
+    editedUser.setId(existingUserId);
 
     assertThrows(AccessDeniedException.class, () -> userService.editUserDetails(editedUser));
   }
