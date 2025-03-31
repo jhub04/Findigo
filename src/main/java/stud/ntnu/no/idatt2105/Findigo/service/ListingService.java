@@ -43,9 +43,9 @@ public class ListingService {
    */
   @Transactional
   public Listing addListing(ListingRequest req) {
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    User user = userRepository.findByUsername(username)
+    User user = userRepository.findByUsername(currentUsername)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     Category category = categoryRepository.findById(req.getCategoryId())
@@ -115,5 +115,11 @@ public class ListingService {
     return listingRepository.findById(id)
             .map(ListingMapper::toDto)
             .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
+  }
+
+  public boolean isListingOwner(Listing listing) {
+    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    return listing.getUser().getUsername().equals(currentUsername);
   }
 }
