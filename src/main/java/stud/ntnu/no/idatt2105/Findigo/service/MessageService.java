@@ -46,13 +46,13 @@ public class MessageService {
     //TODO paginate response
     User currentUser = userRepository.findByUsername(((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername())
         .orElseThrow(() -> new NoSuchElementException("Couldn't find user"));
-    if (currentUser.getId() != userId1 || currentUser.getId() != userId2) {
+    if (!(currentUser.getId().equals(userId1) || currentUser.getId().equals(userId2))) {
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 +") match with userId of current user in the security context(" + currentUser.getId()+")");
     }
     User user1 = userRepository.findById(userId1).
         orElseThrow(() -> new NoSuchElementException("Couldn't find user with id " + userId1));
-    User user2 = userRepository.findById(userId1).
-        orElseThrow(() -> new NoSuchElementException("Couldn't find user with id " + userId1));
+    User user2 = userRepository.findById(userId2).
+        orElseThrow(() -> new NoSuchElementException("Couldn't find user with id " + userId2));
     List<Message> messages = messageRepository.findMessagesByFromUserAndToUser(user1, user2);
     messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
     List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(MessageMapper::toDto).toList());

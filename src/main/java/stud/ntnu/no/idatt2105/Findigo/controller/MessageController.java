@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
@@ -17,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
 public class MessageController {
-  private MessageService messageService;
+  private final MessageService messageService;
   private static final Logger logger = LogManager.getLogger(MessageController.class);
 
   @PostMapping("/send")
