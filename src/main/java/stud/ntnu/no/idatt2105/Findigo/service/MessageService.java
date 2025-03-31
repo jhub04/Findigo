@@ -20,6 +20,9 @@ import java.util.*;
 public class MessageService {
   private final MessageRepository messageRepository;
   private final UserRepository userRepository;
+  private final UserService userService;
+  private final MessageMapper messageMapper;
+  //TODO javadoc
 
   public MessageResponse sendMessage(MessageRequest messageRequest){
     UserDetails currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -39,7 +42,7 @@ public class MessageService {
 
     messageRepository.save(message);
 
-    return MessageMapper.toDto(message);
+    return messageMapper.toDto(message);
   }
 
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
@@ -49,14 +52,40 @@ public class MessageService {
     if (!(currentUser.getId().equals(userId1) || currentUser.getId().equals(userId2))) {
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 +") match with userId of current user in the security context(" + currentUser.getId()+")");
     }
-    User user1 = userRepository.findById(userId1).
-        orElseThrow(() -> new NoSuchElementException("Couldn't find user with id " + userId1));
-    User user2 = userRepository.findById(userId2).
-        orElseThrow(() -> new NoSuchElementException("Couldn't find user with id " + userId2));
+    User user1 = userService.getUserById(userId1);
+    User user2 = userService.getUserById(userId2);
+
     List<Message> messages = messageRepository.findMessagesByFromUserAndToUser(user1, user2);
     messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
-    List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(MessageMapper::toDto).toList());
+    List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(messageMapper::toDto).toList());
     messageResponses.sort(Comparator.comparing(MessageResponse::getSentAt));
     return messageResponses;
+  }
+
+
+  public List<MessageResponse> getNewestMessages(long userID) {
+    User currentUser = userService.getUserById(userID);
+    if (!currentUser.getId().equals(userID)) {
+      throw new AccessDeniedException("UserId of requested messages(" + userID + ") does not match user Id of current user(" + currentUser.getId() + ")");
+    }
+    //Current user must here be user with userID given by param
+    List<Message> allMessagesToOrFromUser = messageRepository.findMessagesByToUser(currentUser);
+    allMessagesToOrFromUser.addAll(messageRepository.findMessagesByFromUser(currentUser)); //All messages that have been sent to or sent by the calling user
+
+    Set<Long> userIdsCommunicatedWith = new HashSet<>();
+    for (Message message: allMessagesToOrFromUser) {
+      userIdsCommunicatedWith.add(message.getFromUser().getId());
+      userIdsCommunicatedWith.add(message.getToUser().getId());
+    }
+    userIdsCommunicatedWith.remove(userID);
+    List<MessageResponse> newestMessages= new ArrayList<>();
+
+    for (Long otherUserId:userIdsCommunicatedWith) {
+      List<MessageResponse> tempList = getAllMessagesBetween(userID, otherUserId);
+      newestMessages.add(tempList.getLast());
+    }
+
+    return newestMessages;
+
   }
 }

@@ -105,31 +105,22 @@ public class UserService {
     //TODO use this method where it need to be used (message service blant annet)
     Optional<User> user = userRepository.findByUsername(username);
     if (user.isEmpty()) {
-      //TODO should throw UserNameNotFoundException or smt
-      throw new NoSuchElementException("No user with username '" + username + "' was found");
+      throw new UsernameNotFoundException("No user with username '" + username + "' was found");
     }
-
     return user.get();
   }
 
   // Get profile of the logged-in user
-  public UserResponse getCurrentUser() {
+  public User getCurrentUser() {
     //TODO use this where needed (message service)
     String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    return mapToDTO(user);
-  }
-
-  private UserResponse mapToDTO(User user) {
-    //TODO add this to a mapper instead of here
-    return new UserResponse(user.getId(), user.getUsername());
+    return getUserByUsername(username);
   }
 
   public void editUserDetails(EditUserDto userDto) {
-    UserResponse currentUser = getCurrentUser();
+    User currentUser = getCurrentUser();
 
-    User user = userRepository.findById(userDto.getId())
-        .orElseThrow(() -> new NoSuchElementException("No user with id " + userDto.getId() + " found"));
+    User user = getUserById(userDto.getId());
 
     if (!(currentUser.getUsername().equals(user.getUsername()) || currentUser.getId().equals(user.getId()))) {
       throw new AccessDeniedException("The current logged in user is not the same as the user which is being edited");
