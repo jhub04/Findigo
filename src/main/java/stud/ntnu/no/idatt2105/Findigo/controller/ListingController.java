@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,8 +50,9 @@ public class ListingController {
   @PostMapping("/{username}")
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<Listing> addListing(
-      @PathVariable String username,
+      @Parameter(description = "the username of the user adding the listing") @PathVariable String username,
       @Valid @RequestBody ListingRequest request) {
+    //TODO use iserid instead of username
     logger.info("Adding listing from user " + username + " with listing description " + request.getBriefDescription());
     Listing listing = listingService.addListing(username, request);//TODO this should be listing response object
     logger.info("Listing with description " + request.getBriefDescription() + " added");
@@ -70,7 +72,7 @@ public class ListingController {
   })
   @GetMapping("/{username}")
   public ResponseEntity<List<ListingResponse>> getUserListings(
-      @PathVariable String username) {
+      @Parameter(description = "The username of the user whose listings are being retrieved") @PathVariable String username) {
     logger.info("Getting listings from user " + username);
     List<ListingResponse> listings = listingService.getUserListings(username);
     logger.info("Fetched listings from user " + username);
@@ -126,7 +128,8 @@ public class ListingController {
       @ApiResponse(responseCode = "404", description = "If no listing with the given ID is found")
   })
   @DeleteMapping("/{listingID}")
-  public ResponseEntity<?> deleteListing(@PathVariable long listingID) {
+  public ResponseEntity<?> deleteListing(
+      @Parameter(description = "ID of the listing to be deleted") @PathVariable long listingID) {
     logger.info("Deleting listing with id " + listingID);
     listingService.deleteListing(listingID);
     return ResponseEntity.ok("Listing deleted");

@@ -7,11 +7,13 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeDefinitionDto;
 
 import java.util.List;
 
+/**
+ * DTO for returning category details, including its ID, name, and attributes.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryResponse {
-  //TODO javadoc
   private Long id;
   private String name;
   private List<AttributeDefinitionDto> attributes;
