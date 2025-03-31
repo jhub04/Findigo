@@ -1,7 +1,8 @@
 package stud.ntnu.no.idatt2105.Findigo.dtos.mappers;
 
 import lombok.NoArgsConstructor;
-import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeDefinitionDto;
+import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 
@@ -27,8 +28,8 @@ public class CategoryMapper {
    * @return a {@code CategoryResponse} containing the category ID, name, and attributes
    */
   public static CategoryResponse toDto(Category category) {
-    List<AttributeDefinitionDto> attributeDtos = category.getAttributes().stream()
-        .map(attr -> new AttributeDefinitionDto(
+    List<AttributeResponse> attributeDtos = category.getAttributes().stream()
+        .map(attr -> new AttributeResponse(
             attr.getId(),
             attr.getAttributeName(),
             attr.getDataType()
@@ -40,5 +41,20 @@ public class CategoryMapper {
         category.getCategoryName(),
         attributeDtos
     );
+  }
+
+  /**
+   * Converts a {@link CategoryRequest} DTO to a {@link Category} entity.
+   * @param category the {@code CategoryRequest} DTO to convert
+   * @return a {@code Category} entity containing the category name and attributes
+   */
+  public static Category toEntity(CategoryRequest category) {
+    return new Category()
+        .setCategoryName(category.getName())
+        .setAttributes(
+            category.getAttributes().stream()
+                .map(AttributeMapper::toEntity)
+                .toList()
+        );
   }
 }

@@ -2,19 +2,14 @@ package stud.ntnu.no.idatt2105.Findigo.dtos.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeResponse;
 
 import java.util.List;
 
-/**
- * DTO for returning category details, including its ID, name, and attributes.
- */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-public class CategoryResponse {
-  private Long id;
+public class CategoryRequest {
   private String name;
-  private List<AttributeResponse> attributes;
+  private List<AttributeRequest> attributes;
 }

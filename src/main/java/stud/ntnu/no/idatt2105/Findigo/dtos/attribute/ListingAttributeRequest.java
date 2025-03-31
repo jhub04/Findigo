@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ListingAttributeRequest {
-  //TODO javadoc
   private Long attributeId;
   private String value;
 }

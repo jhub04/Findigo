@@ -95,4 +95,6 @@ public class CategoryController {
     logger.info("Category found with ID " + categoryID);
     return ResponseEntity.ok(category);
   }
+
+  //TODO add endpoint for creating a category
 }
