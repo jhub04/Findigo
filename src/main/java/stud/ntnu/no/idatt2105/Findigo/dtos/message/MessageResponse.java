@@ -9,7 +9,9 @@ import java.util.Date;
 @AllArgsConstructor
 public class MessageResponse {
   private long fromUserId;
+  private String fromUsername;
   private long toUserId;
+  private String toUsername;
   private String messageText;
   private long messageId;
   private boolean isRead;

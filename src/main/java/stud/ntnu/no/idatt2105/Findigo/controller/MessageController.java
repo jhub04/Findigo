@@ -34,7 +34,13 @@ public class MessageController {
     return ResponseEntity.ok(messageResponses);
   }
 
-
+  @GetMapping("/{userId}")
+  public ResponseEntity<?> getNewestMessagesForUser(@PathVariable long userId) {
+    logger.info("Finding all newest messages to and from userId " + userId);
+    List<MessageResponse> newestMessagesToOrFromUser = messageService.getNewestMessages(userId);
+    logger.info("Found all newest messages to or from userID " + userId);
+    return ResponseEntity.ok(newestMessagesToOrFromUser);
+  }
 
 
 }

@@ -127,7 +127,7 @@ public class UserServiceTests {
 
   @Test
   public void testGetUserByUsernameFail() {
-    assertThrows(NoSuchElementException.class, () -> userService.getUserByUsername("NotAUser"));
+    assertThrows(UsernameNotFoundException.class, () -> userService.getUserByUsername("NotAUser"));
   }
 
   @Test
@@ -136,7 +136,7 @@ public class UserServiceTests {
     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    UserResponse user = userService.getCurrentUser();
+    User user = userService.getCurrentUser();
     assertEquals(existingUserId, user.getId());
     assertEquals("existingUser", user.getUsername());
   }

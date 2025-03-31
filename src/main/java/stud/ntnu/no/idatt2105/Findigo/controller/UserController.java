@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
@@ -31,7 +32,7 @@ public class UserController {
 
   private static final Logger logger = LogManager.getLogger(UserController.class);
   private final UserService userService;
-
+  private final UserMapper userMapper;
   /**
    * Retrieves a list of all users.
    * <p>
@@ -119,7 +120,7 @@ public class UserController {
   @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
   public ResponseEntity<UserResponse> getCurrentUser() {
     logger.info("Fetching current user profile");
-    UserResponse userResponse = userService.getCurrentUser();
+    UserResponse userResponse = userMapper.toDTO(userService.getCurrentUser());
     logger.info("Fetched profile for user: {}", userResponse.getUsername());
     return ResponseEntity.ok(userResponse);
   }
