@@ -12,9 +12,12 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Message;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.MessageRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
-
 import java.util.*;
 
+/**
+ * Service class for handling messages between users.
+ * Implements methods for sending and retrieving messages.
+ */
 @Service
 @AllArgsConstructor
 public class MessageService {
@@ -22,8 +25,13 @@ public class MessageService {
   private final UserRepository userRepository;
   private final UserService userService;
   private final MessageMapper messageMapper;
-  //TODO javadoc
 
+  /**
+   * Sends a message from one user to another.
+   *
+   * @param messageRequest The {@link MessageRequest} containing the message details.
+   * @return The saved {@link Message} entity.
+   */
   public MessageResponse sendMessage(MessageRequest messageRequest){
     UserDetails currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String fromUsername = userService.getUserById(messageRequest.getFromUserId()).getUsername();
@@ -44,6 +52,13 @@ public class MessageService {
     return messageMapper.toDto(message);
   }
 
+  /**
+   * Retrieves all messages between two users.
+   *
+   * @param userId1 The ID of the first user.
+   * @param userId2 The ID of the second user.
+   * @return A list of {@link MessageResponse} objects representing all messages between the two users.
+   */
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
     User currentUser = userService.getCurrentUser();

@@ -1,7 +1,6 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
 import lombok.RequiredArgsConstructor;
-import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,12 +16,9 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -84,13 +80,20 @@ public class UserService {
     return new AuthResponse(token);
   }
 
-  // Get all users (Admin Only)
+  /**
+   * Retrieves all users from the database. Admin only.
+   * @return a list of all users in the database
+   */
   public List<User> getAllUsers() {
-    //TODO javadoc this method and the ones below
     return userRepository.findAll();
   }
 
-  // Get user by ID (Admin Only)
+  /**
+   * Get user by ID.
+   * @param id the id of the user to get
+   * @return the user with the given id
+   * @throws NoSuchElementException if no user with the given id is found
+   */
   public User getUserById(Long id) {
     //TODO user this method where it should be used
     Optional<User> user = userRepository.findById(id);
@@ -100,7 +103,12 @@ public class UserService {
     return user.get();
   }
 
-  // Get user by username (Admin Only)
+  /**
+   * Get user by username.
+   * @param username the username of the user to get
+   * @return the user with the given username
+   * @throws UsernameNotFoundException if no user with the given username is found
+   */
   public User getUserByUsername(String username) {
     //TODO use this method where it need to be used (message service blant annet)
     Optional<User> user = userRepository.findByUsername(username);
@@ -110,13 +118,25 @@ public class UserService {
     return user.get();
   }
 
-  // Get profile of the logged-in user
+  /**
+   * Get the current logged-in user from the security context.
+   *
+   * @return the current logged-in user.
+   */
   public User getCurrentUser() {
     //TODO use this where needed (message service)
     String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
     return getUserByUsername(username);
   }
 
+  /**
+   * Edit user details. Only the user itself can edit its own details.
+   *
+   * @param userDto the new user details.
+   * @throws AccessDeniedException if the current logged-in user is not the same as the user being edited.
+   * @throws UsernameAlreadyExistsException if the new username is already taken.
+   * @throws NoSuchElementException if no user with the given id is found.
+   */
   public void editUserDetails(EditUserDto userDto) {
     User currentUser = getCurrentUser();
 
@@ -128,6 +148,9 @@ public class UserService {
 
     if (user.getUsername().equals(userDto.getUsername())) {
       logger.info("No change in username detected");
+    } else if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
+      logger.error("Couldn't edit user ID" + userDto.getId() + ". Username already taken");
+      throw new UsernameAlreadyExistsException("User with username " + userDto.getUsername() + " already exists");
     } else {
       String oldUsername = user.getUsername();
       user.setUsername(userDto.getUsername());

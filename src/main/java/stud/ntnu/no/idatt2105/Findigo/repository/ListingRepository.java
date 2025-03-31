@@ -8,9 +8,26 @@ import stud.ntnu.no.idatt2105.Findigo.entities.User;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing {@link Listing} entities.
+ * Extends {@link JpaRepository} to provide CRUD operations.
+ */
 @Repository
 public interface ListingRepository extends JpaRepository<Listing, Long> {
-  //TODO javadoc
+
+  /**
+   * Finds all listings created by a specific user.
+   *
+   * @param user The user whose listings are to be retrieved.
+   * @return A list of listings associated with the given user.
+   */
   List<Listing> findListingByUser(User user);
+
+  /**
+   * Finds all listings that belong to a specific category.
+   *
+   * @param id The ID of the category.
+   * @return A list of listings belonging to the specified category.
+   */
   List<Listing> findListingsByCategoryId(Long id);
 }

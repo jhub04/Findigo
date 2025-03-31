@@ -39,8 +39,6 @@ public class User implements UserDetails {
   @Column(updatable = false, name = "created_at")
   private Date createdAt;
 
-  //TODO: fikse initialisering
-
   @UpdateTimestamp
   @Column(name = "updated_at")
   private Date updatedAt;
