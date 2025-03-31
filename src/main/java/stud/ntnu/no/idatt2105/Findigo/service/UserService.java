@@ -86,11 +86,13 @@ public class UserService {
 
   // Get all users (Admin Only)
   public List<User> getAllUsers() {
+    //TODO javadoc this method and the ones below
     return userRepository.findAll();
   }
 
   // Get user by ID (Admin Only)
   public User getUserById(Long id) {
+    //TODO user this method where it should be used
     Optional<User> user = userRepository.findById(id);
     if (user.isEmpty()) {
       throw new NoSuchElementException("No user with the given id: " + id + " was found");
@@ -100,8 +102,10 @@ public class UserService {
 
   // Get user by username (Admin Only)
   public User getUserByUsername(String username) {
+    //TODO use this method where it need to be used (message service blant annet)
     Optional<User> user = userRepository.findByUsername(username);
     if (user.isEmpty()) {
+      //TODO should throw UserNameNotFoundException or smt
       throw new NoSuchElementException("No user with username '" + username + "' was found");
     }
 
@@ -110,12 +114,14 @@ public class UserService {
 
   // Get profile of the logged-in user
   public UserResponse getCurrentUser() {
+    //TODO use this where needed (message service)
     String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
     User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     return mapToDTO(user);
   }
 
   private UserResponse mapToDTO(User user) {
+    //TODO add this to a mapper instead of here
     return new UserResponse(user.getId(), user.getUsername());
   }
 
@@ -125,9 +131,10 @@ public class UserService {
     User user = userRepository.findById(userDto.getId())
         .orElseThrow(() -> new NoSuchElementException("No user with id " + userDto.getId() + " found"));
 
-    if (!currentUser.getUsername().equals(user.getUsername()) || !currentUser.getId().equals(user.getId())) {
+    if (!(currentUser.getUsername().equals(user.getUsername()) || currentUser.getId().equals(user.getId()))) {
       throw new AccessDeniedException("The current logged in user is not the same as the user which is being edited");
     }
+
     if (user.getUsername().equals(userDto.getUsername())) {
       logger.info("No change in username detected");
     } else {
@@ -138,5 +145,6 @@ public class UserService {
 
     user.setPassword(passwordEncoder.encode(userDto.getPassword()));
     logger.info("New password set for user with id " + userDto.getId());
+    userRepository.save(user);
   }
 }
