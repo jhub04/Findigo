@@ -36,7 +36,6 @@ public class ListingController {
   /**
    * Adds a new listing for a specified user.
    *
-   * @param username the username of the user adding the listing
    * @param request  the details of the listing to be added
    * @return a ResponseEntity containing the created listing
    */
@@ -45,13 +44,12 @@ public class ListingController {
       @ApiResponse(responseCode = "201", description = "Listing successfully created"),
       @ApiResponse(responseCode = "404", description = "User or category in the ListingRequest not found")
   })
-  @PostMapping("/{username}")
+  @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<Listing> addListing(
-      @PathVariable String username,
       @Valid @RequestBody ListingRequest request) {
-    logger.info("Adding listing from user " + username + " with listing description " + request.getBriefDescription());
-    Listing listing = listingService.addListing(username, request);
+    logger.info("Adding listing from user with listing description " + request.getBriefDescription());
+    Listing listing = listingService.addListing(request);
     logger.info("Listing with description " + request.getBriefDescription() + " added");
     return ResponseEntity.status(HttpStatus.CREATED).body(listing);
   }
@@ -67,7 +65,7 @@ public class ListingController {
       @ApiResponse(responseCode = "200", description = "Listings fetched successfully"),
       @ApiResponse(responseCode = "404", description = "User not found")
   })
-  @GetMapping("/{username}")
+  @GetMapping("/username/{username}") //TODO: bør endres til userController
   public ResponseEntity<List<ListingResponse>> getUserListings(
       @PathVariable String username) {
     logger.info("Getting listings from user " + username);
@@ -105,7 +103,7 @@ public class ListingController {
           @ApiResponse(responseCode = "200", description = "Listing fetched successfully"),
           @ApiResponse(responseCode = "404", description = "Listing not found")
   })
-  @GetMapping("/{id}")
+  @GetMapping("/id/{id}")
   public ResponseEntity<ListingResponse> getListingById(@PathVariable Long id) {
     logger.info("Fetching listing in database");
     ListingResponse listingResponse = listingService.getListingById(id);

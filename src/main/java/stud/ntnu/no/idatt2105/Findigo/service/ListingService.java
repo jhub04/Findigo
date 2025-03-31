@@ -2,6 +2,7 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
@@ -35,14 +36,15 @@ public class ListingService {
   /**
    * Adds a new listing for a given user.
    *
-   * @param username The username of the user adding the listing.
    * @param req      The listing request containing details of the listing.
    * @return The saved {@link Listing} entity.
    * @throws UsernameNotFoundException if the user is not found in the database.
    * @throws RuntimeException          if the specified category does not exist.
    */
   @Transactional
-  public Listing addListing(String username, ListingRequest req) {
+  public Listing addListing(ListingRequest req) {
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
