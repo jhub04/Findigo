@@ -59,7 +59,7 @@ public class MessageService {
     messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
     List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(messageMapper::toDto).toList());
     messageResponses.sort(Comparator.comparing(MessageResponse::getSentAt));
-    return messageResponses;
+    return messageResponses.reversed();
   }
 
 
@@ -85,7 +85,9 @@ public class MessageService {
       newestMessages.add(tempList.getLast());
     }
 
-    return newestMessages;
+    newestMessages.sort(Comparator.comparing(MessageResponse::getSentAt));
+
+    return newestMessages.reversed();
 
   }
 }
