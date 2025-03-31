@@ -41,7 +41,7 @@ public class Category {
    * Attributes define additional properties that listings in this category may have.
    * If the category is deleted, all its attributes are also deleted due to CascadeType.ALL.
    */
-  @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private List<Attribute> attributes = new ArrayList<>();
 
   /**

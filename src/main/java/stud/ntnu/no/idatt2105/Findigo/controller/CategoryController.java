@@ -96,5 +96,5 @@ public class CategoryController {
     return ResponseEntity.ok(category);
   }
 
-  //TODO add endpoint for creating a category
+  //TODO add endpoint for creating a category (admin)
 }
