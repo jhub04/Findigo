@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.CategoryMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
@@ -51,5 +53,20 @@ public class CategoryService {
       throw new NoSuchElementException("Couldn't find category with ID "+ categoryID);
     }
     return CategoryMapper.toDto(category.get());
+  }
+
+  /**
+   * Creates a new category in the database.
+   *
+   * @param category the CategoryRequest object containing the category name and attributes
+   * @return a CategoryResponse object representing the newly created category
+   */
+  public CategoryResponse createCategory(CategoryRequest category) {
+    if (categoryRepository.findByCategoryName(category.getName()).isPresent()) {
+      throw new CategoryAlreadyExistsException("Category with name " + category.getName() + " already exists");
+    }
+    Category newCategory = CategoryMapper.toEntity(category);
+    Category savedCategory = categoryRepository.save(newCategory);
+    return CategoryMapper.toDto(savedCategory);
   }
 }

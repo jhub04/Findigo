@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AttributeDefinitionDto {
+public class AttributeResponse {
 
   /**
    * The unique identifier for the attribute definition.

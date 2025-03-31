@@ -6,6 +6,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for accessing {@link Category} entities from the database.
@@ -13,4 +14,5 @@ import java.util.List;
  */
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
+  Optional<Category> findByCategoryName(String categoryName);
 }
