@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
+import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Controller for handling user-related operations.
@@ -152,5 +154,17 @@ public class UserController {
     userService.editUserDetails(userDto);
     logger.info("User details edited of user with id " + userID);
     return ResponseEntity.ok("User updated");
+  }
+  @Operation(summary = "Get favorites", description = "Fetches all favorites for the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully fetched all favorites"),
+      @ApiResponse(responseCode = "404", description = "Couldn't find logged in user")
+  })
+  @GetMapping("/favorites")
+  public ResponseEntity<?> getFavorites() {
+    logger.info("Fetching all favorites for current user");
+    Set<Listing> favorites = userService.getFavorites();
+    logger.info("Fetched all favorites for current user");
+    return ResponseEntity.ok(favorites);
   }
 }

@@ -165,6 +165,11 @@ public class UserService {
   }
 
 
+  /**
+   * Get all listings favorited by the current user.
+   *
+   * @return a set of all listings favorited by the current user.
+   */
   public Set<Listing> getFavorites() {
     User currentUser = getCurrentUser();
 
