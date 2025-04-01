@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
 @Service
 @RequiredArgsConstructor
 public class ImageService {
-  private final String picturesPath = "src/main/resources/pictures/";
+  private final String picturesPath = "src/main/resources/pictures/listing";
   private final ListingRepository listingRepository;
   /**
    * Uploads an image to a listing.
@@ -27,15 +27,17 @@ public class ImageService {
    */
   public void uploadImageToListing(long listingId, MultipartFile file){
     try {
-      Path path = Paths.get(picturesPath + listingId + "/" + file.getOriginalFilename());
-      Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+      Path directoryPath = Paths.get(picturesPath + listingId + "/");
+      Files.createDirectories(directoryPath);
+
+      Path targetPath = directoryPath.resolve(file.getOriginalFilename());
+      Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+      Listing listing = listingRepository.findById(listingId)
+          .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId));
+      listing.addImageUrl(picturesPath + listingId + "/" + file.getOriginalFilename());
     } catch (IOException e) {
-      throw new ImageUploadException("Could not upload image to listing with ID " + listingId);
+      throw new ImageUploadException("Could not upload image to listing with ID " + listingId + "," + e.getMessage());
     }
-
-    Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId));
-
-    listing.addImageUrl(picturesPath + listingId + "/" + file.getOriginalFilename());
   }
 }
