@@ -6,10 +6,13 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeRequest;
 
 import java.util.List;
 
+/**
+ * DTO for editing a listing, containing details such as descriptions,
+ * location, category, images, and attributes.
+ */
 @Data
 @AllArgsConstructor
 public class EditListingDto {
-  //TODO javadoc
   private Long id;
   private String briefDescription;
   private String fullDescription;

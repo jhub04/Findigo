@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO that represents a request to edit user details
+ */
 @Data
 @AllArgsConstructor
 public class EditUserDto {

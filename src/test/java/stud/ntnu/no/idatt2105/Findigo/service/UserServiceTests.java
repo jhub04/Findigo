@@ -103,7 +103,6 @@ public class UserServiceTests {
     List<User> allUsers = userService.getAllUsers();//Should only contain existingUser
 
     assertEquals("existingUser", allUsers.get(0).getUsername());
-
   }
 
   @Test
@@ -200,6 +199,4 @@ public class UserServiceTests {
 
     assertThrows(AccessDeniedException.class, () -> userService.editUserDetails(editedUser));
   }
-
-
 }

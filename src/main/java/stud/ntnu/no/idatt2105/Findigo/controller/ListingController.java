@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,13 +47,13 @@ public class ListingController {
       @ApiResponse(responseCode = "201", description = "Listing successfully created"),
       @ApiResponse(responseCode = "404", description = "User or category in the ListingRequest not found")
   })
-  @PostMapping("/{username}")
+  @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<Listing> addListing(
-      @PathVariable String username,
+      @Parameter(description = "the username of the user adding the listing") @PathVariable String username,
       @Valid @RequestBody ListingRequest request) {
-    logger.info("Adding listing from user " + username + " with listing description " + request.getBriefDescription());
-    Listing listing = listingService.addListing(username, request);//TODO this should be listing response object
+    logger.info("Adding listing from user with listing description " + request.getBriefDescription());
+    Listing listing = listingService.addListing(request);
     logger.info("Listing with description " + request.getBriefDescription() + " added");
     return ResponseEntity.status(HttpStatus.CREATED).body(listing);
   }
@@ -68,9 +69,9 @@ public class ListingController {
       @ApiResponse(responseCode = "200", description = "Listings fetched successfully"),
       @ApiResponse(responseCode = "404", description = "User not found")
   })
-  @GetMapping("/{username}")
+  @GetMapping("/username/{username}") //TODO: bør endres til userController
   public ResponseEntity<List<ListingResponse>> getUserListings(
-      @PathVariable String username) {
+      @Parameter(description = "The username of the user whose listings are being retrieved") @PathVariable String username) {
     logger.info("Getting listings from user " + username);
     List<ListingResponse> listings = listingService.getUserListings(username);
     logger.info("Fetched listings from user " + username);
@@ -126,9 +127,29 @@ public class ListingController {
       @ApiResponse(responseCode = "404", description = "If no listing with the given ID is found")
   })
   @DeleteMapping("/{listingID}")
-  public ResponseEntity<?> deleteListing(@PathVariable long listingID) {
+  public ResponseEntity<?> deleteListing(
+      @Parameter(description = "ID of the listing to be deleted") @PathVariable long listingID) {
     logger.info("Deleting listing with id " + listingID);
     listingService.deleteListing(listingID);
     return ResponseEntity.ok("Listing deleted");
+  }
+
+  /**
+   * Retrieves a specific listing by its ID.
+   *
+   * @param id the ID of the listing to retrieve
+   * @return a ResponseEntity containing the listing if found
+   */
+  @Operation(summary = "Get listing by ID", description = "Fetches a single listing by its unique ID")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Listing fetched successfully"),
+          @ApiResponse(responseCode = "404", description = "Listing not found")
+  })
+  @GetMapping("/id/{id}")
+  public ResponseEntity<ListingResponse> getListingById(@PathVariable Long id) {
+    logger.info("Fetching listing in database");
+    ListingResponse listingResponse = listingService.getListingById(id);
+    logger.info("Fetched all listings in database");
+    return ResponseEntity.ok(listingResponse);
   }
 }

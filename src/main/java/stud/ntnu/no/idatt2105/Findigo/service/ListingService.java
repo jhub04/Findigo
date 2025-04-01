@@ -2,6 +2,7 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.EditListingDto;
@@ -39,15 +40,16 @@ public class ListingService {
   /**
    * Adds a new listing for a given user.
    *
-   * @param username The username of the user adding the listing.
    * @param req      The listing request containing details of the listing.
    * @return The saved {@link Listing} entity.
    * @throws UsernameNotFoundException if the user is not found in the database.
    * @throws RuntimeException          if the specified category does not exist.
    */
   @Transactional
-  public Listing addListing(String username, ListingRequest req) {
-    User user = userRepository.findByUsername(username)
+  public Listing addListing(ListingRequest req) {
+    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    User user = userRepository.findByUsername(currentUsername)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     Category category = categoryRepository.findById(req.getCategoryId())
@@ -111,6 +113,12 @@ public class ListingService {
     }
     return listings.stream()
         .map(ListingMapper::toDto).toList();
+  }
+
+  public ListingResponse getListingById(Long id) {
+    return listingRepository.findById(id)
+            .map(ListingMapper::toDto)
+            .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
   }
 
 

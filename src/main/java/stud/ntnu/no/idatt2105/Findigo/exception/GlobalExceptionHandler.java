@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 
@@ -155,5 +156,17 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorDetail> handleGenericException(Exception ex, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);
+  }
+
+  /**
+   * Handles the {@link CategoryAlreadyExistsException} and returns a custom error response.
+   *
+   * @param e the exception that was thrown
+   * @param request the web request that triggered the exception
+   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 409 (Conflict)
+   */
+  @ExceptionHandler(CategoryAlreadyExistsException.class)
+  public ResponseEntity<ErrorDetail> handleCategoryAlreadyExistsException(@NonNull Exception e, WebRequest request) {
+    return createErrorResponseEntity(HttpStatus.CONFLICT, e, request);
   }
 }

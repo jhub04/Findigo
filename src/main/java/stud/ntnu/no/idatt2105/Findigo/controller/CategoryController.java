@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -67,7 +68,8 @@ public class CategoryController {
       @ApiResponse(responseCode = "404", description = "No listings associated with the given categoryID are found")
   })
   @GetMapping("/{categoryID}/listings")
-  public ResponseEntity<List<ListingResponse>> getAllListingsFromCategory(@PathVariable long categoryID) {
+  public ResponseEntity<List<ListingResponse>> getAllListingsFromCategory(
+      @Parameter(description = "ID of the category to get listings from") @PathVariable long categoryID) {
     logger.info("Fetching all listings from category with ID " + categoryID);
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryID);
     logger.info("Fetched listings in category with ID " + categoryID);
@@ -86,10 +88,13 @@ public class CategoryController {
       @ApiResponse(responseCode = "404", description = "Category with the given ID was not found")
   })
   @GetMapping("/{categoryID}")
-  public ResponseEntity<CategoryResponse> getCategory(@PathVariable long categoryID) {
+  public ResponseEntity<CategoryResponse> getCategory(
+      @Parameter(description = "ID of the category to get category information about") @PathVariable long categoryID) {
     logger.info("Fetching category with ID " + categoryID);
     CategoryResponse category = categoryService.getCategory(categoryID);
     logger.info("Category found with ID " + categoryID);
     return ResponseEntity.ok(category);
   }
+
+  //TODO add endpoint for creating a category (admin)
 }
