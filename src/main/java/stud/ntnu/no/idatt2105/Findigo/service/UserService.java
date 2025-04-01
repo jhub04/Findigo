@@ -15,10 +15,13 @@ import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,6 +39,7 @@ public class UserService {
   private final AuthenticationManager authenticationManager;
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
+  private final ListingRepository listingRepository;
   private static final Logger logger = LogManager.getLogger(UserService.class);
 
   /**
@@ -174,5 +178,29 @@ public class UserService {
     User currentUser = getCurrentUser();
 
     return currentUser.getFavoriteListings();
+  }
+
+  /**
+   * Add a listing to the current user's favorites.
+   *
+   * @param listingId the id of the listing to add to favorites.
+   */
+  public ListingResponse addFavorite(long listingId) {
+    User currentUser = getCurrentUser();
+    Listing favorite = listingRepository.findById(listingId)
+        .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
+    currentUser.addFavorite(favorite);
+    userRepository.save(currentUser);
+    return ListingMapper.toDto(favorite);
+  }
+
+
+  public ListingResponse deleteFavorite(long listingId) {
+    User currentUser = getCurrentUser();
+    Listing favorite = listingRepository.findById(listingId)
+        .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
+    currentUser.removeFavorite(favorite);
+    userRepository.save(currentUser);
+    return ListingMapper.toDto(favorite);
   }
 }
