@@ -43,7 +43,8 @@ public class MessageService {
         .setToUser(userRepository.findById(messageRequest.getToUserId())
             .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getToUserId())))
         .setFromUser(userRepository.findById(messageRequest.getFromUserId())
-            .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId())));
+            .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId()))
+        );
 
     messageRepository.save(message);
 
@@ -91,14 +92,27 @@ public class MessageService {
     userIdsCommunicatedWith.remove(userID);
     List<MessageResponse> newestMessages= new ArrayList<>();
 
-    for (Long otherUserId:userIdsCommunicatedWith) {
-      List<MessageResponse> tempList = getAllMessagesBetween(userID, otherUserId);
-      newestMessages.add(tempList.get(0));
+    for (Long otherUserId : userIdsCommunicatedWith) {
+      User otherUser = userService.getUserById(otherUserId);
+      List<Message> conversation = getAllRawMessagesBetween(currentUser, otherUser);
+
+      if (!conversation.isEmpty()) {
+        Message latest = conversation.get(conversation.size() - 1); // newest
+        newestMessages.add(messageMapper.toDto(latest));
+      }
     }
 
     newestMessages.sort(Comparator.comparing(MessageResponse::getSentAt));
 
     return newestMessages.reversed();
 
+  }
+
+  private List<Message> getAllRawMessagesBetween(User user1, User user2) {
+    List<Message> messages = new ArrayList<>();
+    messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user1, user2));
+    messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
+    messages.sort(Comparator.comparing(Message::getSentAt));
+    return messages;
   }
 }
