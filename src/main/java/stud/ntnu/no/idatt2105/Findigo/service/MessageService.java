@@ -64,17 +64,9 @@ public class MessageService {
     List<Message> messages = messageRepository.findMessagesByFromUserAndToUser(user1, user2);
     messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
 
-    // Debugging BEFORE updating
-    messages.forEach(m -> logger.info("BEFORE: Message ID: {}, isRead: {}, from: {}, to: {}",
-        m.getId(), m.isRead(), m.getFromUser().getUsername(), m.getToUser().getUsername()));
-
     messages.stream()
         .filter(m -> !m.isRead() && m.getToUser().equals(currentUser))
         .forEach(m -> m.setRead(true));
-
-    // Debugging AFTER updating
-    messages.forEach(m -> logger.info("AFTER: Message ID: {}, isRead: {}, from: {}, to: {}",
-        m.getId(), m.isRead(), m.getFromUser().getUsername(), m.getToUser().getUsername()));
 
     List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(messageMapper::toDto).toList());
     messageResponses.sort(Comparator.comparing(MessageResponse::getSentAt));
