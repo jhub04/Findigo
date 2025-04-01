@@ -18,6 +18,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -146,7 +147,7 @@ public class ListingController {
           @ApiResponse(responseCode = "404", description = "Listing not found")
   })
   @GetMapping("/id/{id}")
-  public ResponseEntity<ListingResponse> getListingById(@PathVariable Long id) {
+  public ResponseEntity<ListingResponse> getListingById(Principal principal, @PathVariable Long id) {
     logger.info("Fetching listing in database");
     ListingResponse listingResponse = listingService.getListingById(id);
     logger.info("Fetched all listings in database");
