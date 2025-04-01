@@ -1,10 +1,14 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.controller.MessageController;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.MessageMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
@@ -25,6 +29,8 @@ public class MessageService {
   private final UserRepository userRepository;
   private final UserService userService;
   private final MessageMapper messageMapper;
+  private static final Logger logger = LogManager.getLogger(MessageController.class);
+
 
   /**
    * Sends a message from one user to another.
@@ -45,12 +51,14 @@ public class MessageService {
         .setToUser(userRepository.findById(messageRequest.getToUserId())
             .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getToUserId())))
         .setFromUser(userRepository.findById(messageRequest.getFromUserId())
-            .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId())));
+            .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId()))
+        );
 
     messageRepository.save(message);
 
     return messageMapper.toDto(message);
   }
+
 
   /**
    * Retrieves all messages between two users.
@@ -59,6 +67,7 @@ public class MessageService {
    * @param userId2 The ID of the second user.
    * @return A list of {@link MessageResponse} objects representing all messages between the two users.
    */
+  @Transactional
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
     User currentUser = userService.getCurrentUser();
@@ -70,6 +79,11 @@ public class MessageService {
 
     List<Message> messages = messageRepository.findMessagesByFromUserAndToUser(user1, user2);
     messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
+
+    messages.stream()
+        .filter(m -> !m.isRead() && m.getToUser().equals(currentUser))
+        .forEach(m -> m.setRead(true));
+
     List<MessageResponse> messageResponses = new ArrayList<>(messages.stream().map(messageMapper::toDto).toList());
     messageResponses.sort(Comparator.comparing(MessageResponse::getSentAt));
     return messageResponses.reversed();
@@ -93,14 +107,27 @@ public class MessageService {
     userIdsCommunicatedWith.remove(userID);
     List<MessageResponse> newestMessages= new ArrayList<>();
 
-    for (Long otherUserId:userIdsCommunicatedWith) {
-      List<MessageResponse> tempList = getAllMessagesBetween(userID, otherUserId);
-      newestMessages.add(tempList.get(0));
+    for (Long otherUserId : userIdsCommunicatedWith) {
+      User otherUser = userService.getUserById(otherUserId);
+      List<Message> conversation = getAllRawMessagesBetween(currentUser, otherUser);
+
+      if (!conversation.isEmpty()) {
+        Message latest = conversation.get(conversation.size() - 1); // newest
+        newestMessages.add(messageMapper.toDto(latest));
+      }
     }
 
     newestMessages.sort(Comparator.comparing(MessageResponse::getSentAt));
 
     return newestMessages.reversed();
 
+  }
+
+  private List<Message> getAllRawMessagesBetween(User user1, User user2) {
+    List<Message> messages = new ArrayList<>();
+    messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user1, user2));
+    messages.addAll(messageRepository.findMessagesByFromUserAndToUser(user2, user1));
+    messages.sort(Comparator.comparing(Message::getSentAt));
+    return messages;
   }
 }
