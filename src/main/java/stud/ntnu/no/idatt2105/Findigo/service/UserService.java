@@ -16,12 +16,14 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
+import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Service class for handling user authentication and registration.
@@ -160,5 +162,12 @@ public class UserService {
     user.setPassword(passwordEncoder.encode(userDto.getPassword()));
     logger.info("New password set for user with id " + userDto.getId());
     userRepository.save(user);
+  }
+
+
+  public Set<Listing> getFavorites() {
+    User currentUser = getCurrentUser();
+
+    return currentUser.getFavoriteListings();
   }
 }
