@@ -38,19 +38,6 @@ public class MessageController {
   public ResponseEntity<?> getNewestMessagesForUser(@PathVariable long userId) {
     logger.info("Finding all newest messages to and from userId " + userId);
     List<MessageResponse> newestMessagesToOrFromUser = messageService.getNewestMessages(userId);
-
-    // TODO: Remove after issue is resolved
-    newestMessagesToOrFromUser.forEach(message ->
-        logger.info("Message ID: {}, From: {} (ID: {}), To: {} (ID: {}), isRead: {}, sentAt: {}",
-            message.getMessageId(),
-            message.getFromUsername(),
-            message.getFromUserId(),
-            message.getToUsername(),
-            message.getToUserId(),
-            message.isRead(),
-            message.getSentAt()
-        )
-    );
     logger.info("Found all newest messages to or from userID " + userId);
     return ResponseEntity.ok(newestMessagesToOrFromUser);
   }
