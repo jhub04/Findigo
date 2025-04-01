@@ -5,11 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
@@ -166,5 +168,47 @@ public class UserController {
     Set<Listing> favorites = userService.getFavorites();
     logger.info("Fetched all favorites for current user");
     return ResponseEntity.ok(favorites);
+  }
+
+  /**
+   * Adds a listing to the current user's favorites.
+   *
+   * @param listingId the ID of the listing to be added to favorites
+   * @return a {@link ResponseEntity} with a success message if the listing is added to favorites
+   */
+  @Operation(summary = "Add listing to favorites", description = "Adds a listing to the current user's favorites.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully added listing to favorites"),
+      @ApiResponse(responseCode = "404", description = "Couldn't find listing with the given ID or " +
+          "couldn't find logged in user")
+  })
+  @PostMapping("/favorites/{listingId}")
+  public ResponseEntity<?> addNewFavorite(
+      @Parameter(description = "the ID of the listing to be added to favorites") @PathVariable long listingId) {
+    logger.info("Adding listing with id {} to favorites", listingId);
+    ListingResponse favoritedListing = userService.addFavorite(listingId);
+    logger.info("Added listing with id {} to favorites", listingId);
+    return ResponseEntity.ok(favoritedListing);
+  }
+
+  /**
+   * Deletes a listing from the current user's favorites.
+   *
+   * @param listingId the ID of the listing to be removed from favorites
+   * @return a {@link ResponseEntity} with a success message if the listing is removed from favorites
+   */
+  @Operation(summary = "Delete listing from favorites", description = "Deletes a listing from the current user's favorites.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully deleted listing from favorites"),
+      @ApiResponse(responseCode = "404", description = "Couldn't find listing with the given ID or " +
+          "couldn't find logged in user")
+  })
+  @DeleteMapping("/favorites/{listingId}")
+  public ResponseEntity<?> deleteFavorite(
+      @Parameter(description = "the ID of the listing to be removed from favorites") @PathVariable long listingId) {
+    logger.info("Deleting listing with id {} from favorites", listingId);
+    ListingResponse deletedFavorite = userService.deleteFavorite(listingId);
+    logger.info("Deleted listing with id {} from favorites", listingId);
+    return ResponseEntity.ok(deletedFavorite);
   }
 }

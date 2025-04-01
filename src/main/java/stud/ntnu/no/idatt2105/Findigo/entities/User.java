@@ -111,4 +111,22 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
+  /**
+   * Adds a listing to the user's favorites.
+   *
+   * @param listing The listing to add to favorites.
+   */
+  public void addFavorite(Listing listing) {
+    favoriteListings.add(listing);
+  }
+
+  /**
+   * Removes a listing from the user's favorites.
+   *
+   * @param listing The listing to remove from favorites.
+   */
+  public void removeFavorite(Listing listing) {
+    favoriteListings.remove(listing);
+  }
 }
