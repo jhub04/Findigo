@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 
 import java.util.List;
@@ -24,5 +25,5 @@ public class ListingResponse {
   private double longitude;
   private List<String> imageUrls;
   private CategoryResponse category;
-  private UserResponse user;
+  private UserLiteResponse user;
   private List<ListingAttributeResponse> attributes;}
