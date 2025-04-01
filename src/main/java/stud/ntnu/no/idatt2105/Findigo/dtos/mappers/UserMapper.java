@@ -25,6 +25,6 @@ public class UserMapper {
    * @return a {@link UserResponse} DTO containing the user's ID and username
    */
   public UserResponse toDTO(User user) {
-    return new UserResponse(user.getId(), user.getUsername());
+    return new UserResponse(user.getId(), user.getUsername(), user.getListings().stream().map(ListingMapper::toDto).toList());
   }
 }
