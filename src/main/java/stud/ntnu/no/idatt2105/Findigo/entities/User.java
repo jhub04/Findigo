@@ -47,6 +47,14 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
 
+  @ManyToMany
+  @JoinTable(
+      name = "favorite_listings",
+      joinColumns = @JoinColumn(name = "user_id"),
+      inverseJoinColumns = @JoinColumn(name = "listing_id")
+  )
+  private Set<Listing> favoriteListings = new HashSet<>();
+
   /**
    * Returns the authorities granted to the user.
    * Converts {@link Role} enums to Spring Security's {@link GrantedAuthority}.

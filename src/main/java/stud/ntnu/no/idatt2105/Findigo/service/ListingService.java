@@ -47,7 +47,7 @@ public class ListingService {
    */
   @Transactional
   public Listing addListing(ListingRequest req) {
-    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();//TODO Use getcurrent user
 
     User user = userRepository.findByUsername(currentUsername)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -75,7 +75,7 @@ public class ListingService {
   @Transactional
   public List<ListingResponse> getUserListings(String username) {
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));//TODO use getcurrent user method
 
     List<Listing> listings = listingRepository.findListingByUser(user);
 
@@ -161,7 +161,7 @@ public class ListingService {
    * @param listingId The ID of the listing to delete.
    * @throws NoSuchElementException If no listing with the given ID exists.
    */
-  public void deleteListing(long listingId) {
+  public void deleteListing(long listingId) {//TODO sjekk at bruker har lov gtil  slette listingen
     if (!listingRepository.existsById(listingId)) {
       throw new NoSuchElementException("There is no listing with id " + listingId);
     }

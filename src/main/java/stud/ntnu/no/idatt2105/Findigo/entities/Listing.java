@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a listing in the system, which is a post created by a user and categorized under a specific category.
@@ -91,4 +93,7 @@ public class Listing {
   @CollectionTable(name = "listing_image_urls", joinColumns = @JoinColumn(name = "listing_id"))
   @Column(name = "image_url")
   private List<String> imageUrls = new ArrayList<>();
+
+  @ManyToMany(mappedBy = "favoriteListings")
+  private Set<User> favoritedByUsers = new HashSet<>();
 }

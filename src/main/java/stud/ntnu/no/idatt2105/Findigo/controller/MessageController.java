@@ -87,6 +87,7 @@ public class MessageController {
   })
   public ResponseEntity<List<MessageResponse>> getNewestMessagesForUser(
       @Parameter(description = "ID of the user") @PathVariable long userId) {
+
     logger.info("Finding all newest messages to and from userId {}", userId);
     List<MessageResponse> newestMessagesToOrFromUser = messageService.getNewestMessages(userId);
     logger.info("Found all newest messages to or from userID {}", userId);
