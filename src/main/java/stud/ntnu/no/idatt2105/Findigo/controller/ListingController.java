@@ -39,7 +39,6 @@ public class ListingController {
   /**
    * Adds a new listing for a specified user.
    *
-   * @param username the username of the user adding the listing
    * @param request  the details of the listing to be added
    * @return a ResponseEntity containing the created listing
    */
@@ -50,9 +49,7 @@ public class ListingController {
   })
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<ListingResponse> addListing(
-      @Parameter(description = "the username of the user adding the listing") @PathVariable String username,
-      @Valid @RequestBody ListingRequest request) {
+  public ResponseEntity<ListingResponse> addListing(@Valid @RequestBody ListingRequest request) {
     logger.info("Adding listing from user with listing description " + request.getBriefDescription());
     ListingResponse listing = listingService.addListing(request);
     logger.info("Listing with description " + request.getBriefDescription() + " added");
