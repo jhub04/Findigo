@@ -50,11 +50,11 @@ public class ListingController {
   })
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<Listing> addListing(
+  public ResponseEntity<ListingResponse> addListing(
       @Parameter(description = "the username of the user adding the listing") @PathVariable String username,
       @Valid @RequestBody ListingRequest request) {
     logger.info("Adding listing from user with listing description " + request.getBriefDescription());
-    Listing listing = listingService.addListing(request);
+    ListingResponse listing = listingService.addListing(request);
     logger.info("Listing with description " + request.getBriefDescription() + " added");
     return ResponseEntity.status(HttpStatus.CREATED).body(listing);
   }
@@ -153,4 +153,5 @@ public class ListingController {
     logger.info("Fetched all listings in database");
     return ResponseEntity.ok(listingResponse);
   }
+
 }

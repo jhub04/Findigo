@@ -22,7 +22,7 @@ public class ListingResponse {
   private String fullDescription;
   private double latitude;
   private double longitude;
-  private List<String> imageUrls;
   private CategoryResponse category;
   private UserResponse user;
-  private List<ListingAttributeResponse> attributes;}
+  private List<ListingAttributeResponse> attributes;
+}

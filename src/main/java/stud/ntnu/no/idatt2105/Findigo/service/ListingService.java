@@ -46,7 +46,7 @@ public class ListingService {
    * @throws RuntimeException          if the specified category does not exist.
    */
   @Transactional
-  public Listing addListing(ListingRequest req) {
+  public ListingResponse addListing(ListingRequest req) {
     String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();//TODO Use getcurrent user
 
     User user = userRepository.findByUsername(currentUsername)
@@ -61,8 +61,8 @@ public class ListingService {
         category,
         category.getAttributes()
     );
-
-    return listingRepository.save(listing);
+    listingRepository.save(listing);
+    return ListingMapper.toDto(listing);
   }
 
   /**

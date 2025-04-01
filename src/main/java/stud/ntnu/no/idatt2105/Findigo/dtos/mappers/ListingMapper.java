@@ -42,7 +42,6 @@ public class ListingMapper {
         .setFullDescription(request.getFullDescription())
         .setLatitude(request.getLatitude())
         .setLongitude(request.getLongitude())
-        .setImageUrls(request.getImageUrls() != null ? request.getImageUrls() : new ArrayList<>())
         .setCategory(category)
         .setUser(user);
 
@@ -82,7 +81,6 @@ public class ListingMapper {
         listing.getFullDescription(),
         listing.getLatitude(),
         listing.getLongitude(),
-        new ArrayList<>(listing.getImageUrls()),
         CategoryMapper.toDto(listing.getCategory()),
         new UserResponse(listing.getUser().getId(), listing.getUser().getUsername()),
         attributeResponses
