@@ -3,6 +3,7 @@ package stud.ntnu.no.idatt2105.Findigo.dtos.listing;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeRequest;
 
 import java.util.List;
@@ -20,6 +21,5 @@ public class ListingRequest {
   private double latitude;
   private double longitude;
   private Long categoryId;
-  private List<String> imageUrls;
   private List<ListingAttributeRequest> attributes;
 }

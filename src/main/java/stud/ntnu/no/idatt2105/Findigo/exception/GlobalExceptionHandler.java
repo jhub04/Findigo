@@ -13,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.ImageUploadException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 
 import java.time.LocalDateTime;
@@ -168,5 +169,17 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(CategoryAlreadyExistsException.class)
   public ResponseEntity<ErrorDetail> handleCategoryAlreadyExistsException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.CONFLICT, e, request);
+  }
+
+  /**
+   * Handles the {@link ImageUploadException} and returns a custom error response.
+   *
+   * @param e the exception that was thrown
+   * @param request the web request that triggered the exception
+   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 500 (Internal Server Error)
+   */
+  @ExceptionHandler(ImageUploadException.class)
+  public ResponseEntity<ErrorDetail> handleImageUploadException(@NonNull Exception e, WebRequest request) {
+    return createErrorResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e, request);
   }
 }

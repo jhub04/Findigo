@@ -96,4 +96,13 @@ public class Listing {
 
   @ManyToMany(mappedBy = "favoriteListings")
   private Set<User> favoritedByUsers = new HashSet<>();
+
+  /**
+   * Adds an image url to the listing.
+   *
+   * @param url The url to add.
+   */
+  public void addImageUrl(String url) {
+    imageUrls.add(url);
+  }
 }
