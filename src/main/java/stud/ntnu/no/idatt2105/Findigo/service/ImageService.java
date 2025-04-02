@@ -51,6 +51,7 @@ public class ImageService {
       Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
       listing.addImageUrl(picturesPath + listingId + "/" + file.getOriginalFilename());
+      listingRepository.save(listing);
     } catch (IOException e) {
       throw new ImageUploadException("Could not upload image to listing with ID " + listingId + ", url: " + e.getMessage());
     }
