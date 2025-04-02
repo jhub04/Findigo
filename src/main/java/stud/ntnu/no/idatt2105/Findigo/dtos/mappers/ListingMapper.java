@@ -92,7 +92,8 @@ public class ListingMapper {
         listing.getPostalCode(),
         CategoryMapper.toDto(listing.getCategory()),
         new UserResponse(listing.getUser().getId(), listing.getUser().getUsername()),
-        attributeResponses
+        attributeResponses,
+        listing.getImageUrls().size()
     );
   }
 }

@@ -35,17 +35,18 @@ public class ImageService {
 
   /**
    * Uploads an image to a listing.
+   *
    * @param listingId The ID of the listing to upload the image to.
-   * @param file The image file to upload.
+   * @param file      The image file to upload.
    * @throws ImageUploadException if the image could not be uploaded.
    */
-  public void uploadImageToListing(long listingId, MultipartFile file){
+  public void uploadImageToListing(long listingId, MultipartFile file) {
     User currentUser = userService.getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
 
     if (!listing.getUser().getId().equals(currentUser.getId())) {
-      throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user ("+listing.getUser().getId() +") of listing with ID " + listingId);
+      throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
     }
 
     try {
@@ -65,25 +66,28 @@ public class ImageService {
 
   /**
    * Downloads an image from a listing.
+   *
    * @param listingId The ID of the listing to download the images from.
    * @return A list of resources containing the images.
    */
-  public List<Resource> downloadImagesFromListing(long listingId) {
-    Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
+  public Resource downloadImageFromListing(long listingId, int imageIndex) {
+    {
+      Listing listing = listingRepository.findById(listingId)
+          .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
 
-    List<Resource> images = new ArrayList<>();
+      List<Resource> images = new ArrayList<>();
 
-    for (String imageUrl : listing.getImageUrls()) {
-      Path path = Paths.get(imageUrl);
-      try {
-        Resource resource = new UrlResource(path.toUri());
-        images.add(resource);
-      } catch (MalformedURLException e) {
-        throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " +imageUrl +" is malformed. Exception message: " + e.getMessage());
+      for (String imageUrl : listing.getImageUrls()) {
+        Path path = Paths.get(imageUrl);
+        try {
+          Resource resource = new UrlResource(path.toUri());
+          images.add(resource);
+        } catch (MalformedURLException e) {
+          throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " + imageUrl + " is malformed. Exception message: " + e.getMessage());
+        }
       }
-    }
 
-    return images;
+      return images.get(imageIndex);
+    }
   }
 }

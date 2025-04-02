@@ -47,18 +47,19 @@ public class ImageController {
    * Downloads an image from a listing. The images are returned as resources.
    * @return A response entity containing the image.
    */
-  @Operation(summary = "Download images from a listing", description = "Downloads images from a listing.")
+  @Operation(summary = "Download an image from a listing", description = "Downloads an specific image from a listing given by its index and lsiting ID.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Images successfully downloaded"),
       @ApiResponse(responseCode = "500", description = "Image download failed"),
       @ApiResponse(responseCode = "404", description = "Listing not found")
   })
-  @GetMapping("/download/{listingId}")
+  @GetMapping("/download/{listingId}/{imageIndex}")
   public ResponseEntity<?> getImagesFromListing(
-      @Parameter(description = "The ID of the listing to download the images from.") @PathVariable Long listingId) {
+      @Parameter(description = "The ID of the listing to download the images from.") @PathVariable Long listingId,
+      @Parameter(description = "The index of the picture to be fetched") @PathVariable int imageIndex) {
     logger.info("Downloading images from listing with ID " + listingId);
-    List<Resource> images = imageService.downloadImagesFromListing(listingId);
+    Resource image = imageService.downloadImageFromListing(listingId, imageIndex);
     logger.info("Images from listing with ID " + listingId + " successfully downloaded");
-    return ResponseEntity.ok(images.get(0));//TODO fix
+    return ResponseEntity.ok(image);
   }
 }
