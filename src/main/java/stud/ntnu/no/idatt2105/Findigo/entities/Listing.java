@@ -58,6 +58,24 @@ public class Listing {
   private double latitude;
 
   /**
+   * Price of the listing
+   */
+  @Column(nullable = false)
+  private double price;
+
+  /**
+   * Address of the listing
+   */
+  @Column (nullable = false)
+  private String address;
+
+  /**
+   * Postal code of the listing
+   */
+  @Column (nullable = false)
+  private String postalCode;
+
+  /**
    * The category this listing belongs to.
    * Cannot be null.
    */

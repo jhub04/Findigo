@@ -20,6 +20,10 @@ public class ListingRequest {
   private String fullDescription;
   private double latitude;
   private double longitude;
+  private double price;
+  private String address;
+  private String postalCode;
   private Long categoryId;
   private List<ListingAttributeRequest> attributes;
+
 }

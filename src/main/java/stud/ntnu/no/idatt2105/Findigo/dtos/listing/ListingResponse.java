@@ -22,6 +22,9 @@ public class ListingResponse {
   private String fullDescription;
   private double latitude;
   private double longitude;
+  private double price;
+  private String address;
+  private String postalCode;
   private CategoryResponse category;
   private UserResponse user;
   private List<ListingAttributeResponse> attributes;

@@ -11,10 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utility class for mapping between {@link Listing} entities and {@link ListingRequest}, {@link ListingResponse} DTOs.
+ * Utility class for mapping between {@link Listing} entities and {@link ListingRequest},
+ * {@link ListingResponse} DTOs.
  * <p>
- * This class is responsible for converting {@code ListingRequest} objects into {@code Listing} entities, and
- * {@code Listing} entities into {@code ListingResponse} DTOs. It also handles the mapping of listing attributes
+ * This class is responsible for converting {@code ListingRequest} objects into {@code Listing}
+ * entities, and
+ * {@code Listing} entities into {@code ListingResponse} DTOs. It also handles the mapping of
+ * listing attributes
  * from requests and entities.
  * </p>
  */
@@ -43,7 +46,10 @@ public class ListingMapper {
         .setLatitude(request.getLatitude())
         .setLongitude(request.getLongitude())
         .setCategory(category)
-        .setUser(user);
+        .setUser(user)
+        .setPrice(request.getPrice())
+        .setAddress(request.getAddress())
+        .setPostalCode(request.getPostalCode());
 
     List<ListingAttribute> listingAttributes = request.getAttributes().stream()
         .map(attrReq -> {
@@ -81,6 +87,9 @@ public class ListingMapper {
         listing.getFullDescription(),
         listing.getLatitude(),
         listing.getLongitude(),
+        listing.getPrice(),
+        listing.getAddress(),
+        listing.getPostalCode(),
         CategoryMapper.toDto(listing.getCategory()),
         new UserResponse(listing.getUser().getId(), listing.getUser().getUsername()),
         attributeResponses
