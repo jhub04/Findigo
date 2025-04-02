@@ -59,6 +59,6 @@ public class ImageController {
     logger.info("Downloading images from listing with ID " + listingId);
     List<Resource> images = imageService.downloadImagesFromListing(listingId);
     logger.info("Images from listing with ID " + listingId + " successfully downloaded");
-    return ResponseEntity.ok(images);
+    return ResponseEntity.ok(images.get(0));//TODO fix
   }
 }

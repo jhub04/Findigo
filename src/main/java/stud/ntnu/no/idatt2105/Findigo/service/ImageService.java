@@ -1,11 +1,14 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import stud.ntnu.no.idatt2105.Findigo.controller.ListingController;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.ImageDownloadException;
@@ -28,6 +31,8 @@ public class ImageService {
   private final String picturesPath = "src/main/resources/pictures/listing";
   private final ListingRepository listingRepository;
   private final UserService userService;
+  private static final Logger logger = LogManager.getLogger(ImageService.class);
+
   /**
    * Uploads an image to a listing.
    * @param listingId The ID of the listing to upload the image to.
@@ -52,6 +57,7 @@ public class ImageService {
 
       listing.addImageUrl(picturesPath + listingId + "/" + file.getOriginalFilename());
       listingRepository.save(listing);
+      logger.info(listing.getImageUrls());
     } catch (IOException e) {
       throw new ImageUploadException("Could not upload image to listing with ID " + listingId + ", url: " + e.getMessage());
     }
