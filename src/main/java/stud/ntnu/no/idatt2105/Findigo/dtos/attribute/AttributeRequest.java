@@ -20,4 +20,6 @@ public class AttributeRequest {
    * The type of the attribute (e.g., string, integer, boolean).
    */
   private String type;
+
+  private Long categoryId;
 }

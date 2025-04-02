@@ -44,6 +44,9 @@ public class User implements UserDetails {
   @Column(name = "updated_at")
   private Date updatedAt;
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Listing> listings = new ArrayList<>();
+
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
@@ -129,5 +132,13 @@ public class User implements UserDetails {
    */
   public void removeFavorite(Listing listing) {
     favoriteListings.remove(listing);
+  }
+
+  @Override
+  public String toString() {
+    return "User{" +
+            "id=" + id +
+            ", username='" + username + '\'' +
+            '}';
   }
 }

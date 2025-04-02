@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.*;
 
@@ -91,7 +92,7 @@ public class ListingMapper {
         listing.getAddress(),
         listing.getPostalCode(),
         CategoryMapper.toDto(listing.getCategory()),
-        new UserResponse(listing.getUser().getId(), listing.getUser().getUsername()),
+        new UserLiteResponse(listing.getUser().getId(), listing.getUser().getUsername()),
         attributeResponses,
         listing.getImageUrls().size()
     );

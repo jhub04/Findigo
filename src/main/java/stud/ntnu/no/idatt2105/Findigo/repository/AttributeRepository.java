@@ -11,4 +11,5 @@ import stud.ntnu.no.idatt2105.Findigo.entities.User;
  */
 @Repository
 public interface AttributeRepository extends JpaRepository<Attribute, Long> {
+  boolean existsByAttributeName(String attributeName);
 }

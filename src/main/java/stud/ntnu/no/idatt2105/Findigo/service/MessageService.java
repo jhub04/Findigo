@@ -12,6 +12,7 @@ import stud.ntnu.no.idatt2105.Findigo.controller.MessageController;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.MessageMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Message;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.MessageRepository;
@@ -70,7 +71,7 @@ public class MessageService {
   @Transactional
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
-    User currentUser = userService.getCurrentUser();
+    UserResponse currentUser = userService.getCurrentUser();
     if (!(currentUser.getId().equals(userId1) || currentUser.getId().equals(userId2))) {
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 +") match with userId of current user in the security context(" + currentUser.getId()+")");
     }

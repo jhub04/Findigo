@@ -3,14 +3,15 @@ package stud.ntnu.no.idatt2105.Findigo.dtos.user;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 
-/**
- * DTO that represents a request to edit user details
- */
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
-public class EditUserDto {
-  private Long id;
+@NoArgsConstructor
+public class UserRequest {
   private String username;
   private String password;
+  private Set<Role> roles;
 }

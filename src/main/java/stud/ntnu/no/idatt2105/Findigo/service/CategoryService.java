@@ -47,26 +47,30 @@ public class CategoryService {
    * @return a list of CategoryResponse objects representing all available categories.
    * @throws NoSuchElementException if no category is found
    */
-  public CategoryResponse getCategory(long categoryID) {
-    Optional<Category> category = categoryRepository.findById(categoryID);
-    if (category.isEmpty()) {
-      throw new NoSuchElementException("Couldn't find category with ID "+ categoryID);
-    }
-    return CategoryMapper.toDto(category.get());
+  public Category getCategoryById(long categoryID) {
+    return categoryRepository.findById(categoryID)
+            .orElseThrow(() -> new NoSuchElementException("Couldn't find category with ID " + categoryID));
+  }
+
+  public CategoryResponse getCategoryDtoById(long categoryID) {
+    Category category = categoryRepository.findById(categoryID)
+            .orElseThrow(() -> new NoSuchElementException("Couldn't find category with ID " + categoryID));
+    return CategoryMapper.toDto(category);
   }
 
   /**
    * Creates a new category in the database.
    *
-   * @param category the CategoryRequest object containing the category name and attributes
+   * @param req the CategoryRequest object containing the category name and attributes
    * @return a CategoryResponse object representing the newly created category
    */
-  public CategoryResponse createCategory(CategoryRequest category) {
-    if (categoryRepository.findByCategoryName(category.getName()).isPresent()) {
-      throw new CategoryAlreadyExistsException("Category with name " + category.getName() + " already exists");
+  public CategoryResponse createCategory(CategoryRequest req) {
+    if (categoryRepository.existsByCategoryName(req.getName())) {
+      throw new CategoryAlreadyExistsException("Category with name " + req.getName() + " already exists");
     }
-    Category newCategory = CategoryMapper.toEntity(category);
-    Category savedCategory = categoryRepository.save(newCategory);
-    return CategoryMapper.toDto(savedCategory);
+
+    Category category = CategoryMapper.toEntity(req);
+    categoryRepository.save(category);
+    return CategoryMapper.toDto(category);
   }
 }
