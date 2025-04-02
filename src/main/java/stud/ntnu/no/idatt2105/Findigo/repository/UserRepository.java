@@ -21,4 +21,6 @@ public interface UserRepository
    * @return an {@link Optional} containing the user if found, otherwise empty.
    */
   Optional<User> findByUsername(String username);
+
+  boolean existsByUsername(String username);
 }
