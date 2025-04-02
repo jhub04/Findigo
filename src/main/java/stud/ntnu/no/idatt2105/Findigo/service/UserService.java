@@ -6,22 +6,25 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
+import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
  * Service class for handling user authentication and registration.
@@ -35,6 +38,9 @@ public class UserService {
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
   private static final Logger logger = LogManager.getLogger(UserService.class);
+  private final ListingService listingService;
+  private final UserMapper userMapper;
+  private final SecurityUtil securityUtil;
 
   /**
    * Registers a new user in the system.
@@ -44,7 +50,7 @@ public class UserService {
    * @throws RuntimeException if a user with the given username already exists.
    */
   public String register(RegisterRequest request) {
-    if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+    if (userRepository.existsByUsername(request.getUsername())) {
       logger.error("Couldn't register " + request.getUsername() + ". Username already taken");
       throw new UsernameAlreadyExistsException("User with username " + request.getUsername() + " already exists");
     }
@@ -84,8 +90,8 @@ public class UserService {
    * Retrieves all users from the database. Admin only.
    * @return a list of all users in the database
    */
-  public List<User> getAllUsers() {
-    return userRepository.findAll();
+  public List<UserResponse> getAllUsers() {
+    return userRepository.findAll().stream().map(userMapper::toDTO).toList();
   }
 
   /**
@@ -96,69 +102,108 @@ public class UserService {
    */
   public User getUserById(Long id) {
     //TODO user this method where it should be used
-    Optional<User> user = userRepository.findById(id);
-    if (user.isEmpty()) {
-      throw new NoSuchElementException("No user with the given id: " + id + " was found");
-    }
-    return user.get();
+    return userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("No user with the given id: " + id + " was found"));
   }
 
-  /**
-   * Get user by username.
-   * @param username the username of the user to get
-   * @return the user with the given username
-   * @throws UsernameNotFoundException if no user with the given username is found
-   */
-  public User getUserByUsername(String username) {
-    //TODO use this method where it need to be used (message service blant annet)
-    Optional<User> user = userRepository.findByUsername(username);
-    if (user.isEmpty()) {
-      throw new UsernameNotFoundException("No user with username '" + username + "' was found");
-    }
-    return user.get();
-  }
+  public UserResponse getUserDtoById(Long id) {
+    //TODO user this method where it should be used
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("No user with the given id: " + id + " was found"));
 
-  /**
-   * Get the current logged-in user from the security context.
-   *
-   * @return the current logged-in user.
-   */
-  public User getCurrentUser() {
-    //TODO use this where needed (message service)
-    String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-    return getUserByUsername(username);
+    return userMapper.toDTO(user);
   }
 
   /**
    * Edit user details. Only the user itself can edit its own details.
    *
-   * @param userDto the new user details.
+   * @param request the new user details.
    * @throws AccessDeniedException if the current logged-in user is not the same as the user being edited.
    * @throws UsernameAlreadyExistsException if the new username is already taken.
    * @throws NoSuchElementException if no user with the given id is found.
    */
-  public void editUserDetails(EditUserDto userDto) {
-    User currentUser = getCurrentUser();
+  public void editMyUserDetails(UserRequest request) {
+    User currentUser = securityUtil.getCurrentUser();
 
-    User user = getUserById(userDto.getId());
+    // Username check
+    if (!currentUser.getUsername().equals(request.getUsername())) {
+      if (userRepository.existsByUsername(request.getUsername())) {
+        logger.error("Failed to update user: username '{}' already taken", request.getUsername());
+        throw new UsernameAlreadyExistsException("Username already taken: " + request.getUsername());
+      }
 
-    if (!(currentUser.getUsername().equals(user.getUsername()) || currentUser.getId().equals(user.getId()))) {
-      throw new AccessDeniedException("The current logged in user is not the same as the user which is being edited");
-    }
-
-    if (user.getUsername().equals(userDto.getUsername())) {
-      logger.info("No change in username detected");
-    } else if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
-      logger.error("Couldn't edit user ID" + userDto.getId() + ". Username already taken");
-      throw new UsernameAlreadyExistsException("User with username " + userDto.getUsername() + " already exists");
+      logger.info("Changing username from '{}' to '{}'", currentUser.getUsername(), request.getUsername());
+      currentUser.setUsername(request.getUsername());
     } else {
-      String oldUsername = user.getUsername();
-      user.setUsername(userDto.getUsername());
-      logger.info("Changed user with id " + userDto.getId() + " username from " + oldUsername + " to " + userDto.getUsername());
+      logger.info("No change in username for user ID {}", currentUser.getId());
     }
 
-    user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-    logger.info("New password set for user with id " + userDto.getId());
+    // Always update password
+    currentUser.setPassword(passwordEncoder.encode(request.getPassword()));
+    logger.info("Password updated for user ID {}", currentUser.getId());
+
+    userRepository.save(currentUser);
+  }
+
+  public void editUserDetails(UserRequest request, Long userId) {
+    User user = getUserById(userId);
+
+    // Check if username is changed
+    if (!user.getUsername().equals(request.getUsername())) {
+      if (userRepository.existsByUsername(request.getUsername())) {
+        throw new UsernameAlreadyExistsException("Username already taken: " + request.getUsername());
+      }
+      logger.info("Changed username for user ID {} from '{}' to '{}'", userId, user.getUsername(), request.getUsername());
+      user.setUsername(request.getUsername());
+    } else {
+      logger.info("No change in username for user ID {}", userId);
+    }
+
+    // Update password if changed
+    if (request.getPassword() != null && !request.getPassword().isBlank()) {
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
+      logger.info("Password updated for user ID {}", userId);
+    }
+
+    // Update roles
+    if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+      user.setRoles(request.getRoles());
+      logger.info("Roles updated for user ID {}: {}", userId, request.getRoles());
+    }
+
     userRepository.save(user);
+    logger.info("User ID {} successfully updated", userId);
+  }
+
+  public List<ListingResponse> getMyListings() {
+    User currentUser = securityUtil.getCurrentUser();
+    return getListingsUtil(currentUser);
+  } //TODO: admin og isowner autentisering i service også
+
+  public List<ListingResponse> getUserListings(Long id) {
+    User user = getUserById(id);
+
+    return getListingsUtil(user);
+  }
+
+  public UserLiteResponse createUser(UserRequest req) {
+    if (userRepository.existsByUsername(req.getUsername())) {
+      throw new UsernameAlreadyExistsException("User with username " + req.getUsername() + " already exists");
+    }
+
+    User user = userMapper.toEntity(req);
+    return userMapper.toLiteDto(userRepository.save(user));
+  }
+
+  public UserResponse getCurrentUser() {
+    User user = securityUtil.getCurrentUser();
+    return userMapper.toDTO(user);
+  }
+
+  private List<ListingResponse> getListingsUtil(User user) {
+    return user.getListings().stream()
+            .map(ListingMapper::toDto)
+            .toList();
   }
 }
+
