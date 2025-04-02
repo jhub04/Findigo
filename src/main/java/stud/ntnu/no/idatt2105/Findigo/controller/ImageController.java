@@ -25,11 +25,11 @@ public class ImageController {
    * Uploads an image to a listing.
    * @param listingId The ID of the listing to upload the image to.
    * @param file The image file to upload.
-   * @return A response entity with no content.
+   * @return A response entity with the amount of images in the listing.
    */
   @Operation(summary = "Upload an image to a listing", description = "Uploads an image to a listing.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "204", description = "Listing successfully created, no response data"),
+      @ApiResponse(responseCode = "200", description = "Listing successfully created, returning amount of images in the listing"),
       @ApiResponse(responseCode = "500", description = "Image upload failed"),
       @ApiResponse(responseCode = "404", description = "Listing not found")
   })
@@ -38,9 +38,9 @@ public class ImageController {
       @Parameter(description = "The ID of the listing to upload the image to.") @PathVariable Long listingId,
       @RequestParam("file") MultipartFile file) {
     logger.info("Uploading file with name " + file.getOriginalFilename() + " to listing with ID " + listingId);
-    imageService.uploadImageToListing(listingId, file);
+    int numberOfImages = imageService.uploadImageToListing(listingId, file);
     logger.info("File with name " + file.getOriginalFilename() + " successfully uploaded to listing with ID " + listingId);
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok(numberOfImages);
   }
 
   /**

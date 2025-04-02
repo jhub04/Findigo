@@ -40,7 +40,7 @@ public class ImageService {
    * @param file      The image file to upload.
    * @throws ImageUploadException if the image could not be uploaded.
    */
-  public void uploadImageToListing(long listingId, MultipartFile file) {
+  public int uploadImageToListing(long listingId, MultipartFile file) {
     User currentUser = userService.getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
@@ -62,6 +62,7 @@ public class ImageService {
     } catch (IOException e) {
       throw new ImageUploadException("Could not upload image to listing with ID " + listingId + ", url: " + e.getMessage());
     }
+    return listing.getImageUrls().size();
   }
 
   /**
