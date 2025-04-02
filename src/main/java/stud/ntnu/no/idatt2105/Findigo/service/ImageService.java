@@ -39,7 +39,7 @@ public class ImageService {
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
 
-    if (listing.getUser().getId().equals(currentUser.getId())) {
+    if (!listing.getUser().getId().equals(currentUser.getId())) {
       throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user ("+listing.getUser().getId() +") of listing with ID " + listingId);
     }
 
