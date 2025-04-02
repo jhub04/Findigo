@@ -13,20 +13,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
-import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -100,9 +96,9 @@ public class UserServiceTests {
 
   @Test
   public void testGetAllUsers() {
-    List<User> allUsers = userService.getAllUsers();//Should only contain existingUser
+    List<UserResponse> allUsers = userService.getAllUsers();//Should only contain existingUser
 
-    assertEquals("existingUser", allUsers.get(0).getUsername());
+    assertEquals("existingUser", allUsers.getFirst().getUsername());
   }
 
   @Test
@@ -163,7 +159,7 @@ public class UserServiceTests {
 
     anotherUserId = userService.getUserByUsername("anotherUser").getId();
 
-    EditUserDto editedUser = new EditUserDto(anotherUserId, "anotherUserEdited", "newPassword");
+    UserAdminRequest editedUser = new UserAdminRequest(anotherUserId, "anotherUserEdited", "newPassword");
 
     UserDetails userDetails = userService.getUserByUsername("anotherUser");
     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -178,7 +174,7 @@ public class UserServiceTests {
 
   @Test
   public void testEditUserDetailsFail() {
-    EditUserDto editedUser = new EditUserDto(98765434567L,"existingUserEdited", "newPassword");
+    UserAdminRequest editedUser = new UserAdminRequest(98765434567L,"existingUserEdited", "newPassword");
 
     RegisterRequest newUser = new RegisterRequest();
     newUser.setUsername("anotherUser");
