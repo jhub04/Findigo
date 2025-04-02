@@ -10,5 +10,4 @@ import java.util.List;
 @AllArgsConstructor
 public class CategoryRequest {
   private String name;
-  private List<AttributeRequest> attributes;
 }

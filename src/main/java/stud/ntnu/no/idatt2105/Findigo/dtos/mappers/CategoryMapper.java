@@ -49,13 +49,7 @@ public class CategoryMapper {
    * @return a {@code Category} entity containing the category name and attributes
    */
   public static Category toEntity(CategoryRequest category) {
-    Category newCategory = new Category()
+    return new Category()
         .setCategoryName(category.getName());
-    newCategory.setAttributes(
-            category.getAttributes().stream()
-                .map(attributeRequest -> AttributeMapper.toEntity(attributeRequest, newCategory))
-                .toList()
-        );
-    return newCategory;
   }
 }

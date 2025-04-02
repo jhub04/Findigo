@@ -70,6 +70,7 @@ public class CategoryService {
     }
 
     Category category = CategoryMapper.toEntity(req);
-    return CategoryMapper.toDto(categoryRepository.save(category));
+    categoryRepository.save(category);
+    return CategoryMapper.toDto(category);
   }
 }
