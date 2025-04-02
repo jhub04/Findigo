@@ -65,21 +65,6 @@ public class ListingService {
   }
 
   /**
-   * Retrieves all listings associated with a specific user.
-   *
-   * @return A list of {@link ListingResponse} objects containing listing details.
-   * @throws UsernameNotFoundException if the user is not found in the database.
-   */
-  @Transactional
-  public List<ListingResponse> getOwnListings() {
-    User user = securityUtil.getCurrentUser();
-
-    return user.getListings().stream()
-        .map(ListingMapper::toDto)
-        .toList();
-  }
-
-  /**
    * Retrieves all listings associated with a specific cateory.
    *
    * @param categoryID The category id of the category whose listings are to be retrieved.

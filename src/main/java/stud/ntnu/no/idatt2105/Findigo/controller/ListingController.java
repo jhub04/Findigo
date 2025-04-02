@@ -56,24 +56,6 @@ public class ListingController {
   }
 
   /**
-   * Retrieves all listings created by a specified user.
-   *
-   * @return a ResponseEntity containing a list of listing responses
-   */
-  @Operation(summary = "Get listings by user", description = "Fetches all listings associated with a given username")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Listings fetched successfully"),
-      @ApiResponse(responseCode = "404", description = "User not found")
-  })
-  @GetMapping()
-  public ResponseEntity<List<ListingResponse>> getMyListings() {
-    logger.info("Getting listings from current user");
-    List<ListingResponse> listings = listingService.getOwnListings();
-    logger.info("Fetched listings from current user");
-    return ResponseEntity.ok(listings);
-  }
-
-  /**
    * Retrieves all listings available in the database.
    *
    * @return a ResponseEntity containing a list of all listings
