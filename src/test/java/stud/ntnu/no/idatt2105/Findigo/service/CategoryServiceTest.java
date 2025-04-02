@@ -29,16 +29,13 @@ public class CategoryServiceTest {
   @BeforeEach
   public void setUp() {
     categoryRepository.deleteAll();
-    AttributeRequest attributeRequest = new AttributeRequest("att1", "string");
-    AttributeRequest attributeRequest2 = new AttributeRequest("att2", "string");
-    CategoryRequest categoryRequest = new CategoryRequest("category1", List.of(attributeRequest, attributeRequest2));
+    CategoryRequest categoryRequest = new CategoryRequest("category1");
     category1Id = categoryService.createCategory(categoryRequest).getId();
   }
 
   @Test
   public void testCreateCategoryAndGetAllCategories() {
-    AttributeRequest attributeRequest = new AttributeRequest("att3", "string");
-    CategoryRequest categoryRequest = new CategoryRequest("category2", List.of(attributeRequest));
+    CategoryRequest categoryRequest = new CategoryRequest("category2");
     categoryService.createCategory(categoryRequest);
     assertTrue(categoryRepository.findByCategoryName("category2").isPresent());
     List<CategoryResponse> categories = categoryService.getAllCategories();
@@ -47,20 +44,19 @@ public class CategoryServiceTest {
 
   @Test
   public void testCreateCategoryFail() {
-    AttributeRequest attributeRequest = new AttributeRequest("att1", "string");
-    CategoryRequest categoryRequest = new CategoryRequest("category1", List.of(attributeRequest));
+    CategoryRequest categoryRequest = new CategoryRequest("category1");
     assertThrows(CategoryAlreadyExistsException.class, () -> categoryService.createCategory(categoryRequest));
   }
 
   @Test
   public void testGetCategory() {
-    CategoryResponse category = categoryService.getCategory(category1Id);
+    CategoryResponse category = categoryService.getCategoryDtoById(category1Id);
     assertEquals("category1", category.getName());
     assertEquals(2, category.getAttributes().size());
   }
 
   @Test
   public void testGetCategoryFail() {
-    assertThrows(NoSuchElementException.class, () -> categoryService.getCategory(10098765672L));
+    assertThrows(NoSuchElementException.class, () -> categoryService.getCategoryById(10098765672L));
   }
 }

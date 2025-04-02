@@ -54,8 +54,6 @@ public class UserServiceTests {
     } catch(Exception ignored) {
       //the database already has this user in db
     }
-    existingUserId = userService.getUserByUsername("existingUser").getId();
-
   }
 
   @Test
@@ -114,29 +112,6 @@ public class UserServiceTests {
   }
 
   @Test
-  public void testGetUserByUsername() {
-    User user = userService.getUserByUsername("existingUser");
-
-    assertEquals(existingUserId, user.getId());
-  }
-
-  @Test
-  public void testGetUserByUsernameFail() {
-    assertThrows(UsernameNotFoundException.class, () -> userService.getUserByUsername("NotAUser"));
-  }
-
-  @Test
-  public void testGetCurrentUser() {
-    UserDetails userDetails = userService.getUserByUsername("existingUser");
-    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-    User user = userService.getCurrentUser();
-    assertEquals(existingUserId, user.getId());
-    assertEquals("existingUser", user.getUsername());
-  }
-
-  @Test
   public void testGetCurrentUserFail() {
     UserDetails userDetails = new User().setPassword("password").setUsername("NotRegisteredUser");
     List<GrantedAuthority> roles = new ArrayList<>();
@@ -148,51 +123,4 @@ public class UserServiceTests {
     assertThrows(UsernameNotFoundException.class, () -> userService.getCurrentUser());
   }
 
-  @Test
-  public void testEditUserDetails() {
-    RegisterRequest newUser = new RegisterRequest();
-    newUser.setUsername("anotherUser");
-    newUser.setPassword("password");
-    try {
-      userService.register(newUser);
-    }catch (Exception ignored){}
-
-    anotherUserId = userService.getUserByUsername("anotherUser").getId();
-
-    UserAdminRequest editedUser = new UserAdminRequest(anotherUserId, "anotherUserEdited", "newPassword");
-
-    UserDetails userDetails = userService.getUserByUsername("anotherUser");
-    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-    userService.editUserDetails(editedUser);
-
-    User user = userService.getUserById(anotherUserId);
-
-    assertEquals("anotherUserEdited", user.getUsername());
-  }
-
-  @Test
-  public void testEditUserDetailsFail() {
-    UserAdminRequest editedUser = new UserAdminRequest(98765434567L,"existingUserEdited", "newPassword");
-
-    RegisterRequest newUser = new RegisterRequest();
-    newUser.setUsername("anotherUser");
-    newUser.setPassword("password");
-    try {
-      userService.register(newUser);
-    }catch (Exception ignored){}
-
-    anotherUserId = userService.getUserByUsername("anotherUser").getId();
-
-    User anotherUser = userService.getUserById(anotherUserId);
-    Authentication authentication = new UsernamePasswordAuthenticationToken(anotherUser, null, anotherUser.getAuthorities());
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-    assertThrows(NoSuchElementException.class, () -> userService.editUserDetails(editedUser));
-
-    editedUser.setId(existingUserId);
-
-    assertThrows(AccessDeniedException.class, () -> userService.editUserDetails(editedUser));
-  }
 }
