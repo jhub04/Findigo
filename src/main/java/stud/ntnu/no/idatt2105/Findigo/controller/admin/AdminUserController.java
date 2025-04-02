@@ -17,7 +17,6 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
-import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 
 import java.util.List;
@@ -44,7 +43,7 @@ public class AdminUserController {
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<UserLiteResponse> createUser(
-          UserRequest request
+          @RequestBody UserRequest request
   ) {
     UserLiteResponse createdUser = userService.createUser(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);

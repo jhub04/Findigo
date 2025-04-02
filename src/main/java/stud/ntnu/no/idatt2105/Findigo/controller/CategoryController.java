@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
-import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.service.CategoryService;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 
@@ -68,7 +65,7 @@ public class CategoryController {
       @ApiResponse(responseCode = "404", description = "Category with the given ID was not found")
   })
   @GetMapping("/{categoryID}")
-  public ResponseEntity<CategoryResponse> getCategory(
+  public ResponseEntity<CategoryResponse> getCategoryById(
       @Parameter(description = "ID of the category to get category information about") @PathVariable long categoryID) {
     logger.info("Fetching category with ID {}", categoryID);
     CategoryResponse category = categoryService.getCategoryDtoById(categoryID);
