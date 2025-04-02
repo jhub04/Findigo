@@ -5,8 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an authentication request data transfer object containing user credentials.
