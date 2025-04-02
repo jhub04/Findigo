@@ -4,16 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
+import java.util.List;
+
 @Component
+@RequiredArgsConstructor
 public class SecurityUtil {
   private final UserRepository userRepository;
-
-  public SecurityUtil(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
 
   public User getCurrentUser() {
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -32,6 +32,10 @@ public class SecurityUtil {
 
   public boolean isCurrentUser(User user) {
     return getCurrentUser().getId().equals(user.getId());
+  }
+
+  public boolean isListingOwner(Listing listing) {
+    return getCurrentUser().getId().equals(listing.getUser().getId());
   }
 
   public boolean isCurrentUserOrAdmin(User user) {
