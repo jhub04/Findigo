@@ -22,4 +22,7 @@ public class ListingRequest {
   private double longitude;
   private Long categoryId;
   private List<ListingAttributeRequest> attributes;
+  private double price;
+  private String address;
+  private String postalCode;
 }

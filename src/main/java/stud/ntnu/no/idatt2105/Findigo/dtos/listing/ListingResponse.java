@@ -25,4 +25,7 @@ public class ListingResponse {
   private CategoryResponse category;
   private UserResponse user;
   private List<ListingAttributeResponse> attributes;
+  private double price;
+  private String address;
+  private String postalCode;
 }
