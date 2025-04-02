@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import stud.ntnu.no.idatt2105.Findigo.dtos.listing.EditListingDto;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
@@ -38,7 +37,6 @@ public class ListingController {
   /**
    * Adds a new listing for a specified user.
    *
-   * @param username the username of the user adding the listing
    * @param request  the details of the listing to be added
    * @return a ResponseEntity containing the created listing
    */
@@ -49,11 +47,10 @@ public class ListingController {
   })
   @PostMapping()
   @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<Listing> addListing(
-      @Parameter(description = "the username of the user adding the listing") @PathVariable String username,
+  public ResponseEntity<ListingResponse> addListing(
       @Valid @RequestBody ListingRequest request) {
     logger.info("Adding listing from user with listing description " + request.getBriefDescription());
-    Listing listing = listingService.addListing(request);
+    ListingResponse listing = listingService.addListing(request);
     logger.info("Listing with description " + request.getBriefDescription() + " added");
     return ResponseEntity.status(HttpStatus.CREATED).body(listing);
   }
@@ -61,7 +58,6 @@ public class ListingController {
   /**
    * Retrieves all listings created by a specified user.
    *
-   * @param username the username of the user whose listings are being retrieved
    * @return a ResponseEntity containing a list of listing responses
    */
   @Operation(summary = "Get listings by user", description = "Fetches all listings associated with a given username")
@@ -69,12 +65,11 @@ public class ListingController {
       @ApiResponse(responseCode = "200", description = "Listings fetched successfully"),
       @ApiResponse(responseCode = "404", description = "User not found")
   })
-  @GetMapping("/username/{username}") //TODO: bør endres til userController
-  public ResponseEntity<List<ListingResponse>> getUserListings(
-      @Parameter(description = "The username of the user whose listings are being retrieved") @PathVariable String username) {
-    logger.info("Getting listings from user " + username);
-    List<ListingResponse> listings = listingService.getUserListings(username);
-    logger.info("Fetched listings from user " + username);
+  @GetMapping()
+  public ResponseEntity<List<ListingResponse>> getMyListings() {
+    logger.info("Getting listings from current user");
+    List<ListingResponse> listings = listingService.getOwnListings();
+    logger.info("Fetched listings from current user");
     return ResponseEntity.ok(listings);
   }
 
@@ -96,10 +91,17 @@ public class ListingController {
     return ResponseEntity.ok(listings);
   }
 
+  @GetMapping("/category/{categoryId}")
+  public ResponseEntity<List<ListingResponse>> getListingsByCategory(
+          @PathVariable Long categoryId
+  ) {
+    List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
+    return ResponseEntity.ok(listings);
+  }
+
   /**
    * Edits an existing listing with the provided details.
    *
-   * @param listingDto the DTO containing the updated listing information
    * @return a ResponseEntity containing the updated listing response
    */
   @Operation(summary = "Edit a listing", description = "Edits the values in the database of a given listing")
@@ -107,11 +109,14 @@ public class ListingController {
       @ApiResponse(responseCode = "200", description = "Listing edited successfully"),
       @ApiResponse(responseCode = "404", description = "If no listing, category or attributes are found")
   })
-  @PutMapping("/edit")
-  public ResponseEntity<?> editListing(@RequestBody EditListingDto listingDto) {
-    logger.info("Editing listing with listing id " + listingDto.getId());
-    ListingResponse listingResponse = listingService.editListing(listingDto);
-    logger.info("Listing with listing id " + listingDto.getId() + " successfully edited");
+  @PutMapping("/edit/{listingId}")
+  public ResponseEntity<ListingResponse> editListing(
+          @PathVariable Long listingId,
+          @RequestBody ListingRequest request
+  ) {
+    logger.info("Editing listing with listing id {}", listingId);
+    ListingResponse listingResponse = listingService.editListing(listingId, request);
+    logger.info("Listing with listing id {} successfully edited", listingId);
     return ResponseEntity.ok(listingResponse);
   }
 
@@ -127,9 +132,9 @@ public class ListingController {
       @ApiResponse(responseCode = "404", description = "If no listing with the given ID is found")
   })
   @DeleteMapping("/{listingID}")
-  public ResponseEntity<?> deleteListing(
+  public ResponseEntity<String> deleteListing(
       @Parameter(description = "ID of the listing to be deleted") @PathVariable long listingID) {
-    logger.info("Deleting listing with id " + listingID);
+    logger.info("Deleting listing with id {}", listingID);
     listingService.deleteListing(listingID);
     return ResponseEntity.ok("Listing deleted");
   }
@@ -137,7 +142,7 @@ public class ListingController {
   /**
    * Retrieves a specific listing by its ID.
    *
-   * @param id the ID of the listing to retrieve
+   * @param listingId the ID of the listing to retrieve
    * @return a ResponseEntity containing the listing if found
    */
   @Operation(summary = "Get listing by ID", description = "Fetches a single listing by its unique ID")
@@ -145,10 +150,10 @@ public class ListingController {
           @ApiResponse(responseCode = "200", description = "Listing fetched successfully"),
           @ApiResponse(responseCode = "404", description = "Listing not found")
   })
-  @GetMapping("/id/{id}")
-  public ResponseEntity<ListingResponse> getListingById(@PathVariable Long id) {
+  @GetMapping("/{listingId}")
+  public ResponseEntity<ListingResponse> getListingById(@PathVariable Long listingId) {
     logger.info("Fetching listing in database");
-    ListingResponse listingResponse = listingService.getListingById(id);
+    ListingResponse listingResponse = listingService.getListingById(listingId);
     logger.info("Fetched all listings in database");
     return ResponseEntity.ok(listingResponse);
   }
