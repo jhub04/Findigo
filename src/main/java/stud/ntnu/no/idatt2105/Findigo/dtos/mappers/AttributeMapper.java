@@ -22,4 +22,12 @@ public class AttributeMapper {
         .setDataType(attributeDto.getType())
         .setCategory(category);
   }
+
+  public static AttributeResponse toDto(Attribute attribute) {
+    return new AttributeResponse(
+            attribute.getId(),
+            attribute.getAttributeName(),
+            attribute.getDataType()
+    );
+  }
 }
