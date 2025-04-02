@@ -1,5 +1,6 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -175,6 +176,7 @@ public class UserService {
     logger.info("User ID {} successfully updated", userId);
   }
 
+  @Transactional
   public List<ListingResponse> getMyListings() {
     User currentUser = securityUtil.getCurrentUser();
     return getListingsUtil(currentUser);
@@ -199,6 +201,7 @@ public class UserService {
     User user = securityUtil.getCurrentUser();
     return userMapper.toDTO(user);
   }
+
 
   private List<ListingResponse> getListingsUtil(User user) {
     return user.getListings().stream()
