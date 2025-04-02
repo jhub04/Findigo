@@ -57,26 +57,6 @@ public class CategoryController {
   }
 
   /**
-   * Retrieves all listings associated with a specific category.
-   *
-   * @param categoryID the ID of the category whose listings are to be retrieved
-   * @return a ResponseEntity containing a list of listing responses within the specified category
-   */
-  @Operation(summary = "Gets all listings form a category", description = "Gets all listings that are associated with the given categoryID")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Listings with the given categoryID are found"),
-      @ApiResponse(responseCode = "404", description = "No listings associated with the given categoryID are found")
-  })
-  @GetMapping("/{categoryID}/listings")
-  public ResponseEntity<List<ListingResponse>> getAllListingsFromCategory(
-      @Parameter(description = "ID of the category to get listings from") @PathVariable long categoryID) {
-    logger.info("Fetching all listings from category with ID " + categoryID);
-    List<ListingResponse> listings = listingService.getListingsInCategory(categoryID);
-    logger.info("Fetched listings in category with ID " + categoryID);
-    return ResponseEntity.ok(listings);
-  }
-
-  /**
    * Retrieves details of a specific category.
    *
    * @param categoryID the ID of the category to retrieve
@@ -90,11 +70,9 @@ public class CategoryController {
   @GetMapping("/{categoryID}")
   public ResponseEntity<CategoryResponse> getCategory(
       @Parameter(description = "ID of the category to get category information about") @PathVariable long categoryID) {
-    logger.info("Fetching category with ID " + categoryID);
-    CategoryResponse category = categoryService.getCategory(categoryID);
-    logger.info("Category found with ID " + categoryID);
+    logger.info("Fetching category with ID {}", categoryID);
+    CategoryResponse category = categoryService.getCategoryDtoById(categoryID);
+    logger.info("Category found with ID {}", categoryID);
     return ResponseEntity.ok(category);
   }
-
-  //TODO add endpoint for creating a category (admin)
 }
