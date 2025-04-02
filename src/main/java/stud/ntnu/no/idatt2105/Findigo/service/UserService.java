@@ -17,10 +17,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.EditUserDto;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
-import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
@@ -231,7 +228,6 @@ public class UserService {
     userRepository.save(currentUser);
     return ListingMapper.toDto(favorite);
   }
-}
 
   public UserLiteResponse createUser(UserRequest req) {
     if (userRepository.existsByUsername(req.getUsername())) {
@@ -242,11 +238,13 @@ public class UserService {
     return userMapper.toLiteDto(userRepository.save(user));
   }
 
-  public UserResponse getCurrentUser() {
-    User user = securityUtil.getCurrentUser();
-    return userMapper.toDTO(user);
+  public User getCurrentUser() {
+    return securityUtil.getCurrentUser();
   }
 
+  public UserResponse getCurrentDtoUser() {
+    return userMapper.toDTO(securityUtil.getCurrentUser());
+  }
 
   private List<ListingResponse> getListingsUtil(User user) {
     return user.getListings().stream()

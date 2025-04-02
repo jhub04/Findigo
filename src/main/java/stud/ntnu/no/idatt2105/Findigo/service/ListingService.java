@@ -130,8 +130,7 @@ public class ListingService {
             .setCategory(category)
             .setListingAttributes(request.getAttributes().stream()
                     .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listingId))
-                    .toList())
-            .setImageUrls(request.getImageUrls());
+                    .toList()); //TODO: legg til nye bilder
 
     listingRepository.save(listing);
 

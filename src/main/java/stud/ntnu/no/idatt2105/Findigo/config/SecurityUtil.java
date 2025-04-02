@@ -1,6 +1,5 @@
 package stud.ntnu.no.idatt2105.Findigo.config;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +15,6 @@ import java.util.List;
 public class SecurityUtil {
   private final UserRepository userRepository;
 
-  @Transactional
   public User getCurrentUser() {
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = (principal instanceof UserDetails userDetails)

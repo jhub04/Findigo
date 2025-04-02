@@ -71,7 +71,7 @@ public class MessageService {
   @Transactional
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
-    UserResponse currentUser = userService.getCurrentUser();
+    UserResponse currentUser = userService.getCurrentDtoUser();
     if (!(currentUser.getId().equals(userId1) || currentUser.getId().equals(userId2))) {
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 +") match with userId of current user in the security context(" + currentUser.getId()+")");
     }

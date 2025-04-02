@@ -59,7 +59,7 @@ public class UserController {
   @GetMapping("/profile")
   public ResponseEntity<UserResponse> getCurrentUser() {
     logger.info("Fetching current user profile");
-    return ResponseEntity.ok(userService.getCurrentUser());
+    return ResponseEntity.ok(userService.getCurrentDtoUser());
   }
 
   /**
@@ -85,6 +85,7 @@ public class UserController {
     logger.info("User details edited of user with username {}", request.getUsername());
     return ResponseEntity.ok("User updated");
   }
+
   @Operation(summary = "Get favorites", description = "Fetches all favorites for the current user.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successfully fetched all favorites"),
