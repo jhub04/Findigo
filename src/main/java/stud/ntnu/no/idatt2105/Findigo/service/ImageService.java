@@ -79,20 +79,15 @@ public class ImageService {
       throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" +listing.getImageUrls().size() + "), imageIndex is " + imageIndex);
     }
 
-    if (listing.getImageUrls().isEmpty()) {
-      return null;
-    }
-
     Resource resource;
     Path path = Paths.get(listing.getImageUrls().get(imageIndex));
 
     try {
       resource = new UrlResource(path.toUri());
     } catch (MalformedURLException e) {
-      throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " + imageUrl + " is malformed. Exception message: " + e.getMessage());
+      throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " + path + " is malformed. Exception message: " + e.getMessage());
     }
 
     return resource;
   }
-}
 }
