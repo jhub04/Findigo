@@ -72,23 +72,27 @@ public class ImageService {
    * @return A list of resources containing the images.
    */
   public Resource downloadImageFromListing(long listingId, int imageIndex) {
-    {
-      Listing listing = listingRepository.findById(listingId)
-          .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
+    Listing listing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
 
-      List<Resource> images = new ArrayList<>();
-
-      for (String imageUrl : listing.getImageUrls()) {
-        Path path = Paths.get(imageUrl);
-        try {
-          Resource resource = new UrlResource(path.toUri());
-          images.add(resource);
-        } catch (MalformedURLException e) {
-          throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " + imageUrl + " is malformed. Exception message: " + e.getMessage());
-        }
-      }
-
-      return images.get(imageIndex);
+    if (imageIndex < 0 || imageIndex >= listing.getImageUrls().size()) {
+      throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" +listing.getImageUrls().size() + "), imageIndex is " + imageIndex);
     }
+
+    if (listing.getImageUrls().isEmpty()) {
+      return null;
+    }
+
+    Resource resource;
+    Path path = Paths.get(listing.getImageUrls().get(imageIndex));
+
+    try {
+      resource = new UrlResource(path.toUri());
+    } catch (MalformedURLException e) {
+      throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " + imageUrl + " is malformed. Exception message: " + e.getMessage());
+    }
+
+    return resource;
   }
+}
 }
