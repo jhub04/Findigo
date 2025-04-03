@@ -74,8 +74,10 @@ public class AuthController {
   public ResponseEntity<String> authenticate(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
     logger.info("Logging in user with username "+ authRequest.getUsername());
     ResponseCookie cookie = userService.authenticateAndGetCookie(authRequest);
+    logger.debug("JWT token created: " + cookie.getValue());
     logger.info("Authenticated " +authRequest.getUsername() + " successfully");
     response.addHeader("Set-Cookie", cookie.toString());
+    logger.info("JWT token set as cookie, jwt token: " + cookie.getValue());
     return ResponseEntity.ok("Login successful");
   }
 

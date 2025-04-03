@@ -265,7 +265,7 @@ public class UserService {
     return ResponseCookie.from("auth-token", token.getToken())
         .httpOnly(true)
         .secure(true)
-        .sameSite("Strict")
+        .sameSite("None")
         .path("/")
         .maxAge(accessTokenExpiration)
         .build();
@@ -275,7 +275,7 @@ public class UserService {
     return ResponseCookie.from("auth-token", "")
         .httpOnly(true)
         .secure(true)
-        .sameSite("Strict")
+        .sameSite("None")
         .path("/")
         .maxAge(0)
         .build();
