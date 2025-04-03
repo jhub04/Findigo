@@ -51,13 +51,13 @@ public class ImageController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Images successfully downloaded"),
       @ApiResponse(responseCode = "500", description = "Image download failed"),
-      @ApiResponse(responseCode = "404", description = "Listing not found")
+      @ApiResponse(responseCode = "404", description = "Listing not found"),
+      @ApiResponse(responseCode = "400", description = "Image index out of bounds")
   })
   @GetMapping("/download/{listingId}/{imageIndex}")
   public ResponseEntity<?> getImagesFromListing(
       @Parameter(description = "The ID of the listing to download the images from.") @PathVariable Long listingId,
       @Parameter(description = "The index of the picture to be fetched") @PathVariable int imageIndex) {
-    //TODO seperate response for no images found
     logger.info("Downloading images from listing with ID " + listingId);
     Resource image = imageService.downloadImageFromListing(listingId, imageIndex);
     logger.info("Images from listing with ID " + listingId + " successfully downloaded");
