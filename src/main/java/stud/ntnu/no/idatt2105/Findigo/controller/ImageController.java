@@ -57,9 +57,12 @@ public class ImageController {
   public ResponseEntity<?> getImagesFromListing(
       @Parameter(description = "The ID of the listing to download the images from.") @PathVariable Long listingId,
       @Parameter(description = "The index of the picture to be fetched") @PathVariable int imageIndex) {
+    //TODO seperate response for no images found
     logger.info("Downloading images from listing with ID " + listingId);
     Resource image = imageService.downloadImageFromListing(listingId, imageIndex);
     logger.info("Images from listing with ID " + listingId + " successfully downloaded");
     return ResponseEntity.ok(image);
   }
+
+
 }

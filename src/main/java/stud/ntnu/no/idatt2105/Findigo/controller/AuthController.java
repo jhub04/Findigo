@@ -4,9 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +37,9 @@ public class AuthController {
 
   /**
    * Register a new user.
+   *
+   * @param registerRequest the registration request containing user details.
+   * @return a response entity with the registration status.
    */
   @Operation(summary = "Register new user", description = "Creates a new user account based on " +
       "provided details")
@@ -49,20 +56,25 @@ public class AuthController {
   }
 
   /**
-   * Authenticate and return JWT token.
+   * Authenticate and return JWT token as cookie.
+   *
+   * @param authRequest the authentication request containing username and password
+   * @param response the HTTP response to set the cookie
+   * @return a response entity with the authentication status and JWT token as a cookie
    */
   @Operation(summary = "Login", description = "Authenticates user credentials and returns a JWT " +
-      "token if valid")
+      "token as cookie if valid")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Login successful"),
       @ApiResponse(responseCode = "401", description = "Invalid username or password"),
       @ApiResponse(responseCode = "500", description = "Invalid signing key for signing JWT token")
   })
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest authRequest) {
+  public ResponseEntity<String> authenticate(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
     logger.info("Logging in user with username "+ authRequest.getUsername());
-    AuthResponse response = userService.authenticate(authRequest);
+    ResponseCookie cookie = userService.authenticateAndGetCookie(authRequest);
     logger.info("Authenticated " +authRequest.getUsername() + " successfully");
-    return ResponseEntity.ok(response);
+    response.addHeader("Set-Cookie", cookie.toString());
+    return ResponseEntity.ok("Login successful");
   }
 }

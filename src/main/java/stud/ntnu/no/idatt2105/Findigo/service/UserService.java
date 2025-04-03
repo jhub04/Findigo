@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +30,6 @@ import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -47,6 +48,9 @@ public class UserService {
   private final ListingService listingService;
   private final UserMapper userMapper;
   private final SecurityUtil securityUtil;
+  @Value("${security.jwt.access-token-expiration}")
+  private long accessTokenExpiration;
+
 
   /**
    * Registers a new user in the system.
@@ -250,6 +254,18 @@ public class UserService {
     return user.getListings().stream()
             .map(ListingMapper::toDto)
             .toList();
+  }
+
+  public ResponseCookie authenticateAndGetCookie(AuthRequest authRequest) {
+    AuthResponse token = authenticate(authRequest);
+
+    return ResponseCookie.from("auth-token", token.getToken())
+        .httpOnly(true)
+        .secure(true)
+        .sameSite("Strict")
+        .path("/")
+        .maxAge(accessTokenExpiration)
+        .build();
   }
 }
 
