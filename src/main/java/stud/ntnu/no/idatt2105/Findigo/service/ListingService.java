@@ -87,7 +87,7 @@ public class ListingService {
    * @throws NoSuchElementException if there are no listings in database.
    */
   public List<ListingResponse> getAllListings() {
-    List<Listing> listings = listingRepository.findAll();
+    List<Listing> listings = listingRepository.findAllByUser_IdNot(securityUtil.getCurrentUser().getId());
     if (listings.isEmpty()) {
       throw new NoSuchElementException("Couldn't find any listings in database");
     }
