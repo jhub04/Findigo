@@ -1,11 +1,13 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +31,7 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlready
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -266,6 +269,20 @@ public class UserService {
         .path("/")
         .maxAge(accessTokenExpiration)
         .build();
+  }
+
+  public ResponseCookie createLogoutCookie() {
+    return ResponseCookie.from("auth-token", "")
+        .httpOnly(true)
+        .secure(true)
+        .sameSite("Strict")
+        .path("/")
+        .maxAge(0)
+        .build();
+  }
+
+  public boolean validateToken(String token) {
+    return token != null && jwtUtil.isTokenValid(token);
   }
 }
 
