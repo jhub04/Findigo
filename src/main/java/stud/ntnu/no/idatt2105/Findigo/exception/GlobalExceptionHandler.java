@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.*;
 
 import java.time.LocalDateTime;
@@ -27,16 +26,16 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  /**
-   * Handles the {@link UsernameAlreadyExistsException} and returns a custom error response.
-   *
-   * @param e the exception that was thrown
-   * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 409 (Conflict)
-   */
-  @ExceptionHandler(UsernameAlreadyExistsException.class)
-  public ResponseEntity<ErrorDetail> handleUsernameAlreadyExistsException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.CONFLICT, e, request);
+  private ResponseEntity<ErrorDetail> createErrorResponseEntity(CustomErrorMessage errorMessage, Exception e, WebRequest request) {
+    ErrorDetail errorDetail = new ErrorDetail(
+            LocalDateTime.now(),
+            errorMessage.getStatus(),
+            HttpStatus.valueOf(errorMessage.getStatus()).getReasonPhrase(),
+            e.getClass().getName(),
+            errorMessage.getMessage(),
+            request.getDescription(false)
+    );
+    return new ResponseEntity<>(errorDetail, HttpStatus.valueOf(errorMessage.getStatus()));
   }
 
   /**
@@ -62,43 +61,6 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetail> handleAuthenticationException(@NonNull Exception e, WebRequest request) {
     return createErrorResponseEntity(HttpStatus.BAD_REQUEST, e, request);
   }
-
-  /**
-   * Handles the {@link UsernameNotFoundException} and returns a custom error response.
-   *
-   * @param e the exception that was thrown
-   * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 404 (Not Found)
-   */
-  @ExceptionHandler(UsernameNotFoundException.class)
-  public ResponseEntity<ErrorDetail> handleUsernameNotFoundException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
-  }
-
-  /**
-   * Handles the {@link NoSuchElementException} and returns a custom error response.
-   *
-   * @param e the exception that was thrown
-   * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 404 (Not Found)
-   */
-  @ExceptionHandler(NoSuchElementException.class)
-  public ResponseEntity<ErrorDetail> handleNoSuchElementException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
-  }
-
-  /**
-   * Handles the {@link CategoryNotFoundException} and returns a custom error response.
-   *
-   * @param e the exception that was thrown
-   * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 404 (Not Found)
-   */
-  @ExceptionHandler(CategoryNotFoundException.class)
-  public ResponseEntity<ErrorDetail> handleCategoryNotFoundException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.NOT_FOUND, e, request);
-  }
-
 
   /**
    * Handles the {@link InvalidKeyException} and returns a custom error response.
@@ -157,38 +119,29 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Handles the {@link CategoryAlreadyExistsException} and returns a custom error response.
+   * Handles the {@link EditedValueUnchangedException} and returns a custom error response.
    *
    * @param e the exception that was thrown
    * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 409 (Conflict)
+   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 400 (Bad Request)
    */
-  @ExceptionHandler(CategoryAlreadyExistsException.class)
-  public ResponseEntity<ErrorDetail> handleCategoryAlreadyExistsException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.CONFLICT, e, request);
+  @ExceptionHandler(EditedValueUnchangedException.class)
+  public ResponseEntity<ErrorDetail> handleEditedValueUnchangedException(@NonNull EditedValueUnchangedException e, WebRequest request) {
+    return createErrorResponseEntity(e.getErrorMessage(), e, request);
   }
 
-  /**
-   * Handles the {@link ImageUploadException} and returns a custom error response.
-   *
-   * @param e the exception that was thrown
-   * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 500 (Internal Server Error)
-   */
-  @ExceptionHandler(ImageUploadException.class)
-  public ResponseEntity<ErrorDetail> handleImageUploadException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e, request);
+  @ExceptionHandler(EntityAlreadyExistsException.class)
+  public ResponseEntity<ErrorDetail> handleObjectAlreadyExistsException(@NonNull EntityAlreadyExistsException e, WebRequest request) {
+    return createErrorResponseEntity(e.getErrorMessage(), e, request);
   }
 
-  /**
-   * Handles the {@link ImageDownloadException} and returns a custom error response.
-   *
-   * @param e the exception that was thrown
-   * @param request the web request that triggered the exception
-   * @return a {@link ResponseEntity} containing an {@link ErrorDetail} with status 500 (Internal Server Error)
-   */
-  @ExceptionHandler(ImageDownloadException.class)
-  public ResponseEntity<ErrorDetail> handleImageDownloadException(@NonNull Exception e, WebRequest request) {
-    return createErrorResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e, request);
+  @ExceptionHandler(EntityNotFoundException.class)
+  public ResponseEntity<ErrorDetail> handleObjectNotFoundException(@NonNull EntityNotFoundException e, WebRequest request) {
+    return createErrorResponseEntity(e.getErrorMessage(), e, request);
+  }
+
+  @ExceptionHandler(EntityOperationException.class)
+  public ResponseEntity<ErrorDetail> handleEntityOperationException(@NonNull EntityOperationException e, WebRequest request) {
+    return createErrorResponseEntity(e.getErrorMessage(), e, request);
   }
 }
