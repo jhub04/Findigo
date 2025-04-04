@@ -78,7 +78,7 @@ public class Listing {
    * Automatically set to the current date and time when the listing is created.
    */
 @CreationTimestamp
-@Column(name = "created_at", updatable = false)
+@Column(name = "date_created", updatable = false)
 private Date dateCreated;
 
   /**
