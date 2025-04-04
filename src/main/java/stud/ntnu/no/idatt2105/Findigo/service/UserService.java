@@ -234,19 +234,6 @@ public class UserService {
     return getListingsUtil(user);
   }
 
-
-  /**
-   * Get all listings favorited by the current user.
-   *
-   * @return a set of all listings favorited by the current user.
-   */
-  public Set<Listing> getFavorites() {
-    User currentUser = getCurrentUser();
-    //TODO wrong method
-
-    return currentUser.getFavoriteListings();
-  }
-
   /**
    * Add a listing to the current user's favorites.
    *
@@ -375,6 +362,18 @@ public class UserService {
    */
   public boolean validateToken(String token) {
     return token != null && jwtUtil.isTokenValid(token);
+  }
+
+
+  public List<ListingResponse> getFavorites() {
+    User currentUser = getCurrentUser();
+    List<Listing> myFavorites = favoriteListingsRepository.findAllByUser(currentUser)
+        .stream()
+        .map(FavoriteListings::getListing)
+        .toList();
+    return myFavorites.stream()
+        .map(ListingMapper::toDto)
+        .toList();
   }
 }
 
