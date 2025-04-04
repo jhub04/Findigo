@@ -9,6 +9,8 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.service.AttributeService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/attributes")
 @PreAuthorize("hasRole('Admin')") //TODO: caps admin?
@@ -24,5 +26,28 @@ public class AdminAttributeController {
   ) {
     AttributeResponse createdAttribute = attributeService.createAttribute(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdAttribute);
+  }
+
+  @GetMapping()
+  public ResponseEntity<List<AttributeResponse>> getAllAttributes() {
+    List<AttributeResponse> attributes = attributeService.getAllAttributes();
+    return ResponseEntity.ok(attributes);
+  }
+
+  @PutMapping("/edit/{attributeId}")
+  public ResponseEntity<String> editAttribute(
+          @PathVariable Long attributeId,
+          @RequestBody AttributeRequest request
+  ) {
+    attributeService.editAttribute(attributeId, request);
+    return ResponseEntity.ok("Attribute successfully edited");
+  }
+
+  @DeleteMapping("/{attributeId}")
+  public ResponseEntity<String> deleteAttribute(
+          @PathVariable Long attributeId
+  ) {
+    attributeService.deleteAttribute(attributeId);
+    return ResponseEntity.ok("Attribute successfully deleted");
   }
 }

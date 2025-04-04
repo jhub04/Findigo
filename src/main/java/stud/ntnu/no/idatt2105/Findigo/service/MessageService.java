@@ -15,6 +15,8 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Message;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.MessageRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import java.util.*;
@@ -41,8 +43,10 @@ public class MessageService {
    */
   public MessageResponse sendMessage(MessageRequest messageRequest){
     UserDetails currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String fromUsername = userRepository.findById(messageRequest.getFromUserId())
-        .orElseThrow(() -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId())).getUsername();
+    User user = userRepository.findById(messageRequest.getFromUserId())
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+
+    String fromUsername = user.getUsername();
 
     if (!currentUser.getUsername().equals(fromUsername)) {
       throw new AccessDeniedException("User in security context (" + currentUser.getUsername() + ") doesnt match with from user in the message request (" + fromUsername + ")");
@@ -51,9 +55,9 @@ public class MessageService {
     Message message = new Message()
         .setMessageText(messageRequest.getMessageText())
         .setToUser(userRepository.findById(messageRequest.getToUserId())
-            .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getToUserId())))
+            .orElseThrow( () -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND)))
         .setFromUser(userRepository.findById(messageRequest.getFromUserId())
-            .orElseThrow( () -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId()))
+            .orElseThrow( () -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND))
         );
 
     messageRepository.save(message);
@@ -73,7 +77,7 @@ public class MessageService {
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
     User currentUser = userRepository.findByUsername(((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername())
-        .orElseThrow(() -> new NoSuchElementException("Couldn't find user"));
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
     if (!(currentUser.getId().equals(userId1) || currentUser.getId().equals(userId2))) {
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 +") match with userId of current user in the security context(" + currentUser.getId()+")");
     }
