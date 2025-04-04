@@ -91,6 +91,7 @@ public class ListingMapper {
         listing.getPrice(),
         listing.getAddress(),
         listing.getPostalCode(),
+        listing.getDateCreated(),
         CategoryMapper.toDto(listing.getCategory()),
         new UserLiteResponse(listing.getUser().getId(), listing.getUser().getUsername()),
         attributeResponses,
