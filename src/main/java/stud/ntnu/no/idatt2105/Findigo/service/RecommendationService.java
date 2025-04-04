@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
+import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
@@ -23,18 +25,19 @@ import java.util.stream.Collectors;
 public class RecommendationService {
   private final BrowseHistoryRepository browseHistoryRepository;
   private final ListingRepository listingRepository;
+  private final SecurityUtil securityUtil;
 
   /**
    * Gets recommended listings for a user based on their browsing history.
    * This method retrieves the most viewed categories from the user's recent browsing history
    * and recommends listings from those categories that the user has not already viewed.
    *
-   * @param user The user for whom to get recommendations.
    * @param page The page number to retrieve.
    * @param size The number of listings per page.
    * @return A paginated list of recommended listings.
    */
-  public Page<Listing> getRecommendedListingsForUser(User user, int page, int size) {
+  public Page<Listing> getRecommendedListings(int page, int size) {
+    User user = securityUtil.getCurrentUser();
     Pageable pageable = PageRequest.of(page, size);
 
     LocalDate tenDaysAgo = LocalDate.now().minusDays(10);
