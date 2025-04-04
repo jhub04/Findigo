@@ -66,6 +66,7 @@ public class ListingController {
   })
   @GetMapping("")
   public ResponseEntity<List<ListingResponse>> getAllListings() {
+    //TODO get reccomended listings
     logger.info("Fetching all listings in database");
     List<ListingResponse> listings = listingService.getAllListings();
     logger.info("Fetched all listings in database");
@@ -76,7 +77,7 @@ public class ListingController {
   public ResponseEntity<List<ListingResponse>> getListingsByCategory(
           @PathVariable Long categoryId
   ) {
-    //TODO get lsitings that arent yours
+    //TODO get reccomended listings
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
     return ResponseEntity.ok(listings);
   }

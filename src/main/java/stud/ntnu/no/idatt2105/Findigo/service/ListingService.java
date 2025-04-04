@@ -95,6 +95,13 @@ public class ListingService {
         .map(ListingMapper::toDto).toList();
   }
 
+  /**
+   * Retrieves a listing by its ID.
+   *
+   * @param id The ID of the listing to retrieve.
+   * @return A {@link ListingResponse} containing the listing details.
+   * @throws NoSuchElementException If the listing is not found.
+   */
   public ListingResponse getListingById(Long id) {
     Listing listing = listingRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
