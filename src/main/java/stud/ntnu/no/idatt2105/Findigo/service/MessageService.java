@@ -41,7 +41,8 @@ public class MessageService {
    */
   public MessageResponse sendMessage(MessageRequest messageRequest){
     UserDetails currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String fromUsername = userService.getUserById(messageRequest.getFromUserId()).getUsername();
+    String fromUsername = userRepository.findById(messageRequest.getFromUserId())
+        .orElseThrow(() -> new NoSuchElementException("No user with id " + messageRequest.getFromUserId())).getUsername();
 
     if (!currentUser.getUsername().equals(fromUsername)) {
       throw new AccessDeniedException("User in security context (" + currentUser.getUsername() + ") doesnt match with from user in the message request (" + fromUsername + ")");
@@ -71,7 +72,8 @@ public class MessageService {
   @Transactional
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     //TODO paginate response
-    UserResponse currentUser = userService.getCurrentDtoUser();
+    User currentUser = userRepository.findByUsername(((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername())
+        .orElseThrow(() -> new NoSuchElementException("Couldn't find user"));
     if (!(currentUser.getId().equals(userId1) || currentUser.getId().equals(userId2))) {
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 +") match with userId of current user in the security context(" + currentUser.getId()+")");
     }

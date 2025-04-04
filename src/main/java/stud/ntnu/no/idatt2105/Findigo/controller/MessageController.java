@@ -41,10 +41,10 @@ public class MessageController {
       @ApiResponse(responseCode = "403", description = "Unauthorized - User wanting to send message is not the logged in user"),
       @ApiResponse(responseCode = "404", description = "There is no user with the fromUser id")
   })
-  public ResponseEntity<MessageResponse> sendNewMessage(@RequestBody MessageRequest messageRequest) {
-    logger.info("Sending new message from userId {} to userId {}", messageRequest.getFromUserId(), messageRequest.getToUserId());
+  public ResponseEntity<?> sendNewMessage(@RequestBody MessageRequest messageRequest) {
+    logger.info("Sending new message from userId " + messageRequest.getFromUserId() + " to userId " + messageRequest.getToUserId());
     MessageResponse messageResponse = messageService.sendMessage(messageRequest);
-    logger.info("Message sent successfully from userId {} to userId {}", messageRequest.getFromUserId(), messageRequest.getToUserId());
+    logger.info("Message sent from userId " + messageRequest.getFromUserId() + " to userId " + messageRequest.getToUserId());
     return ResponseEntity.ok(messageResponse);
   }
 
@@ -66,9 +66,9 @@ public class MessageController {
       @Parameter(description = "ID of the first user") @PathVariable long userId1,
       @Parameter(description = "ID of the second user") @PathVariable long userId2) {
     //TODO read all messages
-    logger.info("Getting all messages between userId {} and userId {}", userId1, userId2);
+    logger.info("Getting all messages between userId " + userId1 + " and " + userId2);
     List<MessageResponse> messageResponses = messageService.getAllMessagesBetween(userId1, userId2);
-    logger.info("Successfully fetched all messages between userId {} and userId {}", userId1, userId2);
+    logger.info("Successfully fetched all messages between userId " + userId1 + " and " + userId2);
     return ResponseEntity.ok(messageResponses);
   }
 
@@ -85,12 +85,10 @@ public class MessageController {
       @ApiResponse(responseCode = "403", description = "Unauthorized - logged in user wanting to fetch messages does not match the given user id"),
       @ApiResponse(responseCode = "404", description = "There is no user with the given user id in the database")
   })
-  public ResponseEntity<List<MessageResponse>> getNewestMessagesForUser(
-      @Parameter(description = "ID of the user") @PathVariable long userId) {
-
-    logger.info("Finding all newest messages to and from userId {}", userId);
+  public ResponseEntity<?> getNewestMessagesForUser(@PathVariable long userId) {
+    logger.info("Finding all newest messages to and from userId " + userId);
     List<MessageResponse> newestMessagesToOrFromUser = messageService.getNewestMessages(userId);
-    logger.info("Found all newest messages to or from userID {}", userId);
+    logger.info("Found all newest messages to or from userID " + userId);
     return ResponseEntity.ok(newestMessagesToOrFromUser);
   }
 }
