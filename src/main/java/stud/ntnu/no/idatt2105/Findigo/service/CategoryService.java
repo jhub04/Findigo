@@ -8,12 +8,14 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.CategoryMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
  * Service class responsible for handling category-related business logic.
@@ -32,11 +34,7 @@ public class CategoryService {
    * @throws NoSuchElementException if no categories are found
    */
   public List<CategoryResponse> getAllCategories() {
-    List<Category> categories = categoryRepository.findAll();
-    if (categories.isEmpty()) {
-      throw new NoSuchElementException("No categories found in database");
-    }
-    return categories.stream()
+    return categoryRepository.findAll().stream()
         .map(CategoryMapper::toDto)
         .toList();
   }
@@ -49,12 +47,13 @@ public class CategoryService {
    */
   public Category getCategoryById(long categoryID) {
     return categoryRepository.findById(categoryID)
-            .orElseThrow(() -> new NoSuchElementException("Couldn't find category with ID " + categoryID));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
   }
 
   public CategoryResponse getCategoryDtoById(long categoryID) {
     Category category = categoryRepository.findById(categoryID)
-            .orElseThrow(() -> new NoSuchElementException("Couldn't find category with ID " + categoryID));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+
     return CategoryMapper.toDto(category);
   }
 
@@ -66,11 +65,28 @@ public class CategoryService {
    */
   public CategoryResponse createCategory(CategoryRequest req) {
     if (categoryRepository.existsByCategoryName(req.getName())) {
-      throw new CategoryAlreadyExistsException("Category with name " + req.getName() + " already exists");
+      throw new EntityAlreadyExistsException(CustomErrorMessage.CATEGORY_ALREADY_EXISTS);
     }
 
     Category category = CategoryMapper.toEntity(req);
     categoryRepository.save(category);
     return CategoryMapper.toDto(category);
+  }
+
+  public void editCategory(Long categoryId, CategoryRequest request) {
+    Category category = getCategoryById(categoryId);
+
+    if (categoryRepository.existsByCategoryName(request.getName())) {
+      throw new EditedValueUnchangedException(CustomErrorMessage.CATEGORY_NAME_UNCHANGED);
+    }
+    category.setCategoryName(request.getName());
+    categoryRepository.save(category);
+  }
+
+  public void deleteCategory(Long categoryId) {
+    if (!categoryRepository.existsById(categoryId)) {
+      throw new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND);
+    }
+    categoryRepository.deleteById(categoryId);
   }
 }

@@ -10,7 +10,9 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.AttributeMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.AttributeRepository;
 
 import java.util.List;
@@ -41,6 +43,11 @@ public class AttributeService {
             .toList();
   }
 
+  public Attribute getAttributeById(long attributeId) {
+    return attributeRepository.findById(attributeId)
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND));
+  }
+
   /**
    * Creates a new category in the database.
    *
@@ -56,5 +63,26 @@ public class AttributeService {
 
     Attribute attribute = AttributeMapper.toEntity(request, category);
     return AttributeMapper.toDto(attributeRepository.save(attribute));
+  }
+
+  public void editAttribute(Long attributeId, AttributeRequest request) {
+    Attribute attribute = getAttributeById(attributeId);
+
+    if (attributeRepository.existsByAttributeName(attribute.getAttributeName())) {
+      throw new EditedValueUnchangedException(CustomErrorMessage.ATTRIBUTE_NAME_UNCHANGED);
+    }
+
+    attribute.setAttributeName(request.getName());
+    attribute.setDataType(request.getType());
+    attribute.setCategory(categoryService.getCategoryById(request.getCategoryId()));
+
+    attributeRepository.save(attribute);
+  }
+
+  public void deleteAttribute(Long attributeId) {
+    if (!attributeRepository.existsById(attributeId)) {
+      throw new EntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND);
+    }
+    attributeRepository.deleteById(attributeId);
   }
 }
