@@ -76,6 +76,7 @@ public class ListingController {
   public ResponseEntity<List<ListingResponse>> getListingsByCategory(
           @PathVariable Long categoryId
   ) {
+    //TODO get lsitings that arent yours
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
     return ResponseEntity.ok(listings);
   }

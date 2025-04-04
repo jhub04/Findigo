@@ -30,6 +30,8 @@ import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -267,7 +269,7 @@ public class UserService {
         .secure(true)
         .sameSite("None")
         .path("/")
-        .maxAge(accessTokenExpiration)
+        .maxAge(Duration.ofSeconds(accessTokenExpiration))
         .build();
   }
 
@@ -277,7 +279,7 @@ public class UserService {
         .secure(true)
         .sameSite("None")
         .path("/")
-        .maxAge(0)
+        .maxAge(Duration.ofSeconds(0))
         .build();
   }
 
