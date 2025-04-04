@@ -22,6 +22,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
+import stud.ntnu.no.idatt2105.Findigo.entities.FavoriteListings;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
@@ -30,6 +31,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.BrowseHistoryRepository;
+import stud.ntnu.no.idatt2105.Findigo.repository.FavoriteListingsRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
@@ -52,6 +54,7 @@ public class UserService {
   private final CustomUserDetailsService userDetailsService;
   private final ListingRepository listingRepository; //TODO: ikke bruk listingrepo i userservice
   private final BrowseHistoryRepository browseHistoryRepository;
+  private final FavoriteListingsRepository favoriteListingsRepository;
   private static final Logger logger = LogManager.getLogger(UserService.class);
   private final ListingService listingService;
   private final UserMapper userMapper;
@@ -239,6 +242,7 @@ public class UserService {
    */
   public Set<Listing> getFavorites() {
     User currentUser = getCurrentUser();
+    //TODO wrong method
 
     return currentUser.getFavoriteListings();
   }
@@ -255,12 +259,11 @@ public class UserService {
         .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
     logger.info("Found listing " + favorite.getId());
 
-    currentUser.addFavorite(favorite);
-
-    logger.info("Added favorite");
-    userRepository.save(currentUser);
-
-    logger.info("Saves in db");
+    FavoriteListings newFavoriteListing = new FavoriteListings()
+        .setListing(favorite)
+        .setUser(currentUser);
+    favoriteListingsRepository.save(newFavoriteListing);
+    logger.info("new favorite listing saved in db");
     return ListingMapper.toDto(favorite);
   }
 
@@ -271,11 +274,17 @@ public class UserService {
    * @param listingId the id of the listing to remove from favorites.
    */
   public ListingResponse deleteFavorite(long listingId) {
+    logger.debug("Deleting favorite listing with id {}", listingId);
     User currentUser = getCurrentUser();
+    logger.debug("Got current user {}", currentUser.getUsername());
     Listing favorite = listingRepository.findById(listingId)
         .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
-    currentUser.removeFavorite(favorite);
-    userRepository.save(currentUser);
+    logger.debug("Found listing {}", favorite.getId());
+
+    FavoriteListings favoriteListing = favoriteListingsRepository.findByUserAndListing(currentUser, favorite)
+        .orElseThrow(() -> new NoSuchElementException("No favorite listing with id " + listingId + " was found"));
+
+    favoriteListingsRepository.delete(favoriteListing);
     return ListingMapper.toDto(favorite);
   }
 

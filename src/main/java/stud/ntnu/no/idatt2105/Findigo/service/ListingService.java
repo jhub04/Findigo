@@ -72,7 +72,7 @@ public class ListingService {
    * @throws NoSuchElementException if there are no listings associated with the given category.
    */
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
-    List<Listing> listings = listingRepository.findListingsByCategoryId(categoryID);
+    List<Listing> listings = listingRepository.findListingsByCategoryId(categoryID);//TODO ikke få med currentusers egne listings her
     if (listings.isEmpty()) {
       throw new NoSuchElementException("Couldn't find any listings in category with ID "+categoryID);
     }

@@ -58,7 +58,7 @@ public class ListingController {
   }
 
   /**
-   * Retrieves all listings available in the database.
+   * Retrieves all listings available in the database except for the calling users listings.
    *
    * @return a ResponseEntity containing a list of all listings
    */
