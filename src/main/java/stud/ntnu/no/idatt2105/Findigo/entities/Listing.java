@@ -5,11 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents a listing in the system, which is a post created by a user and categorized under a specific category.
@@ -74,6 +72,14 @@ public class Listing {
    */
   @Column (nullable = false)
   private String postalCode;
+
+/**
+   * The date and time when the listing was created.
+   * Automatically set to the current date and time when the listing is created.
+   */
+@CreationTimestamp
+@Column(name = "created_at", updatable = false)
+private Date dateCreated;
 
   /**
    * The category this listing belongs to.

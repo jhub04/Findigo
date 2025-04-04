@@ -8,6 +8,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,6 +27,7 @@ public class ListingResponse {
   private double price;
   private String address;
   private String postalCode;
+  private Date dateCreated;
   private CategoryResponse category;
   private UserLiteResponse user;
   private List<ListingAttributeResponse> attributes;
