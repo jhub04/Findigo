@@ -12,8 +12,8 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-    name = "favoriteListings",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "listingId"})
+    name = "favorite_listings",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "listing_id"})
 )
 public class FavoriteListings {
   @Id
@@ -26,13 +26,13 @@ public class FavoriteListings {
    * Cannot be null.
    */
   @ManyToOne
-  @JoinColumn(name = "userId", nullable = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
   /**
    * The listing that was favorited.
    * Cannot be null.
    */
   @ManyToOne
-  @JoinColumn(name = "listingId", nullable = false)
+  @JoinColumn(name = "listing_id", nullable = false)
   private Listing listing;
 }
