@@ -46,10 +46,13 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
-
+    if (request.getRequestURI().startsWith("/api/auth/")) {
+      chain.doFilter(request, response);
+      return;
+    }
     Cookie[] cookies = request.getCookies();
     String token = null;
-    logger.info("JWTAuthorizationFilter: doFilterInternal called");
+    logger.info("JWTAuthorizationFilter: doFilterInternal called for request: " + request.getRequestURI());
     if (cookies != null) {
       for (Cookie cookie : cookies) {
         if ("auth-token".equals(cookie.getName())) { // This is the name of your JWT cookie
