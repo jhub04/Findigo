@@ -39,7 +39,6 @@ public class UserController {
 
   private static final Logger logger = LogManager.getLogger(UserController.class);
   private final UserService userService;
-  private final UserMapper userMapper;
   private final SecurityUtil securityUtil;
 
 

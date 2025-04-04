@@ -9,12 +9,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
+import stud.ntnu.no.idatt2105.Findigo.service.RecommendationService;
 
 import java.util.List;
 
@@ -29,10 +32,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Listings", description = "Get listings from database")
 public class ListingController {
-
+  private final int pageSize = 20;
   private static final Logger logger = LogManager.getLogger(ListingController.class);
   private final ListingService listingService;
-
+  private final RecommendationService recommendationService;
   /**
    * Adds a new listing for a specified user.
    *
@@ -76,7 +79,7 @@ public class ListingController {
   public ResponseEntity<List<ListingResponse>> getListingsByCategory(
           @PathVariable Long categoryId
   ) {
-    //TODO get lsitings that arent yours
+    //TODO get not your lisitngs
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
     return ResponseEntity.ok(listings);
   }
@@ -134,9 +137,31 @@ public class ListingController {
   })
   @GetMapping("/{listingId}")
   public ResponseEntity<ListingResponse> getListingById(@PathVariable Long listingId) {
+    //kalles når bruker går inn på listing, legg til i browse hsitory
     logger.info("Fetching listing in database");
     ListingResponse listingResponse = listingService.getListingById(listingId);
     logger.info("Fetched all listings in database");
     return ResponseEntity.ok(listingResponse);
   }
+
+  /**
+   * Retrieves a paginated list of recommended listings.
+   *
+   * @param pageNumber the page number to retrieve
+   * @return a ResponseEntity containing the paginated list of recommended listings
+   */
+  @Operation(summary = "Get recommended listings", description = "Fetches a paginated list of recommended listings")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Recommended listings fetched successfully"),
+      @ApiResponse(responseCode = "404", description = "If no recommended listings are found")
+  })//TODO skriv riktig response for ikke finne bruker
+  @GetMapping("/recommended/{pageNumber}")
+  public ResponseEntity<Page<Listing>> getRecommendedListings(
+      @Parameter(description = "the page number to retrieve") @PathVariable int pageNumber) {
+    logger.info("Getting recommended listings, page " + pageNumber);
+    Page<Listing> recommendedListingsPage = recommendationService.getRecommendedListings(pageNumber, pageSize);
+    logger.info("Recommended listings fetched");
+    return ResponseEntity.ok(recommendedListingsPage);
+  }
+
 }

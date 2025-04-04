@@ -32,10 +32,10 @@ import java.util.NoSuchElementException;
 public class ListingService {
 
   private final ListingRepository listingRepository;
-  private final UserRepository userRepository;
   private final CategoryRepository categoryRepository;
   private final ListingAttributeMapper listingAttributeMapper;
   private final SecurityUtil securityUtil;
+  private final RecommendationService recommendationService;
 
   /**
    * Adds a new listing for a given user.
@@ -95,10 +95,18 @@ public class ListingService {
         .map(ListingMapper::toDto).toList();
   }
 
+  /**
+   * Retrieves a listing by its ID.
+   *
+   * @param id The ID of the listing to retrieve.
+   * @return A {@link ListingResponse} containing the listing details.
+   * @throws NoSuchElementException If the listing is not found.
+   */
   public ListingResponse getListingById(Long id) {
-    return listingRepository.findById(id)
-            .map(ListingMapper::toDto)
-            .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
+    Listing listing = listingRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
+    recommendationService.addListingToBrowseHistory(listing);
+    return ListingMapper.toDto(listing);
   }
 
 

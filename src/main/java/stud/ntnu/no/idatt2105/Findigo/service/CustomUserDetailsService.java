@@ -1,5 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +15,7 @@ import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
   private final UserRepository userRepository;
+  Logger logger = LogManager.getLogger(CustomUserDetailsService.class);
 
   /**
    * Constructs a new {@code CustomUserDetailsService} with the injected {@code UserRepository}.
@@ -32,6 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
    */
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    logger.info("Loading user by username: " + username);
     return userRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     //legge til for roller ogsa

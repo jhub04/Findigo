@@ -1,5 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
@@ -8,6 +10,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Repository interface for managing {@link Listing} entities.
@@ -32,4 +35,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    */
   List<Listing> findListingsByCategoryId(Long id);
   List<Listing> findAllByUser_IdNot(long id);
+  Page<Listing> findByCategoryAndIdNotIn(Category category, Set<Long> ids, Pageable pageable);
 }
