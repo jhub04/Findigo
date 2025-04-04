@@ -6,19 +6,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
-import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.AttributeMapper;
-import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.CategoryMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryAlreadyExistsException;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.AttributeRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
  * Service class responsible for handling category-related business logic.
@@ -53,7 +49,7 @@ public class AttributeService {
    */
   public AttributeResponse createAttribute(AttributeRequest request) {
     if (attributeRepository.existsByAttributeName(request.getName())) {
-      throw new CategoryAlreadyExistsException("Category with name " + request.getName() + " already exists");
+      throw new EntityAlreadyExistsException(CustomErrorMessage.ATTRIBUTE_ALREADY_EXISTS);
     }
 
     Category category = categoryService.getCategoryById(request.getCategoryId());

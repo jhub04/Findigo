@@ -1,13 +1,11 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,13 +25,14 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -67,7 +66,7 @@ public class UserService {
   public String register(RegisterRequest request) {
     if (userRepository.existsByUsername(request.getUsername())) {
       logger.error("Couldn't register " + request.getUsername() + ". Username already taken");
-      throw new UsernameAlreadyExistsException("User with username " + request.getUsername() + " already exists");
+      throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
 
     User user = new User()
@@ -118,13 +117,13 @@ public class UserService {
   public User getUserById(Long id) {
     //TODO user this method where it should be used
     return userRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("No user with the given id: " + id + " was found"));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
   }
 
   public UserResponse getUserDtoById(Long id) {
     //TODO user this method where it should be used
     User user = userRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("No user with the given id: " + id + " was found"));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
 
     return userMapper.toDTO(user);
   }
@@ -144,7 +143,7 @@ public class UserService {
     if (!currentUser.getUsername().equals(request.getUsername())) {
       if (userRepository.existsByUsername(request.getUsername())) {
         logger.error("Failed to update user: username '{}' already taken", request.getUsername());
-        throw new UsernameAlreadyExistsException("Username already taken: " + request.getUsername());
+        throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
       }
 
       logger.info("Changing username from '{}' to '{}'", currentUser.getUsername(), request.getUsername());
@@ -166,7 +165,7 @@ public class UserService {
     // Check if username is changed
     if (!user.getUsername().equals(request.getUsername())) {
       if (userRepository.existsByUsername(request.getUsername())) {
-        throw new UsernameAlreadyExistsException("Username already taken: " + request.getUsername());
+        throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
       }
       logger.info("Changed username for user ID {} from '{}' to '{}'", userId, user.getUsername(), request.getUsername());
       user.setUsername(request.getUsername());
@@ -223,7 +222,7 @@ public class UserService {
     User currentUser = getCurrentUser();
     logger.info("Got current user " + currentUser);
     Listing favorite = listingRepository.findById(listingId)
-        .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
     logger.info("Found listing " + favorite.getId());
 
     currentUser.addFavorite(favorite);
@@ -239,7 +238,7 @@ public class UserService {
   public ListingResponse deleteFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing favorite = listingRepository.findById(listingId)
-        .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
     currentUser.removeFavorite(favorite);
     userRepository.save(currentUser);
     return ListingMapper.toDto(favorite);
@@ -247,7 +246,7 @@ public class UserService {
 
   public UserLiteResponse createUser(UserRequest req) {
     if (userRepository.existsByUsername(req.getUsername())) {
-      throw new UsernameAlreadyExistsException("User with username " + req.getUsername() + " already exists");
+      throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
 
     User user = userMapper.toEntity(req);

@@ -8,11 +8,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import stud.ntnu.no.idatt2105.Findigo.controller.ListingController;
+import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.ImageDownloadException;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.ImageUploadException;
+import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
 import java.io.IOException;
@@ -21,8 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -32,6 +31,7 @@ public class ImageService {
   private final ListingRepository listingRepository;
   private final UserService userService;
   private static final Logger logger = LogManager.getLogger(ImageService.class);
+  private final SecurityUtil securityUtil;
 
   /**
    * Uploads an image to a listing.
@@ -43,9 +43,9 @@ public class ImageService {
   public int uploadImageToListing(long listingId, MultipartFile file) {
     User currentUser = userService.getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
-    if (!listing.getUser().getId().equals(currentUser.getId())) {
+    if (securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
     }
 
@@ -60,7 +60,7 @@ public class ImageService {
       listingRepository.save(listing);
       logger.info(listing.getImageUrls());
     } catch (IOException e) {
-      throw new ImageUploadException("Could not upload image to listing with ID " + listingId + ", url: " + e.getMessage());
+      throw new EntityOperationException(CustomErrorMessage.IMAGE_UPLOAD_FAILED);
     }
     return listing.getImageUrls().size();
   }
@@ -73,7 +73,7 @@ public class ImageService {
    */
   public Resource downloadImageFromListing(long listingId, int imageIndex) {
     Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new NoSuchElementException("Listing not found with ID " + listingId)); //TODO make method that does this and replace
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
     if (imageIndex < 0 || imageIndex >= listing.getImageUrls().size()) {
       throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" +listing.getImageUrls().size() + "), imageIndex is " + imageIndex);
@@ -85,7 +85,7 @@ public class ImageService {
     try {
       resource = new UrlResource(path.toUri());
     } catch (MalformedURLException e) {
-      throw new ImageDownloadException("Could not download image from listing with ID " + listingId + ", the URL " + path + " is malformed. Exception message: " + e.getMessage());
+      throw new EntityOperationException(CustomErrorMessage.IMAGE_DOWNLOAD_FAILED);
     }
 
     return resource;

@@ -13,7 +13,8 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.CategoryNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
@@ -50,7 +51,7 @@ public class ListingService {
     User currentUser = securityUtil.getCurrentUser();
 
     Category category = categoryRepository.findById(req.getCategoryId())
-        .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
+        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
     Listing listing = ListingMapper.toEntity(
         req,
@@ -72,11 +73,7 @@ public class ListingService {
    * @throws NoSuchElementException if there are no listings associated with the given category.
    */
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
-    List<Listing> listings = listingRepository.findListingsByCategoryId(categoryID);
-    if (listings.isEmpty()) {
-      throw new NoSuchElementException("Couldn't find any listings in category with ID "+categoryID);
-    }
-    return listings.stream()
+    return listingRepository.findListingsByCategoryId(categoryID).stream()
         .map(ListingMapper::toDto).toList();
   }
 
@@ -88,9 +85,7 @@ public class ListingService {
    */
   public List<ListingResponse> getAllListings() {
     List<Listing> listings = listingRepository.findAllByUser_IdNot(securityUtil.getCurrentUser().getId());
-    if (listings.isEmpty()) {
-      throw new NoSuchElementException("Couldn't find any listings in database");
-    }
+
     return listings.stream()
         .map(ListingMapper::toDto).toList();
   }
@@ -98,7 +93,7 @@ public class ListingService {
   public ListingResponse getListingById(Long id) {
     return listingRepository.findById(id)
             .map(ListingMapper::toDto)
-            .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
   }
 
 
@@ -114,14 +109,14 @@ public class ListingService {
    */
   public ListingResponse editListing(Long listingId, ListingRequest request) { //kan opprette editAsAdmin metode
     Listing listing = listingRepository.findById(listingId)
-            .orElseThrow(() -> new NoSuchElementException("No listing found with id {}" + listingId));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
     if (securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("You do not own this listing");
     }
 
     Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new NoSuchElementException("No category found with ID: " + request.getCategoryId()));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
     listing.setBriefDescription(request.getBriefDescription())
             .setFullDescription(request.getFullDescription())
@@ -148,7 +143,7 @@ public class ListingService {
    */
   public void deleteListing(long listingId) {
     Listing listing = listingRepository.findById(listingId)
-            .orElseThrow(() -> new NoSuchElementException("No listing found with id {}" + listingId));
+            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
     if (securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("You do not own this listing");
