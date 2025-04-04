@@ -360,18 +360,5 @@ public class UserService {
   public boolean validateToken(String token) {
     return token != null && jwtUtil.isTokenValid(token);
   }
-
-  /**
-   * Adds a listing to the current user's browse history.
-   *
-   * @param listing the listing to be added to the browse history
-   */
-  public void addListingToBrowseHistory(Listing listing) {
-    User currentUser = securityUtil.getCurrentUser();
-    BrowseHistory browseHistory = new BrowseHistory()
-        .setUser(currentUser)
-        .setListing(listing);
-    browseHistoryRepository.save(browseHistory);
-  }
 }
 

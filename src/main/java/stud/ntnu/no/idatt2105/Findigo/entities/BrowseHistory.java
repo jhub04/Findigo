@@ -13,7 +13,6 @@ import java.util.Date;
 @Data
 @Entity
 @Accessors(chain = true)
-@RequiredArgsConstructor
 @NoArgsConstructor
 @Table(name = "browse_history")
 public class BrowseHistory {

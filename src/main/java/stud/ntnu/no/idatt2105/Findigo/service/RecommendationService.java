@@ -78,4 +78,17 @@ public class RecommendationService {
     return new PageImpl<>(recommendedListings, pageable, recommendedListings.size());
   }
 
+  /**
+   * Adds a listing to the current user's browse history.
+   *
+   * @param listing the listing to be added to the browse history
+   */
+  public void addListingToBrowseHistory(Listing listing) {
+    User currentUser = securityUtil.getCurrentUser();
+    BrowseHistory browseHistory = new BrowseHistory()
+        .setUser(currentUser)
+        .setListing(listing);
+    browseHistoryRepository.save(browseHistory);
+  }
+
 }

@@ -35,7 +35,7 @@ public class ListingService {
   private final CategoryRepository categoryRepository;
   private final ListingAttributeMapper listingAttributeMapper;
   private final SecurityUtil securityUtil;
-  private final UserService userService;
+  private final RecommendationService recommendationService;
 
   /**
    * Adds a new listing for a given user.
@@ -105,7 +105,7 @@ public class ListingService {
   public ListingResponse getListingById(Long id) {
     Listing listing = listingRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Could not find listing by id"));
-    userService.addListingToBrowseHistory(listing);
+    recommendationService.addListingToBrowseHistory(listing);
     return ListingMapper.toDto(listing);
   }
 
