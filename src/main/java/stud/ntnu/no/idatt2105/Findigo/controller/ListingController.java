@@ -134,6 +134,7 @@ public class ListingController {
   })
   @GetMapping("/{listingId}")
   public ResponseEntity<ListingResponse> getListingById(@PathVariable Long listingId) {
+    //kalles når bruker går inn på listing, legg til i browse hsitory
     logger.info("Fetching listing in database");
     ListingResponse listingResponse = listingService.getListingById(listingId);
     logger.info("Fetched all listings in database");

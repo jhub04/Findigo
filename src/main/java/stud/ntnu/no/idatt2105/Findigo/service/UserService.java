@@ -21,6 +21,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
+import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
@@ -28,6 +29,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
+import stud.ntnu.no.idatt2105.Findigo.repository.BrowseHistoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
@@ -49,6 +51,7 @@ public class UserService {
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
   private final ListingRepository listingRepository; //TODO: ikke bruk listingrepo i userservice
+  private final BrowseHistoryRepository browseHistoryRepository;
   private static final Logger logger = LogManager.getLogger(UserService.class);
   private final ListingService listingService;
   private final UserMapper userMapper;
@@ -121,6 +124,12 @@ public class UserService {
             .orElseThrow(() -> new NoSuchElementException("No user with the given id: " + id + " was found"));
   }
 
+  /**
+   * Get user by ID and map to DTO.
+   * @param id the id of the user to get
+   * @return the user with the given id mapped to DTO
+   * @throws NoSuchElementException if no user with the given id is found
+   */
   public UserResponse getUserDtoById(Long id) {
     //TODO user this method where it should be used
     User user = userRepository.findById(id)
@@ -160,6 +169,15 @@ public class UserService {
     userRepository.save(currentUser);
   }
 
+  /**
+   * Edit user details. Admin only.
+   *
+   * @param request the new user details.
+   * @param userId the id of the user to edit.
+   * @throws AccessDeniedException if the current logged-in user is not an admin.
+   * @throws UsernameAlreadyExistsException if the new username is already taken.
+   * @throws NoSuchElementException if no user with the given id is found.
+   */
   public void editUserDetails(UserRequest request, Long userId) {
     User user = getUserById(userId);
 
@@ -190,12 +208,23 @@ public class UserService {
     logger.info("User ID {} successfully updated", userId);
   }
 
+  /**
+   * Get all listings for the current user.
+   *
+   * @return a list of all listings for the current user
+   */
   @Transactional
   public List<ListingResponse> getMyListings() {
     User currentUser = securityUtil.getCurrentUser();
     return getListingsUtil(currentUser);
   } //TODO: admin og isowner autentisering i service også
 
+  /**
+   * Get all listings for a specific user.
+   *
+   * @param id the id of the user whose listings to get
+   * @return a list of all listings for the given user
+   */
   public List<ListingResponse> getUserListings(Long id) {
     User user = getUserById(id);
 
@@ -229,6 +258,11 @@ public class UserService {
   }
 
 
+  /**
+   * Remove a listing from the current user's favorites.
+   *
+   * @param listingId the id of the listing to remove from favorites.
+   */
   public ListingResponse deleteFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing favorite = listingRepository.findById(listingId)
@@ -238,6 +272,13 @@ public class UserService {
     return ListingMapper.toDto(favorite);
   }
 
+  /**
+   * Creates a new user in the system.
+   *
+   * @param req The {@link UserRequest} containing user details.
+   * @return A {@link UserLiteResponse} object containing the created user's details.
+   * @throws UsernameAlreadyExistsException if a user with the given username already exists.
+   */
   public UserLiteResponse createUser(UserRequest req) {
     if (userRepository.existsByUsername(req.getUsername())) {
       throw new UsernameAlreadyExistsException("User with username " + req.getUsername() + " already exists");
@@ -247,20 +288,42 @@ public class UserService {
     return userMapper.toLiteDto(userRepository.save(user));
   }
 
+  /**
+   * Retrieves the current logged-in user.
+   *
+   * @return The {@link User} object representing the current user.
+   */
   public User getCurrentUser() {
     return securityUtil.getCurrentUser();
   }
 
+  /**
+   * Retrieves the current logged-in user as a DTO.
+   *
+   * @return A {@link UserResponse} object containing user details.
+   */
   public UserResponse getCurrentDtoUser() {
     return userMapper.toDTO(securityUtil.getCurrentUser());
   }
 
+  /**
+   * Retrieves all listings associated with the given user.
+   *
+   * @param user The user whose listings are to be retrieved.
+   * @return A list of {@link ListingResponse} objects containing listing details.
+   */
   private List<ListingResponse> getListingsUtil(User user) {
     return user.getListings().stream()
             .map(ListingMapper::toDto)
             .toList();
   }
 
+  /**
+   * Authenticates a user and generates a JWT token, then creates a cookie with the token.
+   *
+   * @param authRequest The {@link AuthRequest} containing username and password.
+   * @return A {@link ResponseCookie} containing the generated JWT token.
+   */
   public ResponseCookie authenticateAndGetCookie(AuthRequest authRequest) {
     AuthResponse token = authenticate(authRequest);
 
@@ -273,6 +336,11 @@ public class UserService {
         .build();
   }
 
+  /**
+   * Creates a logout cookie to invalidate the JWT token.
+   *
+   * @return a ResponseCookie with the logout configuration
+   */
   public ResponseCookie createLogoutCookie() {
     return ResponseCookie.from("auth-token", "")
         .httpOnly(true)
@@ -283,8 +351,27 @@ public class UserService {
         .build();
   }
 
+  /**
+   * Validates the provided JWT token.
+   *
+   * @param token the JWT token to be validated
+   * @return true if the token is valid, false otherwise
+   */
   public boolean validateToken(String token) {
     return token != null && jwtUtil.isTokenValid(token);
+  }
+
+  /**
+   * Adds a listing to the current user's browse history.
+   *
+   * @param listing the listing to be added to the browse history
+   */
+  public void addListingToBrowseHistory(Listing listing) {
+    User currentUser = securityUtil.getCurrentUser();
+    BrowseHistory browseHistory = new BrowseHistory()
+        .setUser(currentUser)
+        .setListing(listing);
+    browseHistoryRepository.save(browseHistory);
   }
 }
 

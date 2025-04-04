@@ -47,6 +47,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
     if (request.getRequestURI().startsWith("/api/auth/")) {
+      logger.debug("This should never show!!!!");
       chain.doFilter(request, response);
       return;
     }
