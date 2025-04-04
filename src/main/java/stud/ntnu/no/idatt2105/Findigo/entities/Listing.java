@@ -118,8 +118,6 @@ private Date dateCreated;
   @Column(name = "image_url")
   private List<String> imageUrls = new ArrayList<>();
 
-  @ManyToMany(mappedBy = "favoriteListings")
-  private Set<User> favoritedByUsers = new HashSet<>();
 
   /**
    * Adds an image url to the listing.

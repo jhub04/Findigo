@@ -54,14 +54,6 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(
-      name = "favorite_listings",
-      joinColumns = @JoinColumn(name = "user_id"),
-      inverseJoinColumns = @JoinColumn(name = "listing_id")
-  )
-  private Set<Listing> favoriteListings = new HashSet<>();
-
   /**
    * Returns the authorities granted to the user.
    * Converts {@link Role} enums to Spring Security's {@link GrantedAuthority}.
@@ -117,24 +109,6 @@ public class User implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
-  }
-
-  /**
-   * Adds a listing to the user's favorites.
-   *
-   * @param listing The listing to add to favorites.
-   */
-  public void addFavorite(Listing listing) {
-    favoriteListings.add(listing);
-  }
-
-  /**
-   * Removes a listing from the user's favorites.
-   *
-   * @param listing The listing to remove from favorites.
-   */
-  public void removeFavorite(Listing listing) {
-    favoriteListings.remove(listing);
   }
 
   @Override

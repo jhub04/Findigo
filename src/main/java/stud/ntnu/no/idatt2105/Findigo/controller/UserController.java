@@ -84,7 +84,6 @@ public class UserController {
     logger.info("User details edited of user with username {}", request.getUsername());
     return ResponseEntity.ok("User updated");
   }
-
   @Operation(summary = "Get favorites", description = "Fetches all favorites for the current user.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successfully fetched all favorites"),
@@ -93,7 +92,7 @@ public class UserController {
   @GetMapping("/favorites")
   public ResponseEntity<?> getFavorites() {
     logger.info("Fetching all favorites for current user");
-    Set<Listing> favorites = userService.getFavorites();
+    List<ListingResponse> favorites = userService.getFavorites();
     logger.info("Fetched all favorites for current user");
     return ResponseEntity.ok(favorites);
   }
