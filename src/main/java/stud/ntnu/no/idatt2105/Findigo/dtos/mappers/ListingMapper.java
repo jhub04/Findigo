@@ -93,7 +93,7 @@ public class ListingMapper {
         listing.getPostalCode(),
         listing.getDateCreated(),
         CategoryMapper.toDto(listing.getCategory()),
-        new UserLiteResponse(listing.getUser().getId(), listing.getUser().getUsername()),
+        new UserLiteResponse(listing.getUser().getId(), listing.getUser().getUsername(), listing.getUser().getPhoneNumber()),
         attributeResponses,
         listing.getImageUrls().size()
     );

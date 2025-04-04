@@ -33,17 +33,18 @@ public class UserMapper {
    * @return a {@link UserResponse} DTO containing the user's ID and username
    */
   public UserResponse toDTO(User user) {
-    return new UserResponse(user.getId(), user.getUsername(), user.getListings().stream().map(ListingMapper::toDto).toList());
+    return new UserResponse(user.getId(), user.getUsername(), user.getPhoneNumber(), user.getListings().stream().map(ListingMapper::toDto).toList());
   }
 
   public UserLiteResponse toLiteDto(User user) {
-    return new UserLiteResponse(user.getId(), user.getUsername());
+    return new UserLiteResponse(user.getId(), user.getUsername(), user.getPhoneNumber());
   }
 
   public User toEntity(UserRequest request) {
     return new User()
             .setUsername(request.getUsername())
             .setPassword(passwordEncoder.encode(request.getPassword()))
+            .setPhoneNumber(request.getPhoneNumber())
             .setRoles(request.getRoles());
   }
 }

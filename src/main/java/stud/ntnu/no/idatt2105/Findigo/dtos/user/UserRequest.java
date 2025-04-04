@@ -13,5 +13,6 @@ import java.util.Set;
 public class UserRequest {
   private String username;
   private String password;
+  private Long phoneNumber;
   private Set<Role> roles;
 }

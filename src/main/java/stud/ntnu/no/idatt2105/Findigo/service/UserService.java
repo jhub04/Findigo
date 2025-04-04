@@ -221,10 +221,17 @@ public class UserService {
    */
   public ListingResponse addFavorite(long listingId) {
     User currentUser = getCurrentUser();
+    logger.info("Got current user " + currentUser);
     Listing favorite = listingRepository.findById(listingId)
         .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId + " was found"));
+    logger.info("Found listing " + favorite.getId());
+
     currentUser.addFavorite(favorite);
+
+    logger.info("Added favorite");
     userRepository.save(currentUser);
+
+    logger.info("Saves in db");
     return ListingMapper.toDto(favorite);
   }
 

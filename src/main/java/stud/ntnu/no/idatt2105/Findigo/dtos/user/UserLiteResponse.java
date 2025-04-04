@@ -18,4 +18,5 @@ import java.util.List;
 public class UserLiteResponse {
   private Long id;
   private String username;
+  private Long phoneNumber;
 }

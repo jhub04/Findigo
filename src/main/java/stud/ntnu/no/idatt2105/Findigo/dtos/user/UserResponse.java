@@ -20,5 +20,6 @@ import java.util.Set;
 public class UserResponse {
   private Long id;
   private String username;
+  private Long phoneNumber;
   private List<ListingResponse> listings;
 }

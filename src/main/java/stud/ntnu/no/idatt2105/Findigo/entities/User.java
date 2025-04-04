@@ -44,6 +44,9 @@ public class User implements UserDetails {
   @Column(name = "updated_at")
   private Date updatedAt;
 
+  @Column(nullable = true)
+  private Long phoneNumber;
+
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Listing> listings = new ArrayList<>();
 
