@@ -6,14 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.*;
 
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 /**
  * Global exception handler for handling different types of exceptions
@@ -135,8 +133,8 @@ public class GlobalExceptionHandler {
     return createErrorResponseEntity(e.getErrorMessage(), e, request);
   }
 
-  @ExceptionHandler(EntityNotFoundException.class)
-  public ResponseEntity<ErrorDetail> handleObjectNotFoundException(@NonNull EntityNotFoundException e, WebRequest request) {
+  @ExceptionHandler(AppEntityNotFoundException.class)
+  public ResponseEntity<ErrorDetail> handleObjectNotFoundException(@NonNull AppEntityNotFoundException e, WebRequest request) {
     return createErrorResponseEntity(e.getErrorMessage(), e, request);
   }
 

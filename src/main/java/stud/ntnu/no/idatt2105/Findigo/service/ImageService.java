@@ -12,7 +12,7 @@ import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +42,7 @@ public class ImageService {
   public int uploadImageToListing(long listingId, MultipartFile file) {
     User currentUser = userService.getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
     if (securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
@@ -73,7 +72,7 @@ public class ImageService {
    */
   public Resource downloadImageFromListing(long listingId, int imageIndex) {
     Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
     if (imageIndex < 0 || imageIndex >= listing.getImageUrls().size()) {
       throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" +listing.getImageUrls().size() + "), imageIndex is " + imageIndex);

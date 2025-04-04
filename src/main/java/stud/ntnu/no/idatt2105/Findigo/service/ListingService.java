@@ -1,6 +1,5 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,10 +14,9 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
-import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -52,7 +50,7 @@ public class ListingService {
     User currentUser = securityUtil.getCurrentUser();
 
     Category category = categoryRepository.findById(req.getCategoryId())
-        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
     Listing listing = ListingMapper.toEntity(
         req,
@@ -93,7 +91,7 @@ public class ListingService {
 
   public ListingResponse getListingById(Long id) {
     Listing listing = listingRepository.findById(id)
-            .orElseThrow(() -> EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
     recommendationService.addListingToBrowseHistory(listing);
     return ListingMapper.toDto(listing);
   }
@@ -111,14 +109,14 @@ public class ListingService {
    */
   public ListingResponse editListing(Long listingId, ListingRequest request) { //kan opprette editAsAdmin metode
     Listing listing = listingRepository.findById(listingId)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
     if (securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("You do not own this listing");
     }
 
     Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
     listing.setBriefDescription(request.getBriefDescription())
             .setFullDescription(request.getFullDescription())
@@ -145,7 +143,7 @@ public class ListingService {
    */
   public void deleteListing(long listingId) {
     Listing listing = listingRepository.findById(listingId)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
     if (securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("You do not own this listing");

@@ -1,13 +1,11 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +19,6 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
-import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
 import stud.ntnu.no.idatt2105.Findigo.entities.FavoriteListings;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
@@ -29,20 +26,17 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UsernameAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.BrowseHistoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.FavoriteListingsRepository;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 /**
  * Service class for handling user authentication and registration.
@@ -127,7 +121,7 @@ public class UserService {
   public User getUserById(Long id) {
     //TODO user this method where it should be used
     return userRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
   }
 
   /**
@@ -139,7 +133,7 @@ public class UserService {
   public UserResponse getUserDtoById(Long id) {
     //TODO user this method where it should be used
     User user = userRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
 
     return userMapper.toDTO(user);
   }
@@ -149,7 +143,6 @@ public class UserService {
    *
    * @param request the new user details.
    * @throws AccessDeniedException if the current logged-in user is not the same as the user being edited.
-   * @throws UsernameAlreadyExistsException if the new username is already taken.
    * @throws NoSuchElementException if no user with the given id is found.
    */
   public void editMyUserDetails(UserRequest request) {
@@ -181,7 +174,6 @@ public class UserService {
    * @param request the new user details.
    * @param userId the id of the user to edit.
    * @throws AccessDeniedException if the current logged-in user is not an admin.
-   * @throws UsernameAlreadyExistsException if the new username is already taken.
    * @throws NoSuchElementException if no user with the given id is found.
    */
   public void editUserDetails(UserRequest request, Long userId) {
@@ -246,7 +238,7 @@ public class UserService {
     User currentUser = getCurrentUser();
     logger.info("Got current user " + currentUser);
     Listing favorite = listingRepository.findById(listingId)
-        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
     logger.info("Found listing " + favorite.getId());
 
     FavoriteListings newFavoriteListing = new FavoriteListings()
@@ -266,7 +258,7 @@ public class UserService {
   public ListingResponse deleteFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing favorite = listingRepository.findById(listingId)
-        .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
     FavoriteListings favoriteListing = favoriteListingsRepository.findByUserAndListing(currentUser, favorite)
             .orElseThrow(() -> new NoSuchElementException("No favorite listing with id " + listingId + " was found"));
 
@@ -279,7 +271,6 @@ public class UserService {
    *
    * @param req The {@link UserRequest} containing user details.
    * @return A {@link UserLiteResponse} object containing the created user's details.
-   * @throws UsernameAlreadyExistsException if a user with the given username already exists.
    */
   public UserLiteResponse createUser(UserRequest req) {
     if (userRepository.existsByUsername(req.getUsername())) {

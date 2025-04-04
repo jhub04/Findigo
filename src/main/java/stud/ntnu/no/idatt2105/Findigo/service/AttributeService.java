@@ -12,7 +12,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.AttributeRepository;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public class AttributeService {
 
   public Attribute getAttributeById(long attributeId) {
     return attributeRepository.findById(attributeId)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND));
   }
 
   /**
@@ -81,7 +81,7 @@ public class AttributeService {
 
   public void deleteAttribute(Long attributeId) {
     if (!attributeRepository.existsById(attributeId)) {
-      throw new EntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND);
+      throw new AppEntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND);
     }
     attributeRepository.deleteById(attributeId);
   }

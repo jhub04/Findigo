@@ -11,7 +11,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
-import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
@@ -47,12 +47,12 @@ public class CategoryService {
    */
   public Category getCategoryById(long categoryID) {
     return categoryRepository.findById(categoryID)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
   }
 
   public CategoryResponse getCategoryDtoById(long categoryID) {
     Category category = categoryRepository.findById(categoryID)
-            .orElseThrow(() -> new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
     return CategoryMapper.toDto(category);
   }
@@ -85,7 +85,7 @@ public class CategoryService {
 
   public void deleteCategory(Long categoryId) {
     if (!categoryRepository.existsById(categoryId)) {
-      throw new EntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND);
+      throw new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND);
     }
     categoryRepository.deleteById(categoryId);
   }
