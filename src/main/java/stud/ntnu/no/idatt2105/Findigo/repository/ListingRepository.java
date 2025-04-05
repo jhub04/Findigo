@@ -36,4 +36,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
   List<Listing> findListingsByCategoryId(Long id);
   List<Listing> findAllByUser_IdNot(long id);
   List<Listing> findByCategoryAndIdNotIn(Category category, Set<Long> ids);
+  List<Listing> findByCategoryIdAndUser_IdNot(Long categoryId, Long userId);
 }

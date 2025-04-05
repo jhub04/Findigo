@@ -2,10 +2,14 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingAttributeMapper;
@@ -18,6 +22,7 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFou
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -150,6 +155,40 @@ public class ListingService {
     }
 
     listingRepository.deleteById(listingId);
+  }
+
+  public Page<ListingResponse> getFilteredListings(int page, int size, FilterListingsRequest filterListingsRequest) {
+    List<ListingResponse> filteredListings = getAllFilteredListings(filterListingsRequest);
+
+    int start = Math.min(page * size, filteredListings.size());
+    int end = Math.min(start + size, filteredListings.size());
+
+    if (start > filteredListings.size() || start < 0 || end > filteredListings.size() || end < 0) {
+      throw new IllegalArgumentException("Invalid page or size parameters");
+    }
+
+    List<ListingResponse> pagedListings = filteredListings.subList(start, end);
+    return new PageImpl<>(pagedListings, PageRequest.of(page, size), filteredListings.size());
+  }
+
+  public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
+    User currentUser = securityUtil.getCurrentUser();
+    List<Listing> listingsToFilter;
+    if (filterListingsRequest.getCategoryId() != null) {
+      //categoryId is a number here
+      listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNot(filterListingsRequest.getCategoryId(), currentUser.getId());
+    } else {
+      listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
+    }
+    List<Listing> filteredListings = new ArrayList<>();
+
+    for (Listing listing : listingsToFilter) {
+      if (listing.getBriefDescription().toLowerCase().contains(filterListingsRequest.getQuery().toLowerCase())) {
+        filteredListings.add(listing);
+      }
+    }
+    //TODO implement rest of method
+    return null;
   }
 
 }

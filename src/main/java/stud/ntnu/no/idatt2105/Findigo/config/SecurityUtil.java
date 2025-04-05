@@ -23,7 +23,7 @@ public class SecurityUtil {
             : principal.toString();
 
     return userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new RuntimeException("User not found"));//TODO ikke runtime exception
   }
 
   public boolean isAdmin() {
