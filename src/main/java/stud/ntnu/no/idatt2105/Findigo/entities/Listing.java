@@ -107,4 +107,7 @@ private Date dateCreated;
 
   @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ListingImageUrls> imageUrls = new ArrayList<>();
+
+  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<BrowseHistory> browseHistories = new ArrayList<>();
 }
