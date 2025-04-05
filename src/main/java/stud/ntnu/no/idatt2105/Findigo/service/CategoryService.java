@@ -30,7 +30,6 @@ import java.util.NoSuchElementException;
 public class CategoryService {
 
   private final CategoryRepository categoryRepository;
-  private final ListingAttributeService listingAttributeService;
   private final ListingService listingService;
   private static final Logger logger = LogManager.getLogger(CategoryService.class);
   private final AttributeRepository attributeRepository;
