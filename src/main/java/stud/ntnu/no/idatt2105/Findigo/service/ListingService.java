@@ -27,6 +27,7 @@ import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 /**
  * Service class for managing listings.
@@ -210,15 +211,36 @@ public class ListingService {
    */
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
     User currentUser = securityUtil.getCurrentUser();
-    List<Listing> listingsToFilter;
-    if (filterListingsRequest.getCategoryId() != null) {
-      //categoryId is a number here
-      listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNot(filterListingsRequest.getCategoryId(), currentUser.getId());
-    } else {
-      listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
+
+    List<Listing> listingsToFilter = filterListingsRequest.getQuery() != null
+            ? listingRepository.findByCategoryIdAndUser_IdNot(filterListingsRequest.getCategoryId(),
+        currentUser.getId())
+            : listingRepository.findAllByUser_IdNot(currentUser.getId());
+
+    Stream<Listing> stream = listingsToFilter.stream();
+
+    if (filterListingsRequest.getQuery() != null) {
+      stream = stream.filter(listing -> listing.getBriefDescription().toLowerCase()
+              .contains(filterListingsRequest.getQuery().toLowerCase())
+              || listing.getFullDescription().toLowerCase()
+              .contains(filterListingsRequest.getQuery().toLowerCase()));
     }
-    List<Listing> filteredListings = new ArrayList<>();
-    //TODO add more filters
+
+    if (filterListingsRequest.getFromPrice() != null) {
+      stream = stream.filter(listing -> listing.getPrice() >= filterListingsRequest.getFromPrice());
+    }
+
+    if (filterListingsRequest.getToPrice() != null) {
+      stream = stream.filter(listing -> listing.getPrice() <= filterListingsRequest.getToPrice());
+    }
+
+    if (filterListingsRequest.getFromDate() != null) {
+      stream = stream.filter(listing -> listing.getDateCreated()
+              .after(filterListingsRequest.getFromDate()));
+    }
+
+    List<Listing> filteredListings = stream.toList();
+
     return filteredListings.stream().map(listingMapper::toDto).toList();
   }
 
