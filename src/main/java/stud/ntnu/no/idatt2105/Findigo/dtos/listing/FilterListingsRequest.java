@@ -11,7 +11,7 @@ import java.util.Date;
 public class FilterListingsRequest {
   private Long categoryId;
   private String query;
-  private int fromPrice;
-  private int toPrice;
+  private Integer fromPrice;
+  private Integer toPrice;
   private Date fromDate;
 }
