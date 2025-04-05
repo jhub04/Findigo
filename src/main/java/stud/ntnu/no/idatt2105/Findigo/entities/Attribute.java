@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents an attribute that belongs to a specific category.
  * Attributes define additional properties that listings in a category can have.
@@ -50,4 +53,7 @@ public class Attribute {
   @ManyToOne
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
+
+  @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ListingAttribute> listingAttributes = new ArrayList<>();
 }

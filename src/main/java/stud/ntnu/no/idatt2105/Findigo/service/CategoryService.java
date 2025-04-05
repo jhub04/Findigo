@@ -1,5 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,11 +9,14 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.CategoryMapper;
+import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
+import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.repository.AttributeRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
@@ -25,7 +30,10 @@ import java.util.NoSuchElementException;
 public class CategoryService {
 
   private final CategoryRepository categoryRepository;
+  private final ListingAttributeService listingAttributeService;
+  private final ListingService listingService;
   private static final Logger logger = LogManager.getLogger(CategoryService.class);
+  private final AttributeRepository attributeRepository;
 
   /**
    * Retrieves all categories from the database and maps them to CategoryResponse DTOs.
@@ -83,10 +91,10 @@ public class CategoryService {
     categoryRepository.save(category);
   }
 
+  @Transactional
   public void deleteCategory(Long categoryId) {
-    if (!categoryRepository.existsById(categoryId)) {
-      throw new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND);
-    }
-    categoryRepository.deleteById(categoryId);
+    Category category = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+    categoryRepository.delete(category);
   }
 }

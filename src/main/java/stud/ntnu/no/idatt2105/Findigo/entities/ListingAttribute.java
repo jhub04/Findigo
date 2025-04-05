@@ -24,7 +24,7 @@ public class ListingAttribute {
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long Id;
+  private long id;
 
   /**
    * The value assigned to the attribute for this specific listing.

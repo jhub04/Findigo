@@ -101,7 +101,7 @@ private Date dateCreated;
    * List of attributes associated with this listing.
    * These are custom fields defined per category.
    */
-  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ListingAttribute> listingAttributes = new ArrayList<>();
 
   /**
