@@ -67,14 +67,14 @@ public class RecommendationService {
 
 
 
-    Set<Long> alreadyViewedListingIds = recentUserBrowseHistory.stream()
-        .map(b -> b.getListing().getId())
-        .collect(Collectors.toSet()); //To exclude the listings a user already has viewed
+    Set<Long> excludedListingIds = listingRepository.findListingsByUser(user).stream()
+        .map(Listing::getId)
+        .collect(Collectors.toSet());
 
     List<Listing> allRecommendedListings = new ArrayList<>();
 
     for (Category category : sortedCategories) {
-      List<Listing> listingsInCategory = listingRepository.findByCategoryAndIdNotIn(category, alreadyViewedListingIds);
+      List<Listing> listingsInCategory = listingRepository.findByCategoryAndIdNotIn(category, excludedListingIds);
       allRecommendedListings.addAll(listingsInCategory);
     }
     logger.info("User " + user.getUsername() + " has " + allRecommendedListings.size() + " recommended listings.");

@@ -25,7 +25,7 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    * @param user The user whose listings are to be retrieved.
    * @return A list of listings associated with the given user.
    */
-  List<Listing> findListingByUser(User user);
+  List<Listing> findListingsByUser(User user);
 
   /**
    * Finds all listings that belong to a specific category.
