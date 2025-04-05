@@ -180,6 +180,14 @@ public class ListingService {
     logger.info("Listing deleted successfully with ID {}", listingId);
   }
 
+  /**
+   * Retrieves a paginated list of filtered listings based on the given filter request.
+   *
+   * @param page The page number to retrieve.
+   * @param size The number of listings per page.
+   * @param filterListingsRequest The request containing filter criteria.
+   * @return A {@link Page} of {@link ListingResponse} objects matching the filter criteria.
+   */
   public Page<ListingResponse> getFilteredListings(int page, int size, FilterListingsRequest filterListingsRequest) {
     List<ListingResponse> filteredListings = getAllFilteredListings(filterListingsRequest);
 
@@ -194,6 +202,12 @@ public class ListingService {
     return new PageImpl<>(pagedListings, PageRequest.of(page, size), filteredListings.size());
   }
 
+  /**
+   * Retrieves all listings filtered by the given filter request.
+   *
+   * @param filterListingsRequest The request containing filter criteria.
+   * @return A list of {@link ListingResponse} objects matching the filter criteria.
+   */
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
     User currentUser = securityUtil.getCurrentUser();
     List<Listing> listingsToFilter;
