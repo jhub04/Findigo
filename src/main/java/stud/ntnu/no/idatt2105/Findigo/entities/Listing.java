@@ -97,34 +97,14 @@ private Date dateCreated;
   @JoinColumn(name = "userId", nullable = false)
   private User user;
 
+
   /**
    * List of attributes associated with this listing.
    * These are custom fields defined per category.
    */
-  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ListingAttribute> listingAttributes = new ArrayList<>();
 
-  /**
-   * A list of image URLs associated with the listing.
-   *
-   * <p>This field is mapped to a separate table named {@code listing_image_urls},
-   * where each URL is stored as a row tied to the listing via the {@code listing_id} foreign key.
-   * The column storing the actual URL string is named {@code image_url}.</p>
-   *
-   * <p>Used to represent images for the listing without storing binary data directly in the database.</p>
-   */
-  @ElementCollection
-  @CollectionTable(name = "listing_image_urls", joinColumns = @JoinColumn(name = "listing_id"))
-  @Column(name = "image_url")
-  private List<String> imageUrls = new ArrayList<>();
-
-
-  /**
-   * Adds an image url to the listing.
-   *
-   * @param url The url to add.
-   */
-  public void addImageUrl(String url) {
-    imageUrls.add(url);
-  }
+  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ListingImageUrls> imageUrls = new ArrayList<>();
 }

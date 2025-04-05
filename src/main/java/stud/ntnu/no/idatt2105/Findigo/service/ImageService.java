@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.ListingImageUrls;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityOperationException;
+import stud.ntnu.no.idatt2105.Findigo.repository.ListingImageRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +35,13 @@ public class ImageService {
   private final UserService userService;
   private static final Logger logger = LogManager.getLogger(ImageService.class);
   private final SecurityUtil securityUtil;
-
+  private final ListingImageRepository listingImageRepository;
   /**
    * Uploads an image to a listing.
    *
    * @param listingId The ID of the listing to upload the image to.
    * @param file      The image file to upload.
-   * @throws AccessDeniedException if the image could not be uploaded.
+   * @throws EntityOperationException if the image could not be uploaded.
    */
   public int uploadImageToListing(long listingId, MultipartFile file) {
     User currentUser = userService.getCurrentUser();
@@ -55,13 +59,13 @@ public class ImageService {
       Path targetPath = directoryPath.resolve(file.getOriginalFilename());
       Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-      listing.addImageUrl(picturesPath + listingId + "/" + file.getOriginalFilename());
-      listingRepository.save(listing);
-      logger.info(listing.getImageUrls());
+      String currentImagePath = picturesPath + listingId + "/" + file.getOriginalFilename();
+      ListingImageUrls imageUrl = new ListingImageUrls().setImageUrl(currentImagePath).setListing(listing);
+      listingImageRepository.save(imageUrl);
     } catch (IOException e) {
       throw new EntityOperationException(CustomErrorMessage.IMAGE_UPLOAD_FAILED);
     }
-    return listing.getImageUrls().size();
+    return listingImageRepository.findByListingId(listingId).size();
   }
 
   /**
@@ -74,12 +78,14 @@ public class ImageService {
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
-    if (imageIndex < 0 || imageIndex >= listing.getImageUrls().size()) {
-      throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" +listing.getImageUrls().size() + "), imageIndex is " + imageIndex);
+    List<ListingImageUrls> listingImageUrls = new ArrayList<>(listingImageRepository.findByListingId(listingId));
+
+    if (imageIndex < 0 || imageIndex >= listingImageUrls.size()) {
+      throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" +listingImageUrls.size() + "), imageIndex is " + imageIndex);
     }
 
     Resource resource;
-    Path path = Paths.get(listing.getImageUrls().get(imageIndex));
+    Path path = Paths.get(listingImageUrls.get(imageIndex).getImageUrl());
 
     try {
       resource = new UrlResource(path.toUri());
