@@ -82,6 +82,9 @@ public class RecommendationService {
     // Apply pagination manually
     int start = Math.min(page * size, allRecommendedListings.size());
     int end = Math.min(start + size, allRecommendedListings.size());
+    if (start > allRecommendedListings.size() || start < 0 || end > allRecommendedListings.size() || end < 0) {
+      throw new IllegalArgumentException("Invalid page or size parameters");
+    }
     logger.info("User " + user.getUsername() + " requested page " + page + " with size " + size + ". Start: " + start + ", End: " + end);
     List<Listing> pagedListings = allRecommendedListings.subList(start, end);
     logger.info("User " + user.getUsername() + " has " + pagedListings.size() + " recommended listings on page " + page);
