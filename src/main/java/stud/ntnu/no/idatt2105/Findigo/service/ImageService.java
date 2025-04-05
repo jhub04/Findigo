@@ -48,7 +48,7 @@ public class ImageService {
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
-    if (securityUtil.isListingOwner(listing)) {
+    if (!securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
     }
 
