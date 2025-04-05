@@ -218,12 +218,7 @@ public class ListingService {
       listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
     }
     List<Listing> filteredListings = new ArrayList<>();
-    //Legg til i filtered listings her
-    for (Listing listing : listingsToFilter) {
-      if (listing.getBriefDescription().toLowerCase().contains(filterListingsRequest.getQuery().toLowerCase())) {
-        filteredListings.add(listing);
-      }
-    }
+    //TODO add more filters
     return filteredListings.stream().map(listingMapper::toDto).toList();
   }
 
