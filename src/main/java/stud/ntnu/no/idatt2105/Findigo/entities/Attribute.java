@@ -11,8 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents an attribute that belongs to a specific category.
- * Attributes define additional properties that listings in a category can have.
+ * Represents an attribute entity that belongs to a specific category.
+ * <p>
+ * Attributes define additional properties that listings in a category can have,
+ * such as color, size, or material.
+ * </p>
  */
 @Data
 @Entity
@@ -25,7 +28,6 @@ public class Attribute {
 
   /**
    * The unique identifier for the attribute.
-   * This ID is automatically generated using the IDENTITY strategy.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,27 +35,30 @@ public class Attribute {
 
   /**
    * The name of the attribute.
-   * This field is required and cannot be null.
+   * Cannot be null.
    */
   @Column(nullable = false)
   private String attributeName;
 
   /**
    * The data type of the attribute (e.g., String, Integer, Boolean).
-   * This field is required and cannot be null.
+   * Cannot be null.
    */
   @Column(nullable = false)
   private String dataType;
 
   /**
-   * The category to which this attribute belongs.
-   * This relationship is managed using a many-to-one mapping.
-   * The category_id column is a foreign key and cannot be null.
+   * The category this attribute belongs to.
+   * Defined as many-to-one with lazy loading.
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
 
+  /**
+   * The listing attributes associated with this attribute.
+   * Cascade and orphan removal are enabled.
+   */
   @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ListingAttribute> listingAttributes = new ArrayList<>();
 }

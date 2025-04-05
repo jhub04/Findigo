@@ -6,7 +6,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,51 +18,47 @@ import java.io.IOException;
 
 /**
  * Filter responsible for handling JWT authorization.
- *
- * <p>This filter intercepts incoming HTTP requests, extracts and validates the JWT token
- * from the Authorization header, and sets the security context if the token is valid.</p>
- *
- * <p>It extends {@link OncePerRequestFilter} to ensure execution only once per request.</p>
+ * <p>
+ * This filter intercepts each incoming HTTP request, checks for a JWT token in cookies,
+ * validates the token, and if valid, sets the authentication in the security context.
+ * <p>
+ * It extends {@link OncePerRequestFilter} to ensure it is executed once per request.
  */
 @Component
 @RequiredArgsConstructor
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
+
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
 
   /**
-   * Performs JWT authentication filtering for each request.
+   * Filters incoming HTTP requests for JWT authentication.
+   * <p>
+   * If the request is targeting an authentication endpoint, it bypasses the filter.
+   * Otherwise, it looks for the JWT token in cookies, validates it, and sets the security context.
    *
-   * <p>Extracts the JWT token from the {@code Authorization} header, validates it,
-   * and sets the security context with the authenticated user if the token is valid.</p>
-   *
-   * @param request  the HTTP request
-   * @param response the HTTP response
+   * @param request  the HTTP servlet request
+   * @param response the HTTP servlet response
    * @param chain    the filter chain
-   * @throws ServletException if an error occurs during filtering
-   * @throws IOException      if an input or output error occurs
+   * @throws ServletException if a servlet-specific error occurs
+   * @throws IOException      if an I/O error occurs
    */
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-      throws ServletException, IOException {
+          throws ServletException, IOException {
+
+    // Skip filtering for authentication endpoints
     if (request.getRequestURI().startsWith("/api/auth/")) {
-      logger.debug("This should never show!!!!");
+      logger.debug("Skipping JWT filter for authentication endpoint: " + request.getRequestURI());
       chain.doFilter(request, response);
       return;
     }
-    Cookie[] cookies = request.getCookies();
-    String token = null;
-    logger.info("JWTAuthorizationFilter: doFilterInternal called for request: " + request.getRequestURI());
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if ("auth-token".equals(cookie.getName())) { // This is the name of your JWT cookie
-          token = cookie.getValue();
-          break;
-        }
-      }
-    }
 
-    // If there is no token in the cookie, proceed with the filter chain
+    logger.info("JWTAuthorizationFilter: Processing request: " + request.getRequestURI());
+
+    String token = extractTokenFromCookies(request.getCookies());
+
+    // If no token is found, proceed without authentication
     if (token == null) {
       chain.doFilter(request, response);
       return;
@@ -75,14 +70,33 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
       UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
       if (jwtUtil.isTokenValid(token)) {
-
         UsernamePasswordAuthenticationToken authToken =
-            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }
     }
+
     chain.doFilter(request, response);
+  }
+
+  /**
+   * Extracts the JWT token from the request cookies.
+   *
+   * @param cookies an array of cookies from the HTTP request
+   * @return the JWT token if found; otherwise, {@code null}
+   */
+  private String extractTokenFromCookies(Cookie[] cookies) {
+    if (cookies == null) {
+      return null;
+    }
+
+    for (Cookie cookie : cookies) {
+      if ("auth-token".equals(cookie.getName())) {
+        return cookie.getValue();
+      }
+    }
+    return null;
   }
 }

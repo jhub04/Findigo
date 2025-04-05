@@ -27,9 +27,9 @@ import java.util.List;
  *
  * <p>This class configures:
  * <ul>
- *     <li>Cross-Origin Resource Sharing (CORS) settings</li>
+ *     <li>Cross-Origin Resource Sharing (CORS)</li>
  *     <li>JWT authentication filter</li>
- *     <li>Session management</li>
+ *     <li>Session management (stateless)</li>
  *     <li>Password encoding</li>
  *     <li>Authentication and authorization rules</li>
  * </ul>
@@ -38,21 +38,26 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
   private final JWTAuthorizationFilter jwtAuthFilter;
   private final UserDetailsService userDetailsService;
 
   /**
    * Configures Cross-Origin Resource Sharing (CORS) settings.
    *
-   * <p>Allows requests from the frontend running on <a href="http://localhost:5173"></a>
-   * and <a href="http://localhost:5174"></a>.</p>
+   * <p>Allows requests from the frontend running on:
+   * <ul>
+   *     <li><a href="http://localhost:5173/">http://localhost:5173/</a></li>
+   *     <li><a href="http://localhost:5174/">http://localhost:5174/</a></li>
+   * </ul>
+   * </p>
    *
-   * @return a {@link CorsConfigurationSource} with the defined CORS rules.
+   * @return a {@link CorsConfigurationSource} with the defined CORS rules
    */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:5173/", "http://localhost:5174/")); // frontend ports
+    configuration.setAllowedOrigins(List.of("http://localhost:5173/", "http://localhost:5174/"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("Authorization", "Cookie", "Content-Type"));
     configuration.setExposedHeaders(List.of("Set-Cookie"));
@@ -68,43 +73,43 @@ public class SecurityConfig {
    *
    * <p>This method:
    * <ul>
-   *     <li>Disables CSRF protection (not needed for stateless JWT authentication).</li>
-   *     <li>Applies CORS configuration.</li>
-   *     <li>Allows unauthenticated access to authentication endpoints.</li>
-   *     <li>Requires authentication for all other endpoints.</li>
-   *     <li>Uses a stateless session management policy.</li>
-   *     <li>Registers the JWT authentication filter before Spring Security's default authentication filter.</li>
+   *     <li>Disables CSRF protection (not needed for stateless JWT authentication)</li>
+   *     <li>Applies CORS configuration</li>
+   *     <li>Allows unauthenticated access to authentication and API documentation endpoints</li>
+   *     <li>Requires authentication for all other endpoints</li>
+   *     <li>Uses stateless session management</li>
+   *     <li>Adds the JWT authentication filter before the default username-password filter</li>
    * </ul>
    * </p>
    *
-   * @param http the {@link HttpSecurity} instance for configuring security settings.
-   * @return the configured {@link SecurityFilterChain}.
-   * @throws Exception if an error occurs during configuration.
+   * @param http the {@link HttpSecurity} instance for configuring security settings
+   * @return the configured {@link SecurityFilterChain}
+   * @throws Exception if an error occurs during configuration
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
-        .csrf(AbstractHttpConfigurer::disable)
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/api/auth/**",
-                "/api/auth/logout",
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-ui.html"
-            ).permitAll() // kan logge inn + registerer uten token
-            .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-        .build();
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                            "/api/auth/**",
+                            "/api/auth/logout",
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**",
+                            "/swagger-ui.html"
+                    ).permitAll()
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
   }
 
   /**
-   * Configures the password encoder used for hashing and verifying passwords.
+   * Configures the password encoder for hashing and verifying passwords.
    *
-   * @return a {@link PasswordEncoder} using the BCrypt hashing algorithm.
+   * @return a {@link PasswordEncoder} using the BCrypt hashing algorithm
    */
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -114,32 +119,32 @@ public class SecurityConfig {
   /**
    * Configures and provides an {@link AuthenticationManager}.
    *
-   * <p>The authentication manager is responsible for handling authentication requests
-   * using the provided {@link UserDetailsService} and password encoder.</p>
+   * <p>The authentication manager handles authentication requests using the provided
+   * {@link UserDetailsService} and password encoder.</p>
    *
-   * @return an {@link AuthenticationManager} instance.
+   * @return an {@link AuthenticationManager} instance
    */
   @Bean
   public AuthenticationManager authenticationManager() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
     provider.setUserDetailsService(userDetailsService);
-    provider.setPasswordEncoder(passwordEncoder()); //  Hasher passord før lagring
+    provider.setPasswordEncoder(passwordEncoder());
     return new ProviderManager(provider);
   }
 
   /**
    * Configures and provides an {@link AuthenticationProvider} for Spring Security.
    *
-   * <p>The authentication provider verifies user credentials using the {@link UserDetailsService}
-   * and password encoder.</p>
+   * <p>The authentication provider verifies user credentials using the configured
+   * {@link UserDetailsService} and password encoder.</p>
    *
-   * @return an {@link AuthenticationProvider} instance.
+   * @return an {@link AuthenticationProvider} instance
    */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
     authProvider.setUserDetailsService(userDetailsService);
-    authProvider.setPasswordEncoder(passwordEncoder()); //  Sikrer at passord blir kryptert riktig
+    authProvider.setPasswordEncoder(passwordEncoder());
     return authProvider;
   }
 }
