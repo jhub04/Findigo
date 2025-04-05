@@ -24,6 +24,7 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFou
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -203,14 +204,13 @@ public class ListingService {
       listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
     }
     List<Listing> filteredListings = new ArrayList<>();
-
+    //Legg til i filtered listings her
     for (Listing listing : listingsToFilter) {
       if (listing.getBriefDescription().toLowerCase().contains(filterListingsRequest.getQuery().toLowerCase())) {
         filteredListings.add(listing);
       }
     }
-    //TODO implement rest of method
-    return null;
+    return filteredListings.stream().map(listingMapper::toDto).toList();
   }
 
 }
