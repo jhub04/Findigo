@@ -1,6 +1,8 @@
 package stud.ntnu.no.idatt2105.Findigo.dtos.mappers;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
@@ -9,38 +11,67 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 
 /**
- * Mapper class responsible for converting {@link User} entities into {@link UserResponse} DTOs.
+ * Mapper class responsible for converting {@link User} entities into {@link UserResponse} and {@link UserLiteResponse} DTOs,
+ * and vice versa.
  * <p>
- * This class provides a simple method to map user entity data into a response DTO
- * that can be used in API responses.
+ * This class also handles mapping from {@link UserRequest} to {@link User} entity,
+ * including password encoding.
  * </p>
  */
-
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
 
+  private static final Logger logger = LogManager.getLogger(UserMapper.class);
+
   private final PasswordEncoder passwordEncoder;
+  private final ListingMapper listingMapper;
 
   /**
-   * Converts a {@link User} entity to a {@link UserResponse} DTO.
-   * <p>
-   * This method extracts the necessary user details (ID and username)
-   * and returns a DTO containing this information.
-   * </p>
+   * Converts a {@link User} entity to a full {@link UserResponse} DTO.
    *
    * @param user the {@link User} entity to convert
-   * @return a {@link UserResponse} DTO containing the user's ID and username
+   * @return a {@link UserResponse} containing the user's details
    */
   public UserResponse toDTO(User user) {
-    return new UserResponse(user.getId(), user.getUsername(), user.getPhoneNumber(), user.getListings().stream().map(ListingMapper::toDto).toList());
+    logger.debug("Mapping User entity with id {} to UserResponse DTO", user.getId());
+
+    return new UserResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getPhoneNumber(),
+            user.getListings().stream()
+                    .map(listingMapper::toDto)
+                    .toList()
+    );
   }
 
+  /**
+   * Converts a {@link User} entity to a lightweight {@link UserLiteResponse} DTO.
+   *
+   * @param user the {@link User} entity to convert
+   * @return a {@link UserLiteResponse} containing basic user details
+   */
   public UserLiteResponse toLiteDto(User user) {
-    return new UserLiteResponse(user.getId(), user.getUsername(), user.getPhoneNumber());
+    logger.debug("Mapping User entity with id {} to UserLiteResponse DTO", user.getId());
+
+    return new UserLiteResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getPhoneNumber()
+    );
   }
 
+  /**
+   * Converts a {@link UserRequest} DTO to a {@link User} entity.
+   * Encodes the password before setting it to the entity.
+   *
+   * @param request the {@link UserRequest} containing user registration or update data
+   * @return a {@link User} entity
+   */
   public User toEntity(UserRequest request) {
+    logger.debug("Mapping UserRequest to User entity for username '{}'", request.getUsername());
+
     return new User()
             .setUsername(request.getUsername())
             .setPassword(passwordEncoder.encode(request.getPassword()))

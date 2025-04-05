@@ -21,17 +21,17 @@ import java.util.List;
 
 /**
  * Controller for handling category-related operations.
- * <p>
- * This controller provides an endpoint to retrieve all categories available in the system.
- * </p>
+ *
+ * <p>Provides endpoints to retrieve all categories and specific category details.</p>
  */
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
-@Tag(name = "Categories", description = "Endpoints for getting categories and listings filtered by category")
+@Tag(name = "Categories", description = "Endpoints for retrieving categories and listings filtered by category")
 public class CategoryController {
 
   private static final Logger logger = LogManager.getLogger(CategoryController.class);
+
   private final CategoryService categoryService;
   private final ListingService listingService;
 
@@ -40,33 +40,33 @@ public class CategoryController {
    *
    * @return a ResponseEntity containing a list of {@link CategoryResponse} objects.
    */
-  @Operation(summary = "Get all categories", description = "Fetches all categories that exist in the database")
+  @Operation(summary = "Get all categories", description = "Fetches all categories that exist in the database.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Categories fetched"),
-      @ApiResponse(responseCode = "404", description = "No categories found in the database")
+          @ApiResponse(responseCode = "200", description = "Categories fetched successfully"),
+          @ApiResponse(responseCode = "404", description = "No categories found in the database")
   })
-  @GetMapping("")
+  @GetMapping
   public ResponseEntity<List<CategoryResponse>> getAllCategories() {
     logger.info("Fetching all categories");
     List<CategoryResponse> categories = categoryService.getAllCategories();
-    logger.info("All categories fetched");
+    logger.info("Retrieved {} categories", categories.size());
     return ResponseEntity.ok(categories);
   }
 
   /**
-   * Retrieves details of a specific category.
+   * Retrieves details of a specific category by its ID.
    *
    * @param categoryID the ID of the category to retrieve
    * @return a ResponseEntity containing the details of the requested category
    */
-  @Operation(summary = "Get a specific category", description = "Get the details of a category associated with a given categoryID")
+  @Operation(summary = "Get a specific category", description = "Retrieves the details of a category by its ID.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Category with the given ID was found"),
-      @ApiResponse(responseCode = "404", description = "Category with the given ID was not found")
+          @ApiResponse(responseCode = "200", description = "Category found"),
+          @ApiResponse(responseCode = "404", description = "Category not found")
   })
   @GetMapping("/{categoryID}")
   public ResponseEntity<CategoryResponse> getCategoryById(
-      @Parameter(description = "ID of the category to get category information about") @PathVariable long categoryID) {
+          @Parameter(description = "The ID of the category to retrieve", example = "1") @PathVariable long categoryID) {
     logger.info("Fetching category with ID {}", categoryID);
     CategoryResponse category = categoryService.getCategoryDtoById(categoryID);
     logger.info("Category found with ID {}", categoryID);

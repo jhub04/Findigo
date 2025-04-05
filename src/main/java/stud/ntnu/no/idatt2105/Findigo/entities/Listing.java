@@ -7,12 +7,16 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
- * Represents a listing in the system, which is a post created by a user and categorized under a specific category.
- * Each listing can have a brief and full description, and is associated with a user and a category.
- * It can also have a list of custom attributes defined in {@link ListingAttribute}.
+ * Entity representing a listing in the system.
+ * <p>
+ * Each listing is created by a user, belongs to a specific category,
+ * and can contain custom attributes and images.
+ * </p>
  */
 @Data
 @Entity
@@ -31,72 +35,67 @@ public class Listing {
 
   /**
    * Short description or summary of the listing.
-   * Cannot be null.
    */
   @Column(nullable = false)
   private String briefDescription;
 
   /**
-   * Full, detailed description of the listing.
-   * Cannot be null.
+   * Detailed description of the listing.
    */
   @Column(nullable = false)
   private String fullDescription;
 
   /**
-   * Longitude of the place of the listing
+   * Longitude of the listing location.
    */
   @Column(nullable = false)
   private double longitude;
 
   /**
-   * Longitude of the place of the listing
+   * Latitude of the listing location.
    */
   @Column(nullable = false)
   private double latitude;
 
   /**
-   * Price of the listing
+   * Price of the listing.
    */
   @Column(nullable = false)
   private double price;
 
   /**
-   * Address of the listing
+   * Address of the listing.
    */
-  @Column (nullable = false)
+  @Column(nullable = false)
   private String address;
 
   /**
-   * Postal code of the listing
+   * Postal code of the listing.
    */
-  @Column (nullable = false)
+  @Column(nullable = false)
   private String postalCode;
 
-/**
-   * The date and time when the listing was created.
-   * Automatically set to the current date and time when the listing is created.
+  /**
+   * Timestamp of when the listing was created.
+   * Automatically populated at creation.
    */
-@CreationTimestamp
-@Column(name = "date_created", updatable = false)
-private Date dateCreated;
+  @CreationTimestamp
+  @Column(name = "date_created", updatable = false)
+  private Date dateCreated;
 
   /**
    * The category this listing belongs to.
-   * Cannot be null.
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
 
   /**
    * The user who created the listing.
-   * Cannot be null.
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "userId", nullable = false)
   private User user;
-
 
   /**
    * List of attributes associated with this listing.
@@ -105,9 +104,15 @@ private Date dateCreated;
   @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ListingAttribute> listingAttributes = new ArrayList<>();
 
+  /**
+   * List of image URLs associated with this listing.
+   */
   @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ListingImageUrls> imageUrls = new ArrayList<>();
 
+  /**
+   * Browsing history entries associated with this listing.
+   */
   @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BrowseHistory> browseHistories = new ArrayList<>();
 }

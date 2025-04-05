@@ -1,15 +1,15 @@
 package stud.ntnu.no.idatt2105.Findigo.exception;
 
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
 /**
- * A class representing the details of an error response returned from the backend.
+ * Represents the details of an error response returned from the backend.
  * <p>
- * This class contains relevant information about the error, including the HTTP status,
- * exception type, error message, timestamp, and the request path.
+ * Contains information such as timestamp, HTTP status code and message, exception type,
+ * detailed error message, and the request path.
+ * Used to provide clients with clear error information.
  * </p>
  */
 @Data
@@ -46,16 +46,23 @@ public class ErrorDetail {
   private String path;
 
   /**
-   * Constructs an {@link ErrorDetail} with the specified details.
+   * Constructs an instance of {@link ErrorDetail} with the specified details.
    *
-   * @param timestamp the time when the error occurred
-   * @param status the HTTP status code
+   * @param timestamp         the time when the error occurred
+   * @param status            the HTTP status code
    * @param httpStatusMessage the HTTP status message
-   * @param exceptionType the type of exception thrown
-   * @param message the error message
-   * @param path the path of the request that caused the error
+   * @param exceptionType     the type of exception thrown
+   * @param message           the error message
+   * @param path              the path of the request that caused the error
    */
-  public ErrorDetail(LocalDateTime timestamp, int status, String httpStatusMessage, String exceptionType, String message, String path) {
+  public ErrorDetail(
+          LocalDateTime timestamp,
+          int status,
+          String httpStatusMessage,
+          String exceptionType,
+          String message,
+          String path
+  ) {
     this.timestamp = timestamp;
     this.status = status;
     this.httpStatusMessage = httpStatusMessage;

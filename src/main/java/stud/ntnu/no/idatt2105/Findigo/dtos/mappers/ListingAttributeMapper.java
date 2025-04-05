@@ -1,8 +1,9 @@
 package stud.ntnu.no.idatt2105.Findigo.dtos.mappers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
@@ -14,64 +15,72 @@ import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import java.util.NoSuchElementException;
 
 /**
- * A utility class for mapping {@link ListingAttribute} entities to {@link ListingAttributeResponse} DTOs
- * and vice versa. Additionally, it handles the conversion of incoming requests into {@link ListingAttribute} entities.
+ * Service class for mapping between {@link ListingAttribute} entities and their corresponding DTOs.
  * <p>
- * This class utilizes repositories to fetch related {@link Attribute} and {@link Listing} entities when creating
- * or updating {@link ListingAttribute} entities.
+ * Handles conversion of incoming requests into {@link ListingAttribute} entities
+ * and mapping from entities to response DTOs.
  * </p>
  */
-@Component
+@Service
 @RequiredArgsConstructor
 public class ListingAttributeMapper {
+
+  private static final Logger logger = LogManager.getLogger(ListingAttributeMapper.class);
 
   private final AttributeRepository attributeRepository;
   private final ListingRepository listingRepository;
 
   /**
-   * Converts an {@link Attribute} entity, a value, and a {@link Listing} entity into a {@link ListingAttribute} entity.
+   * Converts an {@link Attribute}, a value, and a {@link Listing} into a {@link ListingAttribute} entity.
    *
-   * @param attribute the {@link Attribute} to associate with the listing
-   * @param value the value for the listing's attribute
-   * @param listing the {@link Listing} entity to associate with the attribute
+   * @param attribute the attribute to associate with the listing
+   * @param value the value of the attribute
+   * @param listing the listing to associate the attribute with
    * @return a new {@link ListingAttribute} entity
    */
-  public static ListingAttribute toEntity(Attribute attribute, String value, Listing listing) {
+  public ListingAttribute toEntity(Attribute attribute, String value, Listing listing) {
+    logger.debug("Mapping to ListingAttribute entity for attribute id {}, listing id {}", attribute.getId(), listing.getId());
     return new ListingAttribute()
-        .setAttributeValue(value)
-        .setAttribute(attribute)
-        .setListing(listing);
+            .setAttributeValue(value)
+            .setAttribute(attribute)
+            .setListing(listing);
   }
 
   /**
    * Converts a {@link ListingAttribute} entity to a {@link ListingAttributeResponse} DTO.
    *
-   * @param listingAttribute the {@link ListingAttribute} entity to convert
-   * @return a {@link ListingAttributeResponse} DTO containing the attribute name and value
+   * @param listingAttribute the entity to convert
+   * @return a DTO containing the attribute name and value
    */
-  public static ListingAttributeResponse toDto(ListingAttribute listingAttribute) {
+  public ListingAttributeResponse toDto(ListingAttribute listingAttribute) {
+    logger.debug("Mapping ListingAttribute entity to DTO for attribute id {}", listingAttribute.getAttribute().getId());
     return new ListingAttributeResponse(
-        listingAttribute.getAttribute().getAttributeName(),
-        listingAttribute.getAttributeValue()
+            listingAttribute.getAttribute().getAttributeName(),
+            listingAttribute.getAttributeValue()
     );
   }
 
   /**
-   * Converts a {@link ListingAttributeRequest} into a {@link ListingAttribute} entity, using the provided
-   * listing ID to fetch the corresponding {@link Listing} entity and attribute ID to fetch the corresponding
-   * {@link Attribute} entity.
+   * Converts a {@link ListingAttributeRequest} into a {@link ListingAttribute} entity,
+   * fetching necessary entities from the database.
    *
-   * @param listingAttribute the {@link ListingAttributeRequest} containing the attribute ID and value
-   * @param listingID the ID of the {@link Listing} to associate with the attribute
-   * @return a {@link ListingAttribute} entity with the requested attribute and value
-   * @throws NoSuchElementException if no {@link Attribute} or {@link Listing} can be found with the provided IDs
+   * @param listingAttribute the request DTO containing the attribute ID and value
+   * @param listingId the ID of the listing to associate
+   * @return a new {@link ListingAttribute} entity
+   * @throws NoSuchElementException if the attribute or listing cannot be found
    */
-  public ListingAttribute fromRequestToEntity(ListingAttributeRequest listingAttribute, long listingID) {
+  public ListingAttribute fromRequestToEntity(ListingAttributeRequest listingAttribute, long listingId) {
+    logger.debug("Mapping ListingAttributeRequest to entity for listing id {}", listingId);
+
+    Attribute attribute = attributeRepository.findById(listingAttribute.getAttributeId())
+            .orElseThrow(() -> new NoSuchElementException("No attribute with id " + listingAttribute.getAttributeId()));
+
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId));
+
     return new ListingAttribute()
-        .setAttribute(attributeRepository.findById(listingAttribute.getAttributeId())
-            .orElseThrow(() -> new NoSuchElementException("No attribute with id " + listingAttribute.getAttributeId())))
-        .setListing(listingRepository.findById(listingID)
-            .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingID)))
-        .setAttributeValue(listingAttribute.getValue());
+            .setAttribute(attribute)
+            .setListing(listing)
+            .setAttributeValue(listingAttribute.getValue());
   }
 }

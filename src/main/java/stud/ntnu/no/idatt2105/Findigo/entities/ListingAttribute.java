@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * Represents an association between a listing and an attribute.
- * This entity stores the specific value of an attribute for a given listing.
+ * Entity representing the association between a listing and an attribute.
+ * <p>
+ * Stores the specific value of an attribute for a given listing.
+ * </p>
  */
 @Data
 @Entity
@@ -19,35 +21,29 @@ import lombok.experimental.Accessors;
 public class ListingAttribute {
 
   /**
-   * The unique identifier for this listing-attribute association.
-   * This ID is automatically generated using the IDENTITY strategy.
+   * Unique identifier for this listing-attribute association.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
   /**
-   * The value assigned to the attribute for this specific listing.
-   * This field is required and cannot be null.
+   * Value assigned to the attribute for this specific listing.
    */
   @Column(name = "attribute_value", nullable = false)
   private String attributeValue;
 
   /**
-   * The listing to which this attribute value belongs.
-   * This relationship is managed using a many-to-one mapping.
-   * The listing_id column is a foreign key and cannot be null.
+   * Listing to which this attribute value belongs.
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "listing_id", nullable = false)
   private Listing listing;
 
   /**
-   * The attribute associated with this listing.
-   * This relationship is managed using a many-to-one mapping.
-   * The attribute_id column is a foreign key and cannot be null.
+   * Attribute associated with this listing.
    */
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "attribute_id", nullable = false)
   private Attribute attribute;
 }

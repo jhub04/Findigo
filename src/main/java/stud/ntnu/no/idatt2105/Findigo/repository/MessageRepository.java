@@ -9,32 +9,35 @@ import java.util.List;
 
 /**
  * Repository interface for managing {@link Message} entities.
- * Extends {@link JpaRepository} to provide CRUD operations.
+ * <p>
+ * Provides CRUD operations and custom queries for messages exchanged between users.
+ * </p>
  */
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
+
   /**
    * Finds all messages sent from a specific user to another specific user.
    *
-   * @param fromUser The user who sent the message.
-   * @param toUser The user who received the message.
-   * @return A list of messages sent from the specified user to the specified user.
+   * @param fromUser the user who sent the messages
+   * @param toUser   the user who received the messages
+   * @return a list of messages sent from {@code fromUser} to {@code toUser}
    */
   List<Message> findMessagesByFromUserAndToUser(User fromUser, User toUser);
 
   /**
    * Finds all messages sent from a specific user.
    *
-   * @param fromUser The user who sent the messages.
-   * @return A list of messages sent from the specified user.
+   * @param fromUser the user who sent the messages
+   * @return a list of messages sent by {@code fromUser}
    */
   List<Message> findMessagesByFromUser(User fromUser);
 
   /**
    * Finds all messages sent to a specific user.
    *
-   * @param toUser The user who received the messages.
-   * @return A list of messages sent to the specified user.
+   * @param toUser the user who received the messages
+   * @return a list of messages received by {@code toUser}
    */
   List<Message> findMessagesByToUser(User toUser);
 }

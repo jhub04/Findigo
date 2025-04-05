@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
@@ -24,24 +23,36 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service for generating listing recommendations based on user browsing history.
+ * <p>
+ * Recommendations are based on the most frequently visited categories
+ * by the current user in the last 10 days.
+ * </p>
+ */
 import static java.util.Arrays.stream;
 
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
   Logger logger = LogManager.getLogger(RecommendationService.class);
+
   private final BrowseHistoryRepository browseHistoryRepository;
   private final ListingRepository listingRepository;
   private final SecurityUtil securityUtil;
+  private final ListingMapper listingMapper;
 
   /**
-   * Gets recommended listings for a user based on their browsing history.
-   * This method retrieves the most viewed categories from the user's recent browsing history
-   * and recommends listings from those categories that the user has not already viewed.
+   * Retrieves recommended listings for the current user.
+   * <p>
+   * Recommendations are based on categories most frequently browsed
+   * by the user in the past 10 days. Listings the user has already viewed
+   * are excluded from the recommendations.
+   * </p>
    *
-   * @param page The page number to retrieve.
-   * @param size The number of listings per page.
-   * @return A paginated list of recommended listings.
+   * @param page the page number to retrieve (zero-based)
+   * @param size the number of listings per page
+   * @return a paginated {@link Page} of recommended listings
    */
   public Page<ListingResponse> getRecommendedListings(int page, int size) {
     User user = securityUtil.getCurrentUser();
@@ -90,15 +101,18 @@ public class RecommendationService {
     logger.info("User " + user.getUsername() + " has " + pagedListings.size() + " recommended listings on page " + page);
 
     List<ListingResponse> pagedListingResponses = pagedListings.stream()
-        .map(ListingMapper::toDto)
+        .map(listingMapper::toDto)
         .toList();
     return new PageImpl<>(pagedListingResponses, PageRequest.of(page, size), allRecommendedListings.size());
   }
 
   /**
-   * Adds a listing to the current user's browse history.
+   * Adds a listing to the browsing history of the current user.
+   * <p>
+   * Useful for tracking which listings the user has viewed for future recommendations.
+   * </p>
    *
-   * @param listing the listing to be added to the browse history
+   * @param listing the {@link Listing} entity to add to browsing history
    */
   public void addListingToBrowseHistory(Listing listing) {
     User currentUser = securityUtil.getCurrentUser();
@@ -107,5 +121,4 @@ public class RecommendationService {
         .setListing(listing);
     browseHistoryRepository.save(browseHistory);
   }
-
 }
