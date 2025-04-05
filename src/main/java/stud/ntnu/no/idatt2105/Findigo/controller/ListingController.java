@@ -195,8 +195,8 @@ public class ListingController {
   @Operation(summary = "Get filtered listings", description = "Fetches all listings filtered by the provided criteria")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Filtered listings fetched successfully"),
-      @ApiResponse(responseCode = "404", description = "If no filtered listings are found")
-  })//TODO skriv riktig response for feil
+      @ApiResponse(responseCode = "404", description = "Current user not found")
+  })
   @GetMapping("/all")
   public ResponseEntity<List<ListingResponse>> getAllListingsFiltered(
       @RequestBody FilterListingsRequest filterListingsRequest) {
@@ -215,8 +215,9 @@ public class ListingController {
   @Operation(summary = "Get filtered listings", description = "Fetches a paginated list of filtered listings")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Filtered listings fetched successfully"),
-      @ApiResponse(responseCode = "404", description = "If no filtered listings are found")
-  })//TODO skriv riktig response for feil
+      @ApiResponse(responseCode = "404", description = "Current user not found"),
+      @ApiResponse(responseCode = "400", description = "Invalid page number")
+  })
   @GetMapping("/all/{pageNumber}")
   public ResponseEntity<Page<ListingResponse>> getListingsFiltered(
       @Parameter(description = "The page number to retrieve") @PathVariable int pageNumber,
@@ -229,8 +230,4 @@ public class ListingController {
     }
     return ResponseEntity.ok(filteredListingsPage);
   }
-
-
-
-
 }
