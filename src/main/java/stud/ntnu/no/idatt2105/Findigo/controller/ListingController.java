@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 import stud.ntnu.no.idatt2105.Findigo.service.RecommendationService;
 
@@ -69,6 +70,8 @@ public class ListingController {
   })
   @GetMapping("")
   public ResponseEntity<List<ListingResponse>> getAllListings() {
+
+    //Do not paginate
     logger.info("Fetching all listings in database");
     List<ListingResponse> listings = listingService.getAllListings();
     logger.info("Fetched all listings in database");
@@ -156,11 +159,14 @@ public class ListingController {
       @ApiResponse(responseCode = "404", description = "If no recommended listings are found")
   })//TODO skriv riktig response for ikke finne bruker
   @GetMapping("/recommended/{pageNumber}")
-  public ResponseEntity<Page<Listing>> getRecommendedListings(
+  public ResponseEntity<Page<ListingResponse>> getRecommendedListings(
       @Parameter(description = "the page number to retrieve") @PathVariable int pageNumber) {
     logger.info("Getting recommended listings, page " + pageNumber);
-    Page<Listing> recommendedListingsPage = recommendationService.getRecommendedListings(pageNumber, pageSize);
-    logger.info("Recommended listings fetched");
+    Page<ListingResponse> recommendedListingsPage = recommendationService.getRecommendedListings(pageNumber - 1, pageSize);
+    logger.info("Recommended listings fetched: ");
+    for (ListingResponse listing : recommendedListingsPage.getContent()) {
+      logger.info("Listing ID: " + listing.getId() + ", Description: " + listing.getBriefDescription());
+    }
     return ResponseEntity.ok(recommendedListingsPage);
   }
 

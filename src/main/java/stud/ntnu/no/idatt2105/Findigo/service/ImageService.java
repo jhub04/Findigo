@@ -37,14 +37,14 @@ public class ImageService {
    *
    * @param listingId The ID of the listing to upload the image to.
    * @param file      The image file to upload.
-   * @throws ImageUploadException if the image could not be uploaded.
+   * @throws AccessDeniedException if the image could not be uploaded.
    */
   public int uploadImageToListing(long listingId, MultipartFile file) {
     User currentUser = userService.getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND)); //TODO make method that does this and replace
 
-    if (securityUtil.isListingOwner(listing)) {
+    if (!securityUtil.isListingOwner(listing)) {
       throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
     }
 

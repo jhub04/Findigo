@@ -1,6 +1,8 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
@@ -20,9 +24,12 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.stream;
+
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
+  Logger logger = LogManager.getLogger(RecommendationService.class);
   private final BrowseHistoryRepository browseHistoryRepository;
   private final ListingRepository listingRepository;
   private final SecurityUtil securityUtil;
@@ -36,14 +43,14 @@ public class RecommendationService {
    * @param size The number of listings per page.
    * @return A paginated list of recommended listings.
    */
-  public Page<Listing> getRecommendedListings(int page, int size) {
+  public Page<ListingResponse> getRecommendedListings(int page, int size) {
     User user = securityUtil.getCurrentUser();
-    Pageable pageable = PageRequest.of(page, size);
 
     LocalDate tenDaysAgo = LocalDate.now().minusDays(10);
     Date cutoff = java.sql.Date.valueOf(tenDaysAgo);
 
     List<BrowseHistory> recentUserBrowseHistory = browseHistoryRepository.findByUserAndCreatedAtAfter(user, cutoff);
+    logger.info("User " + user.getUsername() + " has " + recentUserBrowseHistory.size() + " browse history entries in the last 10 days.");
 
     // Most viewed categories
     Map<Category, Long> categoryFrequency = new HashMap<>();
@@ -51,6 +58,7 @@ public class RecommendationService {
       Category category = browseHistory.getListing().getCategory();
       categoryFrequency.put(category, categoryFrequency.getOrDefault(category, 0L) + 1);
     }
+    logger.info("User " + user.getUsername() + " has viewed " + categoryFrequency.size() + " categories in the last 10 days.");
 
     List<Category> sortedCategories = categoryFrequency.entrySet().stream()
         .sorted(Map.Entry.<Category, Long>comparingByValue().reversed())
@@ -58,24 +66,30 @@ public class RecommendationService {
         .toList();
 
 
+
     Set<Long> alreadyViewedListingIds = recentUserBrowseHistory.stream()
         .map(b -> b.getListing().getId())
         .collect(Collectors.toSet()); //To exclude the listings a user already has viewed
 
-    List<Listing> recommendedListings = new ArrayList<>();
+    List<Listing> allRecommendedListings = new ArrayList<>();
 
     for (Category category : sortedCategories) {
-      //Page of listings from a category
-      Page<Listing> pageOfListings = listingRepository.findByCategoryAndIdNotIn(category, alreadyViewedListingIds, pageable);
-      recommendedListings.addAll(pageOfListings.getContent());
-
-      if (recommendedListings.size() >= size) {
-        break;
-      }
+      List<Listing> listingsInCategory = listingRepository.findByCategoryAndIdNotIn(category, alreadyViewedListingIds);
+      allRecommendedListings.addAll(listingsInCategory);
     }
+    logger.info("User " + user.getUsername() + " has " + allRecommendedListings.size() + " recommended listings.");
 
-    // Return a paginated result containing the recommended listings
-    return new PageImpl<>(recommendedListings, pageable, recommendedListings.size());
+    // Apply pagination manually
+    int start = Math.min(page * size, allRecommendedListings.size());
+    int end = Math.min(start + size, allRecommendedListings.size());
+    logger.info("User " + user.getUsername() + " requested page " + page + " with size " + size + ". Start: " + start + ", End: " + end);
+    List<Listing> pagedListings = allRecommendedListings.subList(start, end);
+    logger.info("User " + user.getUsername() + " has " + pagedListings.size() + " recommended listings on page " + page);
+
+    List<ListingResponse> pagedListingResponses = pagedListings.stream()
+        .map(ListingMapper::toDto)
+        .toList();
+    return new PageImpl<>(pagedListingResponses, PageRequest.of(page, size), allRecommendedListings.size());
   }
 
   /**
