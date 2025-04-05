@@ -40,6 +40,7 @@ public class RecommendationService {
   private final BrowseHistoryRepository browseHistoryRepository;
   private final ListingRepository listingRepository;
   private final SecurityUtil securityUtil;
+  private final ListingMapper listingMapper;
 
   /**
    * Retrieves recommended listings for the current user.
@@ -100,7 +101,7 @@ public class RecommendationService {
     logger.info("User " + user.getUsername() + " has " + pagedListings.size() + " recommended listings on page " + page);
 
     List<ListingResponse> pagedListingResponses = pagedListings.stream()
-        .map(ListingMapper::toDto)
+        .map(listingMapper::toDto)
         .toList();
     return new PageImpl<>(pagedListingResponses, PageRequest.of(page, size), allRecommendedListings.size());
   }
