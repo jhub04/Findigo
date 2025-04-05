@@ -197,7 +197,7 @@ public class ListingController {
       @ApiResponse(responseCode = "200", description = "Filtered listings fetched successfully"),
       @ApiResponse(responseCode = "404", description = "Current user not found")
   })
-  @GetMapping("/all")
+  @PostMapping("/all")
   public ResponseEntity<List<ListingResponse>> getAllListingsFiltered(
       @RequestBody FilterListingsRequest filterListingsRequest) {
     logger.info("Fetching filtered listings in database");
@@ -218,7 +218,7 @@ public class ListingController {
       @ApiResponse(responseCode = "404", description = "Current user not found"),
       @ApiResponse(responseCode = "400", description = "Invalid page number")
   })
-  @GetMapping("/all/{pageNumber}")
+  @PostMapping("/all/{pageNumber}")
   public ResponseEntity<Page<ListingResponse>> getListingsFiltered(
       @Parameter(description = "The page number to retrieve") @PathVariable int pageNumber,
       @RequestBody FilterListingsRequest filterListingsRequest) {
