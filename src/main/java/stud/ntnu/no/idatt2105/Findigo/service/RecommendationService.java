@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
@@ -20,75 +19,91 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service for generating listing recommendations based on user browsing history.
+ * <p>
+ * Recommendations are based on the most frequently visited categories
+ * by the current user in the last 10 days.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
+
   private final BrowseHistoryRepository browseHistoryRepository;
   private final ListingRepository listingRepository;
   private final SecurityUtil securityUtil;
 
   /**
-   * Gets recommended listings for a user based on their browsing history.
-   * This method retrieves the most viewed categories from the user's recent browsing history
-   * and recommends listings from those categories that the user has not already viewed.
+   * Retrieves recommended listings for the current user.
+   * <p>
+   * Recommendations are based on categories most frequently browsed
+   * by the user in the past 10 days. Listings the user has already viewed
+   * are excluded from the recommendations.
+   * </p>
    *
-   * @param page The page number to retrieve.
-   * @param size The number of listings per page.
-   * @return A paginated list of recommended listings.
+   * @param page the page number to retrieve (zero-based)
+   * @param size the number of listings per page
+   * @return a paginated {@link Page} of recommended listings
    */
   public Page<Listing> getRecommendedListings(int page, int size) {
-    User user = securityUtil.getCurrentUser();
+    User currentUser = securityUtil.getCurrentUser();
     Pageable pageable = PageRequest.of(page, size);
 
+    // Calculate cutoff date for recent history
     LocalDate tenDaysAgo = LocalDate.now().minusDays(10);
-    Date cutoff = java.sql.Date.valueOf(tenDaysAgo);
+    Date cutoffDate = Date.valueOf(tenDaysAgo);
 
-    List<BrowseHistory> recentUserBrowseHistory = browseHistoryRepository.findByUserAndCreatedAtAfter(user, cutoff);
+    // Fetch recent browsing history
+    List<BrowseHistory> recentHistory = browseHistoryRepository.findByUserAndCreatedAtAfter(currentUser, cutoffDate);
 
-    // Most viewed categories
-    Map<Category, Long> categoryFrequency = new HashMap<>();
-    for (BrowseHistory browseHistory : recentUserBrowseHistory) {
-      Category category = browseHistory.getListing().getCategory();
-      categoryFrequency.put(category, categoryFrequency.getOrDefault(category, 0L) + 1);
-    }
+    // Count frequency of each category
+    Map<Category, Long> categoryFrequency = recentHistory.stream()
+            .collect(Collectors.groupingBy(
+                    browse -> browse.getListing().getCategory(),
+                    Collectors.counting()
+            ));
 
+    // Sort categories by descending frequency
     List<Category> sortedCategories = categoryFrequency.entrySet().stream()
-        .sorted(Map.Entry.<Category, Long>comparingByValue().reversed())
-        .map(Map.Entry::getKey)
-        .toList();
+            .sorted(Map.Entry.<Category, Long>comparingByValue().reversed())
+            .map(Map.Entry::getKey)
+            .toList();
 
-
-    Set<Long> alreadyViewedListingIds = recentUserBrowseHistory.stream()
-        .map(b -> b.getListing().getId())
-        .collect(Collectors.toSet()); //To exclude the listings a user already has viewed
+    // Collect already viewed listing IDs to exclude them from recommendations
+    Set<Long> viewedListingIds = recentHistory.stream()
+            .map(browse -> browse.getListing().getId())
+            .collect(Collectors.toSet());
 
     List<Listing> recommendedListings = new ArrayList<>();
 
+    // Collect recommended listings from most browsed categories
     for (Category category : sortedCategories) {
-      //Page of listings from a category
-      Page<Listing> pageOfListings = listingRepository.findByCategoryAndIdNotIn(category, alreadyViewedListingIds, pageable);
-      recommendedListings.addAll(pageOfListings.getContent());
+      Page<Listing> listingsPage = listingRepository.findByCategoryAndIdNotIn(category, viewedListingIds, pageable);
+      recommendedListings.addAll(listingsPage.getContent());
 
       if (recommendedListings.size() >= size) {
-        break;
+        break; // Stop if we've collected enough recommendations
       }
     }
 
-    // Return a paginated result containing the recommended listings
     return new PageImpl<>(recommendedListings, pageable, recommendedListings.size());
   }
 
   /**
-   * Adds a listing to the current user's browse history.
+   * Adds a listing to the browsing history of the current user.
+   * <p>
+   * Useful for tracking which listings the user has viewed for future recommendations.
+   * </p>
    *
-   * @param listing the listing to be added to the browse history
+   * @param listing the {@link Listing} entity to add to browsing history
    */
   public void addListingToBrowseHistory(Listing listing) {
     User currentUser = securityUtil.getCurrentUser();
     BrowseHistory browseHistory = new BrowseHistory()
-        .setUser(currentUser)
-        .setListing(listing);
+            .setUser(currentUser)
+            .setListing(listing);
+
     browseHistoryRepository.save(browseHistory);
   }
-
 }

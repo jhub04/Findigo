@@ -1,6 +1,5 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
@@ -9,9 +8,7 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.CategoryMapper;
-import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
-import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
@@ -20,80 +17,118 @@ import stud.ntnu.no.idatt2105.Findigo.repository.AttributeRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Service class responsible for handling category-related business logic.
+ * <p>
+ * Provides functionality to create, retrieve, edit, and delete categories.
+ * </p>
  */
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
 
-  private final CategoryRepository categoryRepository;
-  private final ListingService listingService;
   private static final Logger logger = LogManager.getLogger(CategoryService.class);
-  private final AttributeRepository attributeRepository;
+
+  private final CategoryRepository categoryRepository;
 
   /**
    * Retrieves all categories from the database and maps them to CategoryResponse DTOs.
    *
-   * @return a list of CategoryResponse objects representing all available categories.
-   * @throws NoSuchElementException if no categories are found
+   * @return a list of {@link CategoryResponse} objects representing all available categories
    */
   public List<CategoryResponse> getAllCategories() {
-    return categoryRepository.findAll().stream()
-        .map(CategoryMapper::toDto)
-        .toList();
+    logger.info("Fetching all categories");
+    List<CategoryResponse> categories = categoryRepository.findAll().stream()
+            .map(CategoryMapper::toDto)
+            .toList();
+    logger.info("Fetched {} categories", categories.size());
+    return categories;
   }
 
   /**
-   * Retrieves a categories associated with a category ID from the database and maps it to CategoryResponse DTOs.
+   * Retrieves a specific category entity by its ID.
    *
-   * @return a list of CategoryResponse objects representing all available categories.
-   * @throws NoSuchElementException if no category is found
+   * @param categoryId the ID of the category to retrieve
+   * @return the {@link Category} entity
+   * @throws AppEntityNotFoundException if the category is not found
    */
-  public Category getCategoryById(long categoryID) {
-    return categoryRepository.findById(categoryID)
+  public Category getCategoryById(long categoryId) {
+    logger.info("Fetching category with ID {}", categoryId);
+    return categoryRepository.findById(categoryId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
   }
 
-  public CategoryResponse getCategoryDtoById(long categoryID) {
-    Category category = categoryRepository.findById(categoryID)
+  /**
+   * Retrieves a specific category as a DTO by its ID.
+   *
+   * @param categoryId the ID of the category to retrieve
+   * @return the {@link CategoryResponse} DTO
+   * @throws AppEntityNotFoundException if the category is not found
+   */
+  public CategoryResponse getCategoryDtoById(long categoryId) {
+    logger.info("Fetching category DTO with ID {}", categoryId);
+    Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
-
+    logger.info("Category DTO with ID {} fetched successfully", categoryId);
     return CategoryMapper.toDto(category);
   }
 
   /**
    * Creates a new category in the database.
    *
-   * @param req the CategoryRequest object containing the category name and attributes
-   * @return a CategoryResponse object representing the newly created category
+   * @param request the {@link CategoryRequest} object containing the category details
+   * @return a {@link CategoryResponse} representing the newly created category
+   * @throws EntityAlreadyExistsException if a category with the same name already exists
    */
-  public CategoryResponse createCategory(CategoryRequest req) {
-    if (categoryRepository.existsByCategoryName(req.getName())) {
+  public CategoryResponse createCategory(CategoryRequest request) {
+    logger.info("Creating category with name '{}'", request.getName());
+    if (categoryRepository.existsByCategoryName(request.getName())) {
       throw new EntityAlreadyExistsException(CustomErrorMessage.CATEGORY_ALREADY_EXISTS);
     }
 
-    Category category = CategoryMapper.toEntity(req);
+    Category category = CategoryMapper.toEntity(request);
     categoryRepository.save(category);
+    logger.info("Category with name '{}' created successfully", request.getName());
     return CategoryMapper.toDto(category);
   }
 
+  /**
+   * Edits an existing category.
+   *
+   * @param categoryId the ID of the category to edit
+   * @param request    the {@link CategoryRequest} containing the new category details
+   * @throws EditedValueUnchangedException if the new category name is the same as the current one
+   * @throws AppEntityNotFoundException    if the category is not found
+   */
   public void editCategory(Long categoryId, CategoryRequest request) {
+    logger.info("Editing category with ID {}", categoryId);
     Category category = getCategoryById(categoryId);
 
     if (categoryRepository.existsByCategoryName(request.getName())) {
       throw new EditedValueUnchangedException(CustomErrorMessage.CATEGORY_NAME_UNCHANGED);
     }
+
     category.setCategoryName(request.getName());
     categoryRepository.save(category);
+    logger.info("Category with ID {} edited successfully", categoryId);
   }
 
+  /**
+   * Deletes an existing category from the database.
+   * <p>
+   * This operation is transactional to ensure data consistency.
+   * </p>
+   *
+   * @param categoryId the ID of the category to delete
+   * @throws AppEntityNotFoundException if the category is not found
+   */
   @Transactional
   public void deleteCategory(Long categoryId) {
+    logger.info("Deleting category with ID {}", categoryId);
     Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
     categoryRepository.delete(category);
+    logger.info("Category with ID {} deleted successfully", categoryId);
   }
 }

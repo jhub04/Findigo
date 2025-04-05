@@ -2,6 +2,8 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -24,94 +26,111 @@ import java.util.NoSuchElementException;
 /**
  * Service class for managing listings.
  * <p>
- * This service provides functionality for adding new listings and retrieving user-specific listings.
+ * Provides functionalities for creating, retrieving, updating, and deleting listings,
+ * including operations specific to categories and user-based filtering.
  * </p>
  */
 @Service
 @RequiredArgsConstructor
 public class ListingService {
 
+  private static final Logger logger = LogManager.getLogger(ListingService.class);
+
   private final ListingRepository listingRepository;
   private final CategoryRepository categoryRepository;
   private final ListingAttributeMapper listingAttributeMapper;
   private final SecurityUtil securityUtil;
   private final RecommendationService recommendationService;
+  private final ListingMapper listingMapper;
 
   /**
-   * Adds a new listing for a given user.
+   * Adds a new listing for the currently authenticated user.
    *
-   * @param req      The listing request containing details of the listing.
-   * @return The saved {@link Listing} entity.
-   * @throws UsernameNotFoundException if the user is not found in the database.
-   * @throws RuntimeException          if the specified category does not exist.
+   * @param req The listing request containing listing details.
+   * @return A {@link ListingResponse} with the created listing details.
+   * @throws AppEntityNotFoundException if the category does not exist.
    */
   @Transactional
   public ListingResponse addListing(ListingRequest req) {
     User currentUser = securityUtil.getCurrentUser();
+    logger.info("Creating listing for user ID {}", currentUser.getId());
 
     Category category = categoryRepository.findById(req.getCategoryId())
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
-    Listing listing = ListingMapper.toEntity(
-        req,
-        currentUser,
-        category,
-        category.getAttributes()
-    );
+    Listing listing = listingMapper.toEntity(req, currentUser, category, category.getAttributes());
 
     Listing savedListing = listingRepository.save(listing);
 
-    return ListingMapper.toDto(savedListing);
+    logger.info("Listing created successfully with ID {}", savedListing.getId());
+    return listingMapper.toDto(savedListing);
   }
 
   /**
-   * Retrieves all listings associated with a specific cateory.
+   * Retrieves all listings in a specific category.
    *
-   * @param categoryID The category id of the category whose listings are to be retrieved.
-   * @return A list of {@link ListingResponse} objects containing listing details.
-   * @throws NoSuchElementException if there are no listings associated with the given category.
+   * @param categoryID The category ID.
+   * @return A list of {@link ListingResponse} objects.
    */
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
-    return listingRepository.findListingsByCategoryId(categoryID).stream() //TODO ikke få med currentusers egne listings her
-        .map(ListingMapper::toDto).toList();
+    logger.info("Fetching listings for category ID {}", categoryID);
+
+    return listingRepository.findListingsByCategoryId(categoryID).stream()
+            .map(listingMapper::toDto)
+            .toList();
   }
 
   /**
-   * Retrieves all listings in database.
+   * Retrieves all listings excluding the current user's own listings.
    *
-   * @return A list of {@link ListingResponse} objects containing listing details.
-   * @throws NoSuchElementException if there are no listings in database.
+   * @return A list of {@link ListingResponse} objects.
    */
   public List<ListingResponse> getAllListings() {
-    List<Listing> listings = listingRepository.findAllByUser_IdNot(securityUtil.getCurrentUser().getId());
+    long currentUserId = securityUtil.getCurrentUser().getId();
+    logger.info("Fetching all listings excluding user ID {}", currentUserId);
+
+    List<Listing> listings = listingRepository.findAllByUser_IdNot(currentUserId);
 
     return listings.stream()
-        .map(ListingMapper::toDto).toList();
+            .map(listingMapper::toDto)
+            .toList();
   }
-
-  public ListingResponse getListingById(Long id) {
-    Listing listing = listingRepository.findById(id)
-            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
-    recommendationService.addListingToBrowseHistory(listing);
-    return ListingMapper.toDto(listing);
-  }
-
 
   /**
-   * Edits an existing listing in the database.
-   * <p>
-   * This method updates the details of an existing listing, including its description,
-   * location, category, attributes, and image URLs.
-   * </p>
+   * Retrieves a listing by its ID and logs the view in browse history.
    *
-   * @return A {@link ListingResponse} containing the updated listing details.
-   * @throws NoSuchElementException If the listing or category is not found.
+   * @param id The listing ID.
+   * @return A {@link ListingResponse} of the listing.
+   * @throws AppEntityNotFoundException if the listing does not exist.
    */
-  public ListingResponse editListing(Long listingId, ListingRequest request) { //kan opprette editAsAdmin metode
+  public ListingResponse getListingById(Long id) {
+    logger.info("Fetching listing by ID {}", id);
+
+    Listing listing = listingRepository.findById(id)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    recommendationService.addListingToBrowseHistory(listing);
+
+    return listingMapper.toDto(listing);
+  }
+
+  /**
+   * Edits an existing listing.
+   *
+   * @param listingId The ID of the listing to edit.
+   * @param request The updated listing details.
+   * @return A {@link ListingResponse} containing the updated details.
+   * @throws AppEntityNotFoundException if the listing or category does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
+   */
+  public ListingResponse editListing(Long listingId, ListingRequest request) {
+    logger.info("Editing listing with ID {}", listingId);
+
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
     if (securityUtil.isListingOwner(listing)) {
+      logger.warn("Access denied: User does not own listing ID {}", listingId);
       throw new AccessDeniedException("You do not own this listing");
     }
 
@@ -125,31 +144,33 @@ public class ListingService {
             .setCategory(category)
             .setListingAttributes(request.getAttributes().stream()
                     .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listingId))
-                    .toList()); //TODO: legg til nye bilder
+                    .toList());
 
-    listingRepository.save(listing);
+    Listing updatedListing = listingRepository.save(listing);
 
-    return ListingMapper.toDto(listing);
+    logger.info("Listing updated successfully with ID {}", listingId);
+    return listingMapper.toDto(updatedListing);
   }
 
   /**
-   * Deletes a listing from the database.
-   * <p>
-   * If the listing exists, it will be removed; otherwise, an exception is thrown.
-   * </p>
+   * Deletes a listing by its ID.
    *
    * @param listingId The ID of the listing to delete.
-   * @throws NoSuchElementException If no listing with the given ID exists.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
    */
   public void deleteListing(long listingId) {
+    logger.info("Deleting listing with ID {}", listingId);
+
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
     if (securityUtil.isListingOwner(listing)) {
+      logger.warn("Access denied: User does not own listing ID {}", listingId);
       throw new AccessDeniedException("You do not own this listing");
     }
 
     listingRepository.deleteById(listingId);
+    logger.info("Listing deleted successfully with ID {}", listingId);
   }
-
 }

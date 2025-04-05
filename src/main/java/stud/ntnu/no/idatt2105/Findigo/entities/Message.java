@@ -11,10 +11,9 @@ import java.util.Date;
 
 /**
  * Entity representing a message exchanged between users.
- *
  * <p>
- * This entity stores information about messages sent between users, including
- * the sender, recipient, message content, timestamp, and read status.
+ * Stores information about messages sent between users, including
+ * sender, recipient, message content, timestamp, and read status.
  * </p>
  */
 @Data
@@ -30,27 +29,27 @@ public class Message {
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(nullable = false)
+  @Column(nullable = false, updatable = false)
   private long id;
 
   /**
    * The user who sent the message.
    */
-  @ManyToOne
-  @JoinColumn(nullable = false, name = "fromUserId")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "from_user_id", nullable = false)
   private User fromUser;
 
   /**
    * The user who received the message.
    */
-  @ManyToOne
-  @JoinColumn(nullable = false, name = "toUserId")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "to_user_id", nullable = false)
   private User toUser;
 
   /**
    * The text content of the message.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, length = 1000)
   private String messageText;
 
   /**

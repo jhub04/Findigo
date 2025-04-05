@@ -26,7 +26,6 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
-import stud.ntnu.no.idatt2105.Findigo.repository.BrowseHistoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.FavoriteListingsRepository;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
@@ -39,44 +38,45 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Service class for handling user authentication and registration.
+ * Service class for handling user operations such as authentication,
+ * registration, profile updates, and favorite listings management.
  */
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
-  private final ListingRepository listingRepository; //TODO: ikke bruk listingrepo i userservice
-  private final BrowseHistoryRepository browseHistoryRepository;
+  private final ListingRepository listingRepository; // TODO: Avoid using listingRepository in UserService
   private final FavoriteListingsRepository favoriteListingsRepository;
-  private static final Logger logger = LogManager.getLogger(UserService.class);
-  private final ListingService listingService;
-  private final UserMapper userMapper;
   private final SecurityUtil securityUtil;
+  private final UserMapper userMapper;
+  private final ListingMapper listingMapper;
+
+  private static final Logger logger = LogManager.getLogger(UserService.class);
+
   @Value("${security.jwt.access-token-expiration}")
   private long accessTokenExpiration;
 
-
   /**
-   * Registers a new user in the system.
+   * Registers a new user.
    *
-   * @param request The {@link RegisterRequest} containing user details.
-   * @return A success message upon successful registration.
-   * @throws RuntimeException if a user with the given username already exists.
+   * @param request the registration details
+   * @return success message upon successful registration
    */
   public String register(RegisterRequest request) {
     if (userRepository.existsByUsername(request.getUsername())) {
-      logger.error("Couldn't register " + request.getUsername() + ". Username already taken");
+      logger.error("Username '{}' is already taken", request.getUsername());
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
 
     User user = new User()
-        .setUsername(request.getUsername())
-        .setPassword(passwordEncoder.encode(request.getPassword()))
-        .setRoles(request.getRoles());
+            .setUsername(request.getUsername())
+            .setPassword(passwordEncoder.encode(request.getPassword()))
+            .setRoles(request.getRoles());
 
     userRepository.save(user);
     return "User registered successfully!";
@@ -85,285 +85,264 @@ public class UserService {
   /**
    * Authenticates a user and generates a JWT token.
    *
-   * @param request The {@link AuthRequest} containing username and password.
-   * @return An {@link AuthResponse} containing the generated JWT token.
+   * @param request the authentication request
+   * @return the authentication response with token
    */
   public AuthResponse authenticate(AuthRequest request) {
-    logger.info("Authenticating user " + request.getUsername());
+    logger.info("Authenticating user '{}'", request.getUsername());
+
     authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
     );
-    logger.info(request.getUsername() + " credentials authenticated");
 
     UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-
-    logger.info("Trying to create jwt token for " + request.getUsername());
     String token = jwtUtil.generateToken(userDetails);
-    logger.info("Token created successfully for " + request.getUsername());
+
+    logger.info("JWT token successfully generated for user '{}'", request.getUsername());
 
     return new AuthResponse(token);
   }
 
   /**
-   * Retrieves all users from the database. Admin only.
-   * @return a list of all users in the database
+   * Retrieves all users.
+   *
+   * @return list of user responses
    */
   public List<UserResponse> getAllUsers() {
-    return userRepository.findAll().stream().map(userMapper::toDTO).toList();
+    return userRepository.findAll().stream()
+            .map(userMapper::toDTO)
+            .toList();
   }
 
   /**
-   * Get user by ID.
-   * @param id the id of the user to get
-   * @return the user with the given id
-   * @throws NoSuchElementException if no user with the given id is found
+   * Retrieves a user by ID.
+   *
+   * @param id the user ID
+   * @return the user entity
    */
   public User getUserById(Long id) {
-    //TODO user this method where it should be used
     return userRepository.findById(id)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
   }
 
   /**
-   * Get user by ID and map to DTO.
-   * @param id the id of the user to get
-   * @return the user with the given id mapped to DTO
-   * @throws NoSuchElementException if no user with the given id is found
+   * Retrieves a user by ID as DTO.
+   *
+   * @param id the user ID
+   * @return the user response DTO
    */
   public UserResponse getUserDtoById(Long id) {
-    //TODO user this method where it should be used
-    User user = userRepository.findById(id)
-            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
-
+    User user = getUserById(id);
     return userMapper.toDTO(user);
   }
 
   /**
-   * Edit user details. Only the user itself can edit its own details.
+   * Edits the current user's details.
    *
-   * @param request the new user details.
-   * @throws AccessDeniedException if the current logged-in user is not the same as the user being edited.
-   * @throws NoSuchElementException if no user with the given id is found.
+   * @param request the new user details
    */
   public void editMyUserDetails(UserRequest request) {
     User currentUser = securityUtil.getCurrentUser();
 
-    // Username check
-    if (!currentUser.getUsername().equals(request.getUsername())) {
-      if (userRepository.existsByUsername(request.getUsername())) {
-        logger.error("Failed to update user: username '{}' already taken", request.getUsername());
-        throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
-      }
-
-      logger.info("Changing username from '{}' to '{}'", currentUser.getUsername(), request.getUsername());
-      currentUser.setUsername(request.getUsername());
-    } else {
-      logger.info("No change in username for user ID {}", currentUser.getId());
+    if (!currentUser.getUsername().equals(request.getUsername()) &&
+            userRepository.existsByUsername(request.getUsername())) {
+      logger.error("Username '{}' already exists", request.getUsername());
+      throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
 
-    // Always update password
+    currentUser.setUsername(request.getUsername());
     currentUser.setPassword(passwordEncoder.encode(request.getPassword()));
-    logger.info("Password updated for user ID {}", currentUser.getId());
 
     userRepository.save(currentUser);
+    logger.info("User ID {} details updated", currentUser.getId());
   }
 
   /**
-   * Edit user details. Admin only.
+   * Edits another user's details (admin only).
    *
-   * @param request the new user details.
-   * @param userId the id of the user to edit.
-   * @throws AccessDeniedException if the current logged-in user is not an admin.
-   * @throws NoSuchElementException if no user with the given id is found.
+   * @param request the new user details
+   * @param userId the target user ID
    */
   public void editUserDetails(UserRequest request, Long userId) {
     User user = getUserById(userId);
 
-    // Check if username is changed
-    if (!user.getUsername().equals(request.getUsername())) {
-      if (userRepository.existsByUsername(request.getUsername())) {
-        throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
-      }
-      logger.info("Changed username for user ID {} from '{}' to '{}'", userId, user.getUsername(), request.getUsername());
-      user.setUsername(request.getUsername());
-    } else {
-      logger.info("No change in username for user ID {}", userId);
+    if (!user.getUsername().equals(request.getUsername()) &&
+            userRepository.existsByUsername(request.getUsername())) {
+      throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
 
-    // Update password if changed
+    user.setUsername(request.getUsername());
+
     if (request.getPassword() != null && !request.getPassword().isBlank()) {
       user.setPassword(passwordEncoder.encode(request.getPassword()));
-      logger.info("Password updated for user ID {}", userId);
     }
 
-    // Update roles
     if (request.getRoles() != null && !request.getRoles().isEmpty()) {
       user.setRoles(request.getRoles());
-      logger.info("Roles updated for user ID {}: {}", userId, request.getRoles());
     }
 
     userRepository.save(user);
-    logger.info("User ID {} successfully updated", userId);
+    logger.info("User ID {} updated successfully by admin", userId);
   }
 
   /**
-   * Get all listings for the current user.
+   * Retrieves listings for the current user.
    *
-   * @return a list of all listings for the current user
+   * @return list of listing responses
    */
   @Transactional
   public List<ListingResponse> getMyListings() {
     User currentUser = securityUtil.getCurrentUser();
     return getListingsUtil(currentUser);
-  } //TODO: admin og isowner autentisering i service også
+  }
 
   /**
-   * Get all listings for a specific user.
+   * Retrieves listings for a specific user.
    *
-   * @param id the id of the user whose listings to get
-   * @return a list of all listings for the given user
+   * @param id the user ID
+   * @return list of listing responses
    */
   public List<ListingResponse> getUserListings(Long id) {
     User user = getUserById(id);
-
     return getListingsUtil(user);
   }
 
   /**
-   * Add a listing to the current user's favorites.
+   * Adds a listing to the current user's favorites.
    *
-   * @param listingId the id of the listing to add to favorites.
+   * @param listingId the listing ID
+   * @return the listing response
    */
   public ListingResponse addFavorite(long listingId) {
     User currentUser = getCurrentUser();
-    logger.info("Got current user " + currentUser);
-    Listing favorite = listingRepository.findById(listingId)
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
-    logger.info("Found listing " + favorite.getId());
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    FavoriteListings newFavoriteListing = new FavoriteListings()
-        .setListing(favorite)
-        .setUser(currentUser);
-    favoriteListingsRepository.save(newFavoriteListing);
-    logger.info("new favorite listing saved in db");
-    return ListingMapper.toDto(favorite);
+    FavoriteListings favorite = new FavoriteListings()
+            .setListing(listing)
+            .setUser(currentUser);
+
+    favoriteListingsRepository.save(favorite);
+    return listingMapper.toDto(listing);
   }
 
-
   /**
-   * Remove a listing from the current user's favorites.
+   * Removes a listing from the current user's favorites.
    *
-   * @param listingId the id of the listing to remove from favorites.
+   * @param listingId the listing ID
+   * @return the listing response
    */
   public ListingResponse deleteFavorite(long listingId) {
     User currentUser = getCurrentUser();
-    Listing favorite = listingRepository.findById(listingId)
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
-    FavoriteListings favoriteListing = favoriteListingsRepository.findByUserAndListing(currentUser, favorite)
-            .orElseThrow(() -> new NoSuchElementException("No favorite listing with id " + listingId + " was found"));
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    favoriteListingsRepository.delete(favoriteListing);
-    return ListingMapper.toDto(favorite);
+    FavoriteListings favorite = favoriteListingsRepository.findByUserAndListing(currentUser, listing)
+            .orElseThrow(() -> new NoSuchElementException("No favorite listing with id " + listingId));
+
+    favoriteListingsRepository.delete(favorite);
+    return listingMapper.toDto(listing);
   }
 
   /**
-   * Creates a new user in the system.
+   * Creates a new user (admin only).
    *
-   * @param req The {@link UserRequest} containing user details.
-   * @return A {@link UserLiteResponse} object containing the created user's details.
+   * @param request the user request
+   * @return the user lite response
    */
-  public UserLiteResponse createUser(UserRequest req) {
-    if (userRepository.existsByUsername(req.getUsername())) {
+  public UserLiteResponse createUser(UserRequest request) {
+    if (userRepository.existsByUsername(request.getUsername())) {
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
 
-    User user = userMapper.toEntity(req);
+    User user = userMapper.toEntity(request);
     return userMapper.toLiteDto(userRepository.save(user));
   }
 
   /**
-   * Retrieves the current logged-in user.
+   * Retrieves the current user.
    *
-   * @return The {@link User} object representing the current user.
+   * @return the user entity
    */
   public User getCurrentUser() {
     return securityUtil.getCurrentUser();
   }
 
   /**
-   * Retrieves the current logged-in user as a DTO.
+   * Retrieves the current user as DTO.
    *
-   * @return A {@link UserResponse} object containing user details.
+   * @return the user response DTO
    */
   public UserResponse getCurrentDtoUser() {
-    return userMapper.toDTO(securityUtil.getCurrentUser());
+    return userMapper.toDTO(getCurrentUser());
   }
 
   /**
-   * Retrieves all listings associated with the given user.
+   * Utility method to retrieve listings for a given user.
    *
-   * @param user The user whose listings are to be retrieved.
-   * @return A list of {@link ListingResponse} objects containing listing details.
+   * @param user the user entity
+   * @return list of listing responses
    */
   private List<ListingResponse> getListingsUtil(User user) {
     return user.getListings().stream()
-            .map(ListingMapper::toDto)
+            .map(listingMapper::toDto)
             .toList();
   }
 
   /**
-   * Authenticates a user and generates a JWT token, then creates a cookie with the token.
+   * Authenticates a user and returns a JWT token as a secure cookie.
    *
-   * @param authRequest The {@link AuthRequest} containing username and password.
-   * @return A {@link ResponseCookie} containing the generated JWT token.
+   * @param request the authentication request
+   * @return the response cookie containing the JWT token
    */
-  public ResponseCookie authenticateAndGetCookie(AuthRequest authRequest) {
-    AuthResponse token = authenticate(authRequest);
+  public ResponseCookie authenticateAndGetCookie(AuthRequest request) {
+    AuthResponse token = authenticate(request);
 
     return ResponseCookie.from("auth-token", token.getToken())
-        .httpOnly(true)
-        .secure(true)
-        .sameSite("None")
-        .path("/")
-        .maxAge(Duration.ofSeconds(accessTokenExpiration))
-        .build();
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .path("/")
+            .maxAge(Duration.ofSeconds(accessTokenExpiration))
+            .build();
   }
 
   /**
-   * Creates a logout cookie to invalidate the JWT token.
+   * Creates a cookie to invalidate the JWT token (logout).
    *
-   * @return a ResponseCookie with the logout configuration
+   * @return the response cookie for logout
    */
   public ResponseCookie createLogoutCookie() {
     return ResponseCookie.from("auth-token", "")
-        .httpOnly(true)
-        .secure(true)
-        .sameSite("None")
-        .path("/")
-        .maxAge(Duration.ofSeconds(0))
-        .build();
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .path("/")
+            .maxAge(Duration.ZERO)
+            .build();
   }
 
   /**
-   * Validates the provided JWT token.
+   * Validates a JWT token.
    *
-   * @param token the JWT token to be validated
+   * @param token the JWT token
    * @return true if the token is valid, false otherwise
    */
   public boolean validateToken(String token) {
     return token != null && jwtUtil.isTokenValid(token);
   }
 
-
+  /**
+   * Retrieves the current user's favorite listings.
+   *
+   * @return list of listing responses
+   */
   public List<ListingResponse> getFavorites() {
     User currentUser = getCurrentUser();
-    List<Listing> myFavorites = favoriteListingsRepository.findAllByUser(currentUser)
-        .stream()
-        .map(FavoriteListings::getListing)
-        .toList();
-    return myFavorites.stream()
-        .map(ListingMapper::toDto)
-        .toList();
+
+    return favoriteListingsRepository.findAllByUser(currentUser).stream()
+            .map(FavoriteListings::getListing)
+            .map(listingMapper::toDto)
+            .toList();
   }
 }
-

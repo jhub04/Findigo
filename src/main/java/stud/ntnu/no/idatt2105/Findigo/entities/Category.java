@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a category in the system, which can contain multiple attributes and listings.
- * Each category has a unique name and is associated with multiple listings and attributes.
+ * Entity representing a category in the system.
+ * <p>
+ * A category groups listings and defines a set of attributes applicable to its listings.
+ * </p>
  */
 @Data
 @Entity
@@ -25,7 +27,6 @@ public class Category {
 
   /**
    * The unique identifier for the category.
-   * This ID is automatically generated using the IDENTITY strategy.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,24 +34,29 @@ public class Category {
 
   /**
    * The name of the category.
-   * This field must be unique and cannot be null.
+   * Must be unique and cannot be null.
    */
   @Column(nullable = false, unique = true)
   private String categoryName;
 
   /**
-   * The list of attributes associated with this category.
-   * Attributes define additional properties that listings in this category may have.
-   * If the category is deleted, all its attributes are also deleted due to CascadeType.ALL.
+   * Attributes associated with this category.
+   * These define additional properties that listings in this category can have.
+   * <p>
+   * Eagerly fetched, and cascade operations ensure attributes are removed when the category is deleted.
+   * </p>
    */
   @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<Attribute> attributes = new ArrayList<>();
 
   /**
-   * The list of listings associated with this category.
-   * Listings represent individual items belonging to this category.
-   * If the category is deleted, all its listings are also deleted due to CascadeType.ALL.
+   * Listings belonging to this category.
+   * Listings represent individual items classified under this category.
+   * <p>
+   * Cascade operations ensure listings are removed when the category is deleted.
+   * Lazy fetching optimizes performance.
+   * </p>
    */
-  @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<Listing> listings = new ArrayList<>();
 }
