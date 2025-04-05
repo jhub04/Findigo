@@ -50,6 +50,9 @@ public class User implements UserDetails {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Listing> listings = new ArrayList<>();
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<BrowseHistory> browseHistories = new ArrayList<>();
+
   @ElementCollection(fetch = FetchType.EAGER)
   @Enumerated(EnumType.STRING)
   private Set<Role> roles;
