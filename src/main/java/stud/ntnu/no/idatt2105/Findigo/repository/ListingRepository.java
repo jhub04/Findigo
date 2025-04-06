@@ -56,4 +56,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    * @return a page of listings matching the criteria
    */
   Page<Listing> findByCategoryAndIdNotIn(Category category, Set<Long> ids, Pageable pageable);
+  List<Listing> findByCategoryIdAndUser_IdNot(Long categoryId, Long userId);
 }

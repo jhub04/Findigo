@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
@@ -32,8 +34,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Listings", description = "Endpoints for creating, retrieving, updating, and deleting listings")
 public class ListingController {
-
-  private static final int pageSize = 20;
+  private final int pageSize = 15;
   private static final Logger logger = LogManager.getLogger(ListingController.class);
 
   private final ListingService listingService;
@@ -184,4 +185,49 @@ public class ListingController {
     return ResponseEntity.ok(recommendedListingsPage);
   }
 
+
+  /**
+   * Retrieves all listings filtered by the provided criteria.
+   *
+   * @param filterListingsRequest the filtering criteria
+   * @return a ResponseEntity containing the filtered listings
+   */
+  @Operation(summary = "Get filtered listings", description = "Fetches all listings filtered by the provided criteria")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Filtered listings fetched successfully"),
+      @ApiResponse(responseCode = "404", description = "Current user not found")
+  })
+  @PostMapping("/all")
+  public ResponseEntity<List<ListingResponse>> getAllListingsFiltered(
+      @RequestBody FilterListingsRequest filterListingsRequest) {
+    logger.info("Fetching filtered listings in database");
+    List<ListingResponse> filteredListings = listingService.getAllFilteredListings(filterListingsRequest);
+    logger.info("Fetched all filtered listings in database");
+    return ResponseEntity.ok(filteredListings);
+  }
+
+  /**
+   * Retrieves a paginated list of filtered listings.
+   *
+   * @param pageNumber the page number to retrieve
+   * @return a ResponseEntity containing the paginated list of filtered listings
+   */
+  @Operation(summary = "Get filtered listings", description = "Fetches a paginated list of filtered listings")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Filtered listings fetched successfully"),
+      @ApiResponse(responseCode = "404", description = "Current user not found"),
+      @ApiResponse(responseCode = "400", description = "Invalid page number")
+  })
+  @PostMapping("/all/{pageNumber}")
+  public ResponseEntity<Page<ListingResponse>> getListingsFiltered(
+      @Parameter(description = "The page number to retrieve") @PathVariable int pageNumber,
+      @RequestBody FilterListingsRequest filterListingsRequest) {
+    logger.info("Getting filtered listings, page " + pageNumber);
+    Page<ListingResponse> filteredListingsPage = listingService.getFilteredListings(pageNumber - 1, pageSize, filterListingsRequest);
+    logger.info("Filtered listings fetched: ");
+    for (ListingResponse listing : filteredListingsPage.getContent()) {
+      logger.info("Listing ID: " + listing.getId() + ", Description: " + listing.getBriefDescription());
+    }
+    return ResponseEntity.ok(filteredListingsPage);
+  }
 }

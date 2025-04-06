@@ -2,12 +2,16 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
+import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingAttributeMapper;
@@ -20,8 +24,10 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFou
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 /**
  * Service class for managing listings.
@@ -69,8 +75,9 @@ public class ListingService {
   /**
    * Retrieves all listings in a specific category.
    *
-   * @param categoryID The category ID.
-   * @return A list of {@link ListingResponse} objects.
+   * @param categoryID The category id of the category whose listings are to be retrieved.
+   * @return A list of {@link ListingResponse} objects containing listing details.
+   * @throws NoSuchElementException if there are no listings associated with the given category.
    */
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
     logger.info("Fetching listings for category ID {}", categoryID);
@@ -173,4 +180,71 @@ public class ListingService {
     listingRepository.deleteById(listingId);
     logger.info("Listing deleted successfully with ID {}", listingId);
   }
+
+  /**
+   * Retrieves a paginated list of filtered listings based on the given filter request.
+   *
+   * @param page The page number to retrieve.
+   * @param size The number of listings per page.
+   * @param filterListingsRequest The request containing filter criteria.
+   * @return A {@link Page} of {@link ListingResponse} objects matching the filter criteria.
+   */
+  public Page<ListingResponse> getFilteredListings(int page, int size, FilterListingsRequest filterListingsRequest) {
+    List<ListingResponse> filteredListings = getAllFilteredListings(filterListingsRequest);
+
+    int start = Math.min(page * size, filteredListings.size());
+    int end = Math.min(start + size, filteredListings.size());
+
+    if (start > filteredListings.size() || start < 0 || end > filteredListings.size() || end < 0) {
+      throw new IllegalArgumentException("Invalid page or size parameters");
+    }
+
+    List<ListingResponse> pagedListings = filteredListings.subList(start, end);
+    return new PageImpl<>(pagedListings, PageRequest.of(page, size), filteredListings.size());
+  }
+
+  /**
+   * Retrieves all listings filtered by the given filter request.
+   *
+   * @param filterListingsRequest The request containing filter criteria.
+   * @return A list of {@link ListingResponse} objects matching the filter criteria.
+   */
+  public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
+    User currentUser = securityUtil.getCurrentUser();
+
+    List<Listing> listingsToFilter;
+    if (filterListingsRequest.getCategoryId() != null) {
+      listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNot(
+          filterListingsRequest.getCategoryId(), currentUser.getId());
+    } else {
+      listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
+    }
+
+    Stream<Listing> stream = listingsToFilter.stream();
+
+    if (filterListingsRequest.getQuery() != null) {
+      stream = stream.filter(listing -> listing.getBriefDescription().toLowerCase()
+              .contains(filterListingsRequest.getQuery().toLowerCase())
+              || listing.getFullDescription().toLowerCase()
+              .contains(filterListingsRequest.getQuery().toLowerCase()));
+    }
+
+    if (filterListingsRequest.getFromPrice() != null) {
+      stream = stream.filter(listing -> listing.getPrice() >= filterListingsRequest.getFromPrice());
+    }
+
+    if (filterListingsRequest.getToPrice() != null) {
+      stream = stream.filter(listing -> listing.getPrice() <= filterListingsRequest.getToPrice());
+    }
+
+    if (filterListingsRequest.getFromDate() != null) {
+      stream = stream.filter(listing -> listing.getDateCreated()
+              .after(filterListingsRequest.getFromDate()));
+    }
+
+    List<Listing> filteredListings = stream.toList();
+
+    return filteredListings.stream().map(listingMapper::toDto).toList();
+  }
+
 }
