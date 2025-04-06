@@ -315,4 +315,28 @@ public class ListingService {
     return filteredListings.stream().map(listingMapper::toDto).toList();
   }
 
+  /**
+   * Marks a listing as sold.
+   *
+   * @param listingId The ID of the listing to mark as sold.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
+   * @throws IllegalStateException if the listing is already sold or archived.
+   */
+  public void markListingAsSold(long listingId) {
+    Listing soldListing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+    if (!securityUtil.isListingOwner(soldListing)) {
+      logger.warn("Access denied: User does not own listing ID {}", listingId);
+      throw new AccessDeniedException("You do not own this listing");
+    }
+    if (soldListing.getListingStatus() == ListingStatus.SOLD || soldListing.getListingStatus() == ListingStatus.ARCHIVED) {
+      logger.warn("Listing ID {} is already marked as sold or archived", listingId);
+      throw new IllegalStateException("Listing is already marked as sold or archived");
+    }
+
+    soldListing.setListingStatus(ListingStatus.SOLD);
+    listingRepository.save(soldListing);
+  }
+
 }

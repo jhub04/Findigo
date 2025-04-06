@@ -141,7 +141,7 @@ public class UserController {
   @GetMapping("/me/activeListings")
   public ResponseEntity<List<ListingResponse>> getMyActiveListings() {
     logger.info("Fetching listings for current user");
-    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    List<ListingResponse> myListings = userService.getMyActiveListings();
     logger.info("Fetched {} listings for current user", myListings.size());
     return ResponseEntity.ok(myListings);
   }
@@ -158,7 +158,7 @@ public class UserController {
   @GetMapping("/me/archivedListings")
   public ResponseEntity<List<ListingResponse>> getMyArchivedListings() {
     logger.info("Fetching listings for current user");
-    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    List<ListingResponse> myListings = userService.getMyArchivedListings();
     logger.info("Fetched {} listings for current user", myListings.size());
     return ResponseEntity.ok(myListings);
   }
@@ -175,7 +175,7 @@ public class UserController {
   @GetMapping("/me/soldListings")
   public ResponseEntity<List<ListingResponse>> getMySoldListings() {
     logger.info("Fetching listings for current user");
-    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    List<ListingResponse> myListings = userService.getMySoldListings();
     logger.info("Fetched {} listings for current user", myListings.size());
     return ResponseEntity.ok(myListings);
   }
@@ -192,7 +192,7 @@ public class UserController {
   @GetMapping("/me/boughtListings")
   public ResponseEntity<List<ListingResponse>> getMyBoughtListings() {
     logger.info("Fetching listings for current user");
-    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    List<ListingResponse> myListings = userService.getMyBoughtListings();
     logger.info("Fetched {} listings for current user", myListings.size());
     return ResponseEntity.ok(myListings);
   }

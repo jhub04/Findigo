@@ -134,4 +134,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorDetail> handleEntityOperationException(@NonNull EntityOperationException e, WebRequest request) {
     return createErrorResponseEntity(e.getErrorMessage(), e, request);
   }
+
+  /**
+   * Handles {@link IllegalStateException} when an entity cannot be found.
+   */
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ErrorDetail> handleIllegalStateException(@NonNull IllegalStateException e, WebRequest request) {
+    return createErrorResponseEntity(HttpStatus.CONFLICT, e, request);
+  }
 }

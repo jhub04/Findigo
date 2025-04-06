@@ -229,4 +229,20 @@ public class ListingController {
     }
     return ResponseEntity.ok(filteredListingsPage);
   }
+
+  /**
+   * Marks a listing as sold.
+   *
+   * @param listingId the ID of the listing to mark as sold
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PutMapping("/sell/{listingId}")
+  public ResponseEntity<?> markListingAsSold(@PathVariable long listingId) {
+    logger.info("Marking listing with ID {} as sold", listingId);
+    listingService.markListingAsSold(listingId);
+  }
+
+
+
+
 }
