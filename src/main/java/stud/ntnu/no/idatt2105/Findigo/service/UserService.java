@@ -80,12 +80,11 @@ public class UserService {
             .setPassword(passwordEncoder.encode(request.getPassword()));
 
     userRepository.save(user);
-    for (Role role : request.getRoles()) {
-      UserRoles userRole = new UserRoles()
-              .setUser(user)
-              .setRole(role);
-      userRolesRepository.save(userRole);
-    }
+
+    UserRoles userRole = new UserRoles()
+        .setUser(user)
+        .setRole(Role.ROLE_USER);
+    userRolesRepository.save(userRole);
     return "User registered successfully!";
   }
 
