@@ -48,6 +48,6 @@ public class UserRequest {
    * The set of roles assigned to the user.
    */
   @NotEmpty(message = "User must have at least one role")
-  @Schema(description = "Roles assigned to the user", example = "[\"USER\", \"ADMIN\"]")
+  @Schema(description = "Roles assigned to the user", example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]")
   private Set<Role> roles;
 }

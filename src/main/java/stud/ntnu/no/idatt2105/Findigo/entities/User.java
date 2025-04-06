@@ -86,9 +86,8 @@ public class User implements UserDetails {
    * Set of roles assigned to the user.
    * Determines the user's access permissions.
    */
-  @ElementCollection(fetch = FetchType.EAGER)
-  @Enumerated(EnumType.STRING)
-  private Set<Role> roles;
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  private Set<UserRoles> userRoles = new HashSet<>();
 
   /**
    * Returns the authorities granted to the user.
@@ -98,9 +97,11 @@ public class User implements UserDetails {
    */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles.stream()
-            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+    List<SimpleGrantedAuthority> authorities = userRoles.stream()
+            .map(role -> new SimpleGrantedAuthority(role.getRole().toString()))
             .toList();
+    System.out.println(authorities);
+    return authorities;
   }
 
   /**

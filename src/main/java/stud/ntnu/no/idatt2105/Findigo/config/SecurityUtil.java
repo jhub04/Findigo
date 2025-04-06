@@ -48,8 +48,8 @@ public class SecurityUtil {
    * @return {@code true} if the user has the ADMIN role, {@code false} otherwise
    */
   public boolean isAdmin() {
-    return getCurrentUser().getRoles().stream()
-            .anyMatch(role -> role.name().equals("ADMIN"));
+    return getCurrentUser().getUserRoles().stream()
+            .anyMatch(role -> role.getRole().toString().equals("ROLE_ADMIN"));
   }
 
   /**
