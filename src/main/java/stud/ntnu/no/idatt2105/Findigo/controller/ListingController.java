@@ -91,6 +91,7 @@ public class ListingController {
   @GetMapping("/category/{categoryId}")
   public ResponseEntity<List<ListingResponse>> getListingsByCategory(
           @Parameter(description = "The ID of the category", example = "1") @PathVariable Long categoryId) {
+    //TODO paginate... kalles denne på i frontend når man henter lisitngs i kategori på main page?
     logger.info("Fetching listings in category with ID {}", categoryId);
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
     logger.info("Fetched {} listings in category with ID {}", listings.size(), categoryId);
