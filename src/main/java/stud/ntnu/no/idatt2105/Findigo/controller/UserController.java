@@ -130,18 +130,69 @@ public class UserController {
   }
 
   /**
-   * Retrieves listings created by the current user.
+   * Retrieves active listings created by the current user.
    *
-   * @return list of user's own listings
+   * @return list of user's own active listings
    */
-  @Operation(summary = "Get own listings", description = "Fetches all listings created by the current user.")
+  @Operation(summary = "Get own active listings", description = "Fetches all active listings created by the current user.")
   @ApiResponses(value = {
           @ApiResponse(responseCode = "200", description = "Successfully fetched user's listings")
   })
-  @GetMapping("/me/listings")
-  public ResponseEntity<List<ListingResponse>> getMyListings() {
+  @GetMapping("/me/activeListings")
+  public ResponseEntity<List<ListingResponse>> getMyActiveListings() {
     logger.info("Fetching listings for current user");
-    List<ListingResponse> myListings = userService.getMyListings();
+    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    logger.info("Fetched {} listings for current user", myListings.size());
+    return ResponseEntity.ok(myListings);
+  }
+
+  /**
+   * Retrieves archived listings created by the current user.
+   *
+   * @return list of user's own archived listings
+   */
+  @Operation(summary = "Get own archived listings", description = "Fetches all archived listings created by the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully fetched user's listings")
+  })
+  @GetMapping("/me/archivedListings")
+  public ResponseEntity<List<ListingResponse>> getMyArchivedListings() {
+    logger.info("Fetching listings for current user");
+    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    logger.info("Fetched {} listings for current user", myListings.size());
+    return ResponseEntity.ok(myListings);
+  }
+
+  /**
+   * Retrieves sold listings created by the current user.
+   *
+   * @return list of user's sold listings
+   */
+  @Operation(summary = "Get sold listings", description = "Fetches all sold listings created by the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully fetched user's listings")
+  })
+  @GetMapping("/me/soldListings")
+  public ResponseEntity<List<ListingResponse>> getMySoldListings() {
+    logger.info("Fetching listings for current user");
+    List<ListingResponse> myListings = userService.getMyListings();//TODO
+    logger.info("Fetched {} listings for current user", myListings.size());
+    return ResponseEntity.ok(myListings);
+  }
+
+  /**
+   * Retrieves listings the current user has bought.
+   *
+   * @return list of user's bought listings
+   */
+  @Operation(summary = "Get bought listings", description = "Fetches all listings bought by the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully fetched user's bought listings")
+  })
+  @GetMapping("/me/boughtListings")
+  public ResponseEntity<List<ListingResponse>> getMyBoughtListings() {
+    logger.info("Fetching listings for current user");
+    List<ListingResponse> myListings = userService.getMyListings();//TODO
     logger.info("Fetched {} listings for current user", myListings.size());
     return ResponseEntity.ok(myListings);
   }
