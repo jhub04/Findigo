@@ -16,12 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
-import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
-import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 import stud.ntnu.no.idatt2105.Findigo.service.RecommendationService;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -113,11 +110,11 @@ public class ListingController {
           @ApiResponse(responseCode = "404", description = "Listing, category, or attributes not found")
   })
   @PutMapping("/edit/{listingId}")
-  public ResponseEntity<ListingResponse> editListing(
+  public ResponseEntity<ListingResponse> update(
           @Parameter(description = "The ID of the listing to edit", example = "1") @PathVariable Long listingId,
           @RequestBody ListingRequest request) {
     logger.info("Editing listing with ID {}", listingId);
-    ListingResponse listingResponse = listingService.editListing(listingId, request);
+    ListingResponse listingResponse = listingService.editMyListing(listingId, request);
     logger.info("Listing with ID {} successfully edited", listingId);
     return ResponseEntity.ok(listingResponse);
   }

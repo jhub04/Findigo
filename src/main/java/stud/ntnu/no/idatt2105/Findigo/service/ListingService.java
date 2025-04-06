@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
@@ -24,7 +23,6 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFou
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -130,13 +128,12 @@ public class ListingService {
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    * @throws AccessDeniedException if the current user does not own the listing.
    */
-  public ListingResponse editListing(Long listingId, ListingRequest request) {
-    logger.info("Editing listing with ID {}", listingId);
-
+  public ListingResponse editMyListing(Long listingId, ListingRequest request) {
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    if (securityUtil.isListingOwner(listing)) {
+
+    if (!securityUtil.isListingOwner(listing)) {
       logger.warn("Access denied: User does not own listing ID {}", listingId);
       throw new AccessDeniedException("You do not own this listing");
     }
@@ -160,6 +157,38 @@ public class ListingService {
   }
 
   /**
+   * Edits an existing listing as an administrator.
+   * <p>
+   * Admins can edit any listing, regardless of ownership.
+   *
+   * @param listingId The ID of the listing to edit.
+   * @param request The updated listing details.
+   * @return A {@link ListingResponse} containing the updated details.
+   * @throws AppEntityNotFoundException if the listing or category does not exist.
+   */
+  public ListingResponse editListingAsAdmin(Long listingId, ListingRequest request) {
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    Category category = categoryRepository.findById(request.getCategoryId())
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+
+    listing.setBriefDescription(request.getBriefDescription())
+            .setFullDescription(request.getFullDescription())
+            .setLatitude(request.getLatitude())
+            .setLongitude(request.getLongitude())
+            .setCategory(category)
+            .setListingAttributes(request.getAttributes().stream()
+                    .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listingId))
+                    .toList());
+
+    Listing updatedListing = listingRepository.save(listing);
+
+    logger.info("Admin updated listing successfully with ID {}", listingId);
+    return listingMapper.toDto(updatedListing);
+  }
+
+  /**
    * Deletes a listing by its ID.
    *
    * @param listingId The ID of the listing to delete.
@@ -172,7 +201,7 @@ public class ListingService {
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    if (securityUtil.isListingOwner(listing)) {
+    if (!securityUtil.isListingOwner(listing)) {
       logger.warn("Access denied: User does not own listing ID {}", listingId);
       throw new AccessDeniedException("You do not own this listing");
     }
@@ -180,6 +209,25 @@ public class ListingService {
     listingRepository.deleteById(listingId);
     logger.info("Listing deleted successfully with ID {}", listingId);
   }
+
+  /**
+   * Deletes a listing by its ID as an administrator.
+   * <p>
+   * Admins can delete any listing, regardless of ownership.
+   *
+   * @param listingId The ID of the listing to delete.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   */
+  public void deleteListingAsAdmin(long listingId) {
+    logger.info("Admin: Deleting listing with ID {}", listingId);
+
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    listingRepository.deleteById(listingId);
+    logger.info("Admin: Listing deleted successfully with ID {}", listingId);
+  }
+
 
   /**
    * Retrieves a paginated list of filtered listings based on the given filter request.
