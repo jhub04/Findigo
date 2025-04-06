@@ -83,6 +83,11 @@ public enum CustomErrorMessage {
   UNAUTHORIZED_OPERATION(403, "You are not authorized to perform this operation."),
 
   /**
+   * Error when the server cant delete the specified image
+   */
+  IMAGE_DELETE_FAILED(500, "Failed to delete the image."),
+
+  /**
    * Error when an internal server error occurs.
    */
   INTERNAL_SERVER_ERROR(500, "An internal server error occurred.");
