@@ -15,7 +15,6 @@ import stud.ntnu.no.idatt2105.Findigo.config.JWTUtil;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.MyUserRequest;
@@ -24,7 +23,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.AdminUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.repository.FavoriteListingsRepository;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
@@ -69,7 +68,7 @@ public class UserService {
    * @param request the registration details
    * @return success message upon successful registration
    */
-  public String register(RegisterRequest request) {
+  public String register(AuthRequest request) {
     if (userRepository.existsByUsername(request.getUsername())) {
       logger.error("Username '{}' is already taken", request.getUsername());
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
@@ -170,7 +169,7 @@ public class UserService {
    * @param request the new user details
    * @param userId the target user ID
    */
-  public void editUserDetails(UserRequest request, Long userId) {
+  public void editUserDetails(AdminUserRequest request, Long userId) {
     User user = getUserById(userId);
 
     if (!user.getUsername().equals(request.getUsername()) &&
@@ -264,7 +263,7 @@ public class UserService {
    * @param request the user request
    * @return the user lite response
    */
-  public UserLiteResponse createUser(UserRequest request) {
+  public UserLiteResponse createUser(AdminUserRequest request) {
     if (userRepository.existsByUsername(request.getUsername())) {
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }

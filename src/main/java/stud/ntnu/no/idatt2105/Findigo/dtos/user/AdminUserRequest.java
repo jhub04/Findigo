@@ -21,7 +21,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "DTO for user creation or update, including username, password, phone number, and roles.")
-public class UserRequest {
+public class AdminUserRequest {
 
   /**
    * The username of the user.

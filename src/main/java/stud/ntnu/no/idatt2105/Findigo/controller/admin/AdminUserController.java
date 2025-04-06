@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.AdminUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 
@@ -105,7 +105,7 @@ public class AdminUserController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ResponseEntity<UserLiteResponse> create(
-          @Validated @RequestBody UserRequest request
+          @Validated @RequestBody AdminUserRequest request
   ) {
     logger.info("Admin: Creating new user with username '{}'", request.getUsername());
     UserLiteResponse createdUser = userService.createUser(request);
@@ -132,7 +132,7 @@ public class AdminUserController {
   public ResponseEntity<String> update(
           @Parameter(description = "The ID of the user to update", example = "1")
           @PathVariable long userId,
-          @Validated @RequestBody UserRequest request
+          @Validated @RequestBody AdminUserRequest request
   ) {
     logger.info("Admin: Updating user with ID {}", userId);
     userService.editUserDetails(request, userId);
