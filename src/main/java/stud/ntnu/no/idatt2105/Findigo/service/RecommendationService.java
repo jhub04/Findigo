@@ -55,6 +55,7 @@ public class RecommendationService {
    * @return a paginated {@link Page} of recommended listings
    */
   public Page<ListingResponse> getRecommendedListings(int page, int size) {
+    //TODO what to do if the user has no browse history?
     User user = securityUtil.getCurrentUser();
 
     LocalDate tenDaysAgo = LocalDate.now().minusDays(10);
@@ -63,6 +64,14 @@ public class RecommendationService {
     List<BrowseHistory> recentUserBrowseHistory = browseHistoryRepository.findByUserAndCreatedAtAfter(user, cutoff);
     logger.info("User " + user.getUsername() + " has " + recentUserBrowseHistory.size() + " browse history entries in the last 10 days.");
 
+    if (recentUserBrowseHistory.isEmpty()) {
+      logger.info("User " + user.getUsername() + " has no browse history in the last 10 days.");
+      List<Listing> allListings = listingRepository.findAll();
+      int start = Math.min(page * size, allListings.size());
+      int end = Math.min(start + size, allListings.size());
+      List<Listing> pagedListings = allListings.subList(start, end);
+      return new PageImpl<>(pagedListings.stream().map(listingMapper::toDto).toList(), PageRequest.of(page, size), allListings.size());
+    }
     // Most viewed categories
     Map<Category, Long> categoryFrequency = new HashMap<>();
     for (BrowseHistory browseHistory : recentUserBrowseHistory) {
@@ -75,17 +84,25 @@ public class RecommendationService {
         .sorted(Map.Entry.<Category, Long>comparingByValue().reversed())
         .map(Map.Entry::getKey)
         .toList();
+    logger.info("User " + user.getUsername() + " sorted categories length is " + sortedCategories.size());
 
 
 
     Set<Long> excludedListingIds = listingRepository.findListingsByUser(user).stream()
         .map(Listing::getId)
         .collect(Collectors.toSet());
+    logger.info("User " + user.getUsername() + " has " + excludedListingIds.size() + " excluded listings.");
 
     List<Listing> allRecommendedListings = new ArrayList<>();
 
     for (Category category : sortedCategories) {
-      List<Listing> listingsInCategory = listingRepository.findByCategoryAndIdNotIn(category, excludedListingIds);
+
+      List<Listing> listingsInCategory;
+      if (excludedListingIds.isEmpty()) {
+        listingsInCategory = listingRepository.findListingsByCategoryId(category.getId());
+      } else {
+        listingsInCategory = listingRepository.findByCategoryAndIdNotIn(category, excludedListingIds);
+      }
       allRecommendedListings.addAll(listingsInCategory);
     }
     logger.info("User " + user.getUsername() + " has " + allRecommendedListings.size() + " recommended listings.");

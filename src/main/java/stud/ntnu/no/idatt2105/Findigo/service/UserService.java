@@ -21,17 +21,18 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.MyUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.entities.FavoriteListings;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
-import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.repository.FavoriteListingsRepository;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+import stud.ntnu.no.idatt2105.Findigo.repository.UserRolesRepository;
 
 import java.time.Duration;
 import java.util.List;
@@ -48,6 +49,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
+  private final UserRolesRepository  userRolesRepository;
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
   private final ListingRepository listingRepository; // TODO: Avoid using listingRepository in UserService
@@ -75,10 +77,15 @@ public class UserService {
 
     User user = new User()
             .setUsername(request.getUsername())
-            .setPassword(passwordEncoder.encode(request.getPassword()))
-            .setRoles(request.getRoles());
+            .setPassword(passwordEncoder.encode(request.getPassword()));
 
     userRepository.save(user);
+    for (Role role : request.getRoles()) {
+      UserRoles userRole = new UserRoles()
+              .setUser(user)
+              .setRole(role);
+      userRolesRepository.save(userRole);
+    }
     return "User registered successfully!";
   }
 
@@ -178,7 +185,13 @@ public class UserService {
     }
 
     if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-      user.setRoles(request.getRoles());
+      userRolesRepository.deleteByUser(user);
+      for (Role role: request.getRoles()) {
+        UserRoles userRole = new UserRoles()
+                .setUser(user)
+                .setRole(role);
+        userRolesRepository.save(userRole);
+      }
     }
 
     userRepository.save(user);
@@ -256,7 +269,7 @@ public class UserService {
     }
 
     User user = userMapper.toEntity(request);
-    return userMapper.toLiteDto(userRepository.save(user));
+    return userMapper.toLiteDto(user);
   }
 
   /**
