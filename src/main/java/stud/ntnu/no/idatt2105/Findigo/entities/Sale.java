@@ -39,13 +39,6 @@ public class Sale {
   private Listing listing;
 
   /**
-   * The user who bought the listing.
-   */
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "buyer_id", nullable = false)
-  private User buyer;
-
-  /**
    * The price at which the listing was sold.
    */
   @Column(nullable = true)

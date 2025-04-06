@@ -379,14 +379,4 @@ public class UserService {
   public List<ListingResponse> getMySoldListings() {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
-
-  public List<ListingResponse> getMyBoughtListings() {
-    User currentUser = getCurrentUser();
-    List<Sale> boughtListings = saleRepository.findAllByBuyer(currentUser);
-    return boughtListings
-        .stream()
-        .map(Sale::getListing)
-        .map(listingMapper::toDto)
-        .toList();
-  }
 }

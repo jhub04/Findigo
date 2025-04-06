@@ -9,5 +9,4 @@ import java.util.List;
 
 @Repository
 public interface SaleRepository extends JpaRepository<Sale, Long> {
-  List<Sale> findAllByBuyer(User buyer);
 }

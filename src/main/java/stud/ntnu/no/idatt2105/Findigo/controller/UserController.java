@@ -179,21 +179,4 @@ public class UserController {
     logger.info("Fetched {} listings for current user", myListings.size());
     return ResponseEntity.ok(myListings);
   }
-
-  /**
-   * Retrieves listings the current user has bought.
-   *
-   * @return list of user's bought listings
-   */
-  @Operation(summary = "Get bought listings", description = "Fetches all listings bought by the current user.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successfully fetched user's bought listings")
-  })
-  @GetMapping("/me/boughtListings")
-  public ResponseEntity<List<ListingResponse>> getMyBoughtListings() {
-    logger.info("Fetching listings for current user");
-    List<ListingResponse> myListings = userService.getMyBoughtListings();
-    logger.info("Fetched {} listings for current user", myListings.size());
-    return ResponseEntity.ok(myListings);
-  }
 }
