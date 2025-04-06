@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -24,6 +25,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "listing")
+@ToString(exclude = {"category", "user", "listingAttributes", "imageUrls", "browseHistories", "favoriteListings"})
 public class Listing {
 
   /**
@@ -115,4 +117,10 @@ public class Listing {
    */
   @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BrowseHistory> browseHistories = new ArrayList<>();
+
+  /**
+   * Favourites associated with this listing.
+   */
+  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FavoriteListings> favoriteListings = new ArrayList<>();
 }

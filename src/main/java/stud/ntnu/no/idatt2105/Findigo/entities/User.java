@@ -65,7 +65,7 @@ public class User implements UserDetails {
    * Phone number of the user.
    */
   @Column
-  private Long phoneNumber;
+  private String phoneNumber;
 
   /**
    * List of listings created by the user.
@@ -80,6 +80,12 @@ public class User implements UserDetails {
    */
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<BrowseHistory> browseHistories = new ArrayList<>();
+
+  /**
+   * Favourites associated with this user.
+   */
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FavoriteListings> favoriteListings = new ArrayList<>();
 
   /**
    * Set of roles assigned to the user.

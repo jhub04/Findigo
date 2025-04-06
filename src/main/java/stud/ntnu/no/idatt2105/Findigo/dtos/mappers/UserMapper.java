@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.AdminUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
@@ -18,7 +18,7 @@ import stud.ntnu.no.idatt2105.Findigo.repository.UserRolesRepository;
  * Mapper class responsible for converting {@link User} entities into {@link UserResponse} and {@link UserLiteResponse} DTOs,
  * and vice versa.
  * <p>
- * This class also handles mapping from {@link UserRequest} to {@link User} entity,
+ * This class also handles mapping from {@link AdminUserRequest} to {@link User} entity,
  * including password encoding.
  * </p>
  */
@@ -69,13 +69,13 @@ public class UserMapper {
   }
 
   /**
-   * Converts a {@link UserRequest} DTO to a {@link User} entity.
+   * Converts a {@link AdminUserRequest} DTO to a {@link User} entity.
    * Encodes the password before setting it to the entity.
    *
-   * @param request the {@link UserRequest} containing user registration or update data
+   * @param request the {@link AdminUserRequest} containing user registration or update data
    * @return a {@link User} entity
    */
-  public User toEntity(UserRequest request) {
+  public User toEntity(AdminUserRequest request) {
     logger.debug("Mapping UserRequest to User entity for username '{}'", request.getUsername());
 
     User newUser = new User()

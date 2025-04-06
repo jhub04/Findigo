@@ -21,7 +21,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "DTO for user creation or update, including username, password, phone number, and roles.")
-public class UserRequest {
+public class AdminUserRequest {
 
   /**
    * The username of the user.
@@ -42,7 +42,7 @@ public class UserRequest {
    */
   @NotNull(message = "Phone number cannot be null")
   @Schema(description = "The phone number of the user", example = "12345678")
-  private Long phoneNumber;
+  private String phoneNumber;
 
   /**
    * The set of roles assigned to the user.

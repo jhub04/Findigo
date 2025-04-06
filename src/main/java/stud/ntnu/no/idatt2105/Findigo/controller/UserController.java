@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.MyUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
@@ -64,7 +64,7 @@ public class UserController {
           @ApiResponse(responseCode = "403", description = "Forbidden - Cannot edit another user's profile")
   })
   @PutMapping("/me/edit")
-  public ResponseEntity<String> editUserDetails(@RequestBody UserRequest request) {
+  public ResponseEntity<String> update(@RequestBody MyUserRequest request) {
     logger.info("Editing profile for user '{}'", request.getUsername());
     userService.editMyUserDetails(request);
     logger.info("Profile updated for user '{}'", request.getUsername());
