@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.ListingStatus;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    * @param id the ID of the category
    * @return a list of listings belonging to the specified category
    */
-  List<Listing> findListingsByCategoryId(Long id);
+  List<Listing> findListingsByCategoryIdAndListingStatus(Long id, ListingStatus listingStatus);
 
   /**
    * Finds all listings not created by the user with the given ID.
@@ -43,8 +44,8 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    * @param id the ID of the user to exclude
    * @return a list of listings not created by the specified user
    */
-  List<Listing> findAllByUser_IdNot(long id);
-  List<Listing> findByCategoryAndIdNotIn(Category category, Set<Long> ids);
+  List<Listing> findAllByUser_IdNotAndListingStatus(long id, ListingStatus listingStatus);
+  List<Listing> findByCategoryAndIdNotInAndListingStatus(Category category, Set<Long> ids, ListingStatus listingStatus);
 
   /**
    * Finds listings in a given category, excluding listings with IDs in the provided set.
@@ -56,5 +57,5 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    * @return a page of listings matching the criteria
    */
   Page<Listing> findByCategoryAndIdNotIn(Category category, Set<Long> ids, Pageable pageable);
-  List<Listing> findByCategoryIdAndUser_IdNot(Long categoryId, Long userId);
+  List<Listing> findByCategoryIdAndUser_IdNotAndListingStatus(Long categoryId, Long userId, ListingStatus listingStatus);
 }

@@ -17,6 +17,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingAttributeMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.ListingStatus;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
@@ -57,6 +58,7 @@ public class ListingService {
    */
   @Transactional
   public ListingResponse addListing(ListingRequest req) {
+    //GOOD
     User currentUser = securityUtil.getCurrentUser();
     logger.info("Creating listing for user ID {}", currentUser.getId());
 
@@ -81,7 +83,7 @@ public class ListingService {
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
     logger.info("Fetching listings for category ID {}", categoryID);
 
-    return listingRepository.findListingsByCategoryId(categoryID).stream()
+    return listingRepository.findListingsByCategoryIdAndListingStatus(categoryID, ListingStatus.ACTIVE).stream()
         .map(listingMapper::toDto)
         .toList();
   }
@@ -95,7 +97,7 @@ public class ListingService {
     long currentUserId = securityUtil.getCurrentUser().getId();
     logger.info("Fetching all listings excluding user ID {}", currentUserId);
 
-    List<Listing> listings = listingRepository.findAllByUser_IdNot(currentUserId);
+    List<Listing> listings = listingRepository.findAllByUser_IdNotAndListingStatus(currentUserId, ListingStatus.ACTIVE);
 
     return listings.stream()
         .map(listingMapper::toDto)
@@ -280,10 +282,10 @@ public class ListingService {
 
     List<Listing> listingsToFilter;
     if (filterListingsRequest.getCategoryId() != null) {
-      listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNot(
-          filterListingsRequest.getCategoryId(), currentUser.getId());
+      listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNotAndListingStatus(
+          filterListingsRequest.getCategoryId(), currentUser.getId(), ListingStatus.ACTIVE);
     } else {
-      listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
+      listingsToFilter = listingRepository.findAllByUser_IdNotAndListingStatus(currentUser.getId(), ListingStatus.ACTIVE);
     }
 
     Stream<Listing> stream = listingsToFilter.stream();

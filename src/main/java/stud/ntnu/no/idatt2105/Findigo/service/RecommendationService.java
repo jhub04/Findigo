@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
-import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
-import stud.ntnu.no.idatt2105.Findigo.entities.Category;
-import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
-import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import stud.ntnu.no.idatt2105.Findigo.repository.BrowseHistoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
@@ -66,7 +63,7 @@ public class RecommendationService {
 
     if (recentUserBrowseHistory.isEmpty()) {
       logger.info("User " + user.getUsername() + " has no browse history in the last 10 days.");
-      List<Listing> allListings = listingRepository.findAll();
+      List<Listing> allListings = listingRepository.findAllByUser_IdNotAndListingStatus(user.getId(), ListingStatus.ACTIVE);
       int start = Math.min(page * size, allListings.size());
       int end = Math.min(start + size, allListings.size());
       List<Listing> pagedListings = allListings.subList(start, end);
@@ -99,9 +96,9 @@ public class RecommendationService {
 
       List<Listing> listingsInCategory;
       if (excludedListingIds.isEmpty()) {
-        listingsInCategory = listingRepository.findListingsByCategoryId(category.getId());
+        listingsInCategory = listingRepository.findListingsByCategoryIdAndListingStatus(category.getId(), ListingStatus.ACTIVE);
       } else {
-        listingsInCategory = listingRepository.findByCategoryAndIdNotIn(category, excludedListingIds);
+        listingsInCategory = listingRepository.findByCategoryAndIdNotInAndListingStatus(category, excludedListingIds, ListingStatus.ACTIVE);
       }
       allRecommendedListings.addAll(listingsInCategory);
     }
