@@ -79,16 +79,18 @@ public class UserMapper {
     logger.debug("Mapping UserRequest to User entity for username '{}'", request.getUsername());
 
     User newUser = new User()
-            .setUsername(request.getUsername())
-            .setPassword(passwordEncoder.encode(request.getPassword()))
-            .setPhoneNumber(request.getPhoneNumber());
-    userRepository.save(newUser);
+        .setUsername(request.getUsername())
+        .setPassword(passwordEncoder.encode(request.getPassword()))
+        .setPhoneNumber(request.getPhoneNumber());
+
     for (Role role : request.getRoles()) {
       UserRoles userRole = new UserRoles()
-              .setUser(newUser)
-              .setRole(role);
-      userRolesRepository.save(userRole);
+          .setUser(newUser)
+          .setRole(role);
+      newUser.getUserRoles().add(userRole);
     }
-    return newUser;
+
+    return userRepository.save(newUser);
   }
+
 }

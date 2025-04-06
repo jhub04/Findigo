@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.ListingAttributeRequest;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 @Schema(description = "DTO for creating or editing a listing with details like description, location, price, category, and attributes.")
 public class ListingRequest {
 

@@ -44,11 +44,18 @@ public class CustomUserDetailsService implements UserDetailsService {
    */
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    logger.info("Attempting to load user by username: {}", username);
-    return userRepository.findByUsername(username)
-            .orElseThrow(() -> {
-              logger.warn("User not found with username: {}", username);
-              return new UsernameNotFoundException("User not found: " + username);
-            });
+    try {
+      logger.info("Attempting to load user by username: {}", username);
+      return userRepository.findByUsername(username)
+          .orElseThrow(() -> {
+            logger.warn("User not found with username: {}", username);
+            return new UsernameNotFoundException("User not found: " + username);
+          });
+    } catch(Exception e) {
+      logger.error("Error loading user by username: {}", username, e);
+      throw new UsernameNotFoundException("Error loading user: " + username, e);
+    } finally {
+      logger.info("Finished loading user by username: {}", username);
+    }
   }
 }

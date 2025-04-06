@@ -40,7 +40,6 @@ public class ImageService {
    * The base path where listing images are stored.
    */
   private final String picturesPath = "src/main/resources/pictures/listing";
-
   private final ListingRepository listingRepository;
   private final UserService userService;
   private final SecurityUtil securityUtil;

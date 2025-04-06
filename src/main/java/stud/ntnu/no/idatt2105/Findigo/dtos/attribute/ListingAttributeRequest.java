@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * DTO for assigning a specific attribute to a listing.
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 @Schema(description = "Request DTO for assigning an attribute and its value to a listing.")
 public class ListingAttributeRequest {
 

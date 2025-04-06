@@ -74,15 +74,16 @@ public class UserService {
     }
 
     User user = new User()
-            .setUsername(request.getUsername())
-            .setPassword(passwordEncoder.encode(request.getPassword()));
-
-    userRepository.save(user);
+        .setUsername(request.getUsername())
+        .setPassword(passwordEncoder.encode(request.getPassword()));
 
     UserRoles userRole = new UserRoles()
         .setUser(user)
-        .setRole(Role.ROLE_USER);
-    userRolesRepository.save(userRole);
+        .setRole(Role.ROLE_USER); //Standard role for new users
+
+    user.getUserRoles().add(userRole);
+
+    userRepository.save(user);
     return "User registered successfully!";
   }
 

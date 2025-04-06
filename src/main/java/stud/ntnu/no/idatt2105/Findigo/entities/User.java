@@ -1,9 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,7 +15,8 @@ import java.util.*;
  * Represents a user in the system.
  * Implements {@link UserDetails} for integration with Spring Security.
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Accessors(chain = true)
 @NoArgsConstructor
@@ -97,10 +96,10 @@ public class User implements UserDetails {
    */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
+    System.out.println("Getting authorities for user: " + username);
     List<SimpleGrantedAuthority> authorities = userRoles.stream()
-            .map(role -> new SimpleGrantedAuthority(role.getRole().toString()))
+            .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
             .toList();
-    System.out.println(authorities);
     return authorities;
   }
 
@@ -159,5 +158,30 @@ public class User implements UserDetails {
             "id=" + id +
             ", username='" + username + '\'' +
             '}';
+  }
+
+  /**
+   * Compares this user with another object for equality.
+   * Two users are considered equal if they have the same ID.
+   *
+   * @param o the object to compare with
+   * @return {@code true} if the objects are equal, {@code false} otherwise
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    User user = (User) o;
+    return id != null && id.equals(user.id);
+  }
+
+  /**
+   * Generates a hash code for the user.
+   *
+   * @return the hash code of the user
+   */
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
   }
 }
