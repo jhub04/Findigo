@@ -8,7 +8,11 @@ import org.springframework.stereotype.Component;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
+import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.entities.UserRoles;
+import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+import stud.ntnu.no.idatt2105.Findigo.repository.UserRolesRepository;
 
 /**
  * Mapper class responsible for converting {@link User} entities into {@link UserResponse} and {@link UserLiteResponse} DTOs,
@@ -26,6 +30,8 @@ public class UserMapper {
 
   private final PasswordEncoder passwordEncoder;
   private final ListingMapper listingMapper;
+  private final UserRolesRepository userRolesRepository;
+  private final UserRepository userRepository;
 
   /**
    * Converts a {@link User} entity to a full {@link UserResponse} DTO.
@@ -72,10 +78,17 @@ public class UserMapper {
   public User toEntity(UserRequest request) {
     logger.debug("Mapping UserRequest to User entity for username '{}'", request.getUsername());
 
-    return new User()
+    User newUser = new User()
             .setUsername(request.getUsername())
             .setPassword(passwordEncoder.encode(request.getPassword()))
-            .setPhoneNumber(request.getPhoneNumber())
-            .setRoles(request.getRoles());
+            .setPhoneNumber(request.getPhoneNumber());
+    userRepository.save(newUser);
+    for (Role role : request.getRoles()) {
+      UserRoles userRole = new UserRoles()
+              .setUser(newUser)
+              .setRole(role);
+      userRolesRepository.save(userRole);
+    }
+    return newUser;
   }
 }

@@ -267,7 +267,7 @@ public class UserService {
     }
 
     User user = userMapper.toEntity(request);
-    return userMapper.toLiteDto(userRepository.save(user));
+    return userMapper.toLiteDto(user);
   }
 
   /**
