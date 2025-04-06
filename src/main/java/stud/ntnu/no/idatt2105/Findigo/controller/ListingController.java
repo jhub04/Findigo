@@ -114,6 +114,7 @@ public class ListingController {
           @Parameter(description = "The ID of the listing to edit", example = "1") @PathVariable Long listingId,
           @RequestBody ListingRequest request) {
     logger.info("Editing listing with ID {}", listingId);
+    logger.info("Request attributes: {}", request.getAttributes());
     ListingResponse listingResponse = listingService.editMyListing(listingId, request);
     logger.info("Listing with ID {} successfully edited", listingId);
     return ResponseEntity.ok(listingResponse);

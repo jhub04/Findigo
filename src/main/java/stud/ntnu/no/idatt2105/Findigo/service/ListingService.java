@@ -129,10 +129,11 @@ public class ListingService {
    * @throws AccessDeniedException if the current user does not own the listing.
    */
   public ListingResponse editMyListing(Long listingId, ListingRequest request) {
+    logger.info("updating with request {}", request);
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-
+    logger.info("listing retrieved {}", listing);
     if (!securityUtil.isListingOwner(listing)) {
       logger.warn("Access denied: User does not own listing ID {}", listingId);
       throw new AccessDeniedException("You do not own this listing");
@@ -140,19 +141,27 @@ public class ListingService {
 
     Category category = categoryRepository.findById(request.getCategoryId())
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+    logger.info("category got{}", category);
 
     listing.setBriefDescription(request.getBriefDescription())
             .setFullDescription(request.getFullDescription())
             .setLatitude(request.getLatitude())
             .setLongitude(request.getLongitude())
             .setCategory(category)
+            .setPrice(request.getPrice())
             .setListingAttributes(request.getAttributes().stream()
-                    .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listingId))
+                    .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
                     .toList());
 
-    Listing updatedListing = listingRepository.save(listing);
-
-    logger.info("Listing updated successfully with ID {}", listingId);
+    Listing updatedListing;
+    logger.info("new listing{}", listing);
+    try {
+      updatedListing = listingRepository.save(listing);
+      logger.info("Listing updated successfully with ID {}", listingId);
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      throw e;
+    }
     return listingMapper.toDto(updatedListing);
   }
 
@@ -179,7 +188,7 @@ public class ListingService {
             .setLongitude(request.getLongitude())
             .setCategory(category)
             .setListingAttributes(request.getAttributes().stream()
-                    .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listingId))
+                    .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
                     .toList());
 
     Listing updatedListing = listingRepository.save(listing);

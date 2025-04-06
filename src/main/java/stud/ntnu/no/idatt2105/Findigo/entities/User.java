@@ -83,6 +83,12 @@ public class User implements UserDetails {
   private List<BrowseHistory> browseHistories = new ArrayList<>();
 
   /**
+   * Favourites associated with this user.
+   */
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FavoriteListings> favoriteListings = new ArrayList<>();
+
+  /**
    * Set of roles assigned to the user.
    * Determines the user's access permissions.
    */
