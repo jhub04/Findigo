@@ -15,10 +15,9 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingAttributeMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
-import stud.ntnu.no.idatt2105.Findigo.entities.Category;
-import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
-import stud.ntnu.no.idatt2105.Findigo.entities.ListingStatus;
-import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.SaleMapper;
+import stud.ntnu.no.idatt2105.Findigo.dtos.sale.SaleResponse;
+import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
@@ -313,6 +312,61 @@ public class ListingService {
     List<Listing> filteredListings = stream.toList();
 
     return filteredListings.stream().map(listingMapper::toDto).toList();
+  }
+
+  /**
+   * Marks a listing as sold.
+   *
+   * @param listingId The ID of the listing to mark as sold.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
+   * @throws IllegalStateException if the listing is already sold or archived.
+   */
+  public SaleResponse markListingAsSold(long listingId) {
+    Listing soldListing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    if (soldListing.getListingStatus() == ListingStatus.SOLD || soldListing.getListingStatus() == ListingStatus.ARCHIVED) {
+      logger.warn("Listing ID {} is already marked as sold or archived", listingId);
+      throw new IllegalStateException("Listing is already marked as sold or archived");
+    }
+
+    soldListing.setListingStatus(ListingStatus.SOLD);
+    listingRepository.save(soldListing);
+
+    Sale sale = new Sale()
+        .setListing(soldListing)
+        .setSalePrice(soldListing.getPrice());
+
+    return SaleMapper.toDto(sale);
+  }
+
+  /**
+   * Marks a listing as archived.
+   *
+   * @param listingId The ID of the listing to mark as archived.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
+   * @throws IllegalStateException if the listing is already archived or sold.
+   */
+  public void markListingAsArchived(long listingId) {
+    Listing archivedListing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    if (!securityUtil.isListingOwner(archivedListing)) {
+      logger.warn("Access denied: User does not own listing ID {}", listingId);
+      throw new AccessDeniedException("You do not own this listing");
+    }
+
+    if (archivedListing.getListingStatus() == ListingStatus.ARCHIVED || archivedListing.getListingStatus() == ListingStatus.SOLD) {
+      logger.warn("Listing ID {} is already archived or sold", listingId);
+      throw new IllegalStateException("Listing is already archived or sold");
+    }
+
+    archivedListing.setListingStatus(ListingStatus.ARCHIVED);
+    listingRepository.save(archivedListing);
+
+    logger.info("Listing ID {} marked as archived", listingId);
   }
 
 }

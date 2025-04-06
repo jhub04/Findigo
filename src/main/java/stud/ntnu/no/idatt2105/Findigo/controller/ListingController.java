@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
+import stud.ntnu.no.idatt2105.Findigo.dtos.sale.SaleResponse;
 import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 import stud.ntnu.no.idatt2105.Findigo.service.RecommendationService;
 
@@ -229,4 +230,46 @@ public class ListingController {
     }
     return ResponseEntity.ok(filteredListingsPage);
   }
+
+  /**
+   * Marks a listing as sold.
+   *
+   * @param listingId the ID of the listing to mark as sold
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @Operation(summary = "Mark listing as sold", description = "Marks a listing as sold")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Listing sold and a SaleResponse returned"),
+      @ApiResponse(responseCode = "404", description = "Listing not found"),
+  })
+  @PutMapping("/sell/{listingId}")
+  public ResponseEntity<?> markListingAsSold(@PathVariable long listingId) {
+    logger.info("Marking listing with ID {} as sold", listingId);
+    SaleResponse saleResponse = listingService.markListingAsSold(listingId);
+    logger.info("Listing with ID {} marked as sold", listingId);
+    return ResponseEntity.ok(saleResponse);
+  }
+
+  /**
+   * Marks a listing as archived.
+   *
+   * @param listingId the ID of the listing to mark as archived
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @Operation(summary = "Mark listing as archived", description = "Marks a listing as archived")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Listing archived successfully"),
+      @ApiResponse(responseCode = "404", description = "Listing not found")
+  })
+  @PutMapping("/archive/{listingId}")
+  public ResponseEntity<?> markListingAsArchived(@PathVariable long listingId) {
+    logger.info("Marking listing with ID {} as archived", listingId);
+    listingService.markListingAsArchived(listingId);
+    logger.info("Listing with ID {} marked as archived", listingId);
+    return ResponseEntity.noContent().build();
+  }
+
+
+
+
 }

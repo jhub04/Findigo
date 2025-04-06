@@ -25,13 +25,10 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.AdminUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
-import stud.ntnu.no.idatt2105.Findigo.repository.FavoriteListingsRepository;
+import stud.ntnu.no.idatt2105.Findigo.repository.*;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
-import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
-import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
-import stud.ntnu.no.idatt2105.Findigo.repository.UserRolesRepository;
 
 import java.time.Duration;
 import java.util.List;
@@ -56,6 +53,7 @@ public class UserService {
   private final SecurityUtil securityUtil;
   private final UserMapper userMapper;
   private final ListingMapper listingMapper;
+  private final SaleRepository saleRepository;
 
   private static final Logger logger = LogManager.getLogger(UserService.class);
 
@@ -205,9 +203,23 @@ public class UserService {
    * @return list of listing responses
    */
   @Transactional
-  public List<ListingResponse> getMyListings() {
+  public List<ListingResponse> getMyActiveListings() {
+    return getMyListingWithStatus(ListingStatus.ACTIVE);
+  }
+
+  public List<ListingResponse> getMyListingWithStatus(ListingStatus listingStatus) {
     User currentUser = securityUtil.getCurrentUser();
-    return getListingsUtil(currentUser);
+
+    List<Listing> allMyListings = currentUser.getListings();
+
+    List<Listing> filteredListings = allMyListings
+        .stream()
+        .filter(listing -> listing.getListingStatus() == listingStatus)
+        .toList();
+
+    return filteredListings.stream()
+        .map(listingMapper::toDto)
+        .toList();
   }
 
   /**
@@ -358,5 +370,13 @@ public class UserService {
             .map(FavoriteListings::getListing)
             .map(listingMapper::toDto)
             .toList();
+  }
+
+  public List<ListingResponse> getMyArchivedListings() {
+    return getMyListingWithStatus(ListingStatus.ARCHIVED);
+  }
+
+  public List<ListingResponse> getMySoldListings() {
+    return getMyListingWithStatus(ListingStatus.SOLD);
   }
 }
