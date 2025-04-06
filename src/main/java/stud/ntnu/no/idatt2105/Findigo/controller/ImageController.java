@@ -38,14 +38,14 @@ public class ImageController {
    */
   @Operation(summary = "Upload an image to a listing", description = "Uploads an image to a listing.")
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "Image uploaded successfully, returning the number of images in the listing"),
-          @ApiResponse(responseCode = "404", description = "Listing not found"),
-          @ApiResponse(responseCode = "500", description = "Image upload failed")
+      @ApiResponse(responseCode = "200", description = "Image uploaded successfully, returning the number of images in the listing"),
+      @ApiResponse(responseCode = "404", description = "Listing not found"),
+      @ApiResponse(responseCode = "500", description = "Image upload failed")
   })
   @PostMapping("/upload/{listingId}")
   public ResponseEntity<?> uploadImageToListing(
-          @Parameter(description = "The ID of the listing to upload the image to.", example = "1") @PathVariable Long listingId,
-          @RequestParam("file") MultipartFile file) {
+      @Parameter(description = "The ID of the listing to upload the image to.", example = "1") @PathVariable Long listingId,
+      @RequestParam("file") MultipartFile file) {
     logger.info("Uploading file '{}' to listing with ID {}", file.getOriginalFilename(), listingId);
     int numberOfImages = imageService.uploadImageToListing(listingId, file);
     logger.info("File '{}' successfully uploaded to listing with ID {}", file.getOriginalFilename(), listingId);
@@ -61,18 +61,41 @@ public class ImageController {
    */
   @Operation(summary = "Download an image from a listing", description = "Downloads a specific image from a listing given its index and listing ID.")
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "200", description = "Image successfully downloaded"),
-          @ApiResponse(responseCode = "404", description = "Listing not found"),
-          @ApiResponse(responseCode = "400", description = "Image index out of bounds"),
-          @ApiResponse(responseCode = "500", description = "Image download failed")
+      @ApiResponse(responseCode = "200", description = "Image successfully downloaded"),
+      @ApiResponse(responseCode = "404", description = "Listing not found"),
+      @ApiResponse(responseCode = "400", description = "Image index out of bounds"),
+      @ApiResponse(responseCode = "500", description = "Image download failed")
   })
   @GetMapping("/download/{listingId}/{imageIndex}")
   public ResponseEntity<?> getImagesFromListing(
-          @Parameter(description = "The ID of the listing to download the image from.", example = "1") @PathVariable Long listingId,
-          @Parameter(description = "The index of the image to download", example = "0") @PathVariable int imageIndex) {
+      @Parameter(description = "The ID of the listing to download the image from.", example = "1") @PathVariable Long listingId,
+      @Parameter(description = "The index of the image to download", example = "0") @PathVariable int imageIndex) {
     logger.info("Downloading image at index {} from listing with ID {}", imageIndex, listingId);
     Resource image = imageService.downloadImageFromListing(listingId, imageIndex);
     logger.info("Image at index {} from listing with ID {} successfully downloaded", imageIndex, listingId);
     return ResponseEntity.ok(image);
+  }
+
+  /**
+   * Deletes an image from a listing.
+   *
+   * @param listingId  The ID of the listing.
+   * @param imageIndex The index of the image to delete.
+   * @return A response entity with the number of images remaining in the listing.
+   */
+  @Operation(summary = "Delete an image from a listing", description = "Deletes a specific image from a listing given its index and listing ID.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Image successfully deleted, returning the number of images remaining in the listing"),
+      @ApiResponse(responseCode = "400", description = "Image index out of bounds"),
+      @ApiResponse(responseCode = "404", description = "Listing not found"),
+      @ApiResponse(responseCode = "500", description = "Image deletion failed")
+  })
+  @DeleteMapping("/delete/{listingId}/{imageIndex}")
+  public ResponseEntity<?> deleteImageFromListing(
+      @PathVariable Long listingId, @PathVariable int imageIndex) {
+    logger.info("Deleting image at index {} from listing with ID {}", imageIndex, listingId);
+    int numberOfImages = imageService.deleteImageFromListing(listingId, imageIndex);
+    logger.info("Image at index {} from listing with ID {} successfully deleted", imageIndex, listingId);
+    return ResponseEntity.ok(numberOfImages);
   }
 }

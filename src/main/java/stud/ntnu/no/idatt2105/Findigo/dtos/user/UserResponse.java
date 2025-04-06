@@ -36,7 +36,7 @@ public class UserResponse {
    * The phone number of the user.
    */
   @Schema(description = "Phone number of the user", example = "12345678")
-  private Long phoneNumber;
+  private String phoneNumber;
 
   /**
    * The list of listings associated with the user.

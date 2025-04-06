@@ -65,22 +65,24 @@ public class ListingAttributeMapper {
    * fetching necessary entities from the database.
    *
    * @param listingAttribute the request DTO containing the attribute ID and value
-   * @param listingId the ID of the listing to associate
+   * @param listing the listing to associate
    * @return a new {@link ListingAttribute} entity
    * @throws NoSuchElementException if the attribute or listing cannot be found
    */
-  public ListingAttribute fromRequestToEntity(ListingAttributeRequest listingAttribute, long listingId) {
-    logger.debug("Mapping ListingAttributeRequest to entity for listing id {}", listingId);
-
+  public ListingAttribute fromRequestToEntity(ListingAttributeRequest listingAttribute, Listing listing) {
     Attribute attribute = attributeRepository.findById(listingAttribute.getAttributeId())
             .orElseThrow(() -> new NoSuchElementException("No attribute with id " + listingAttribute.getAttributeId()));
 
-    Listing listing = listingRepository.findById(listingId)
-            .orElseThrow(() -> new NoSuchElementException("No listing with id " + listingId));
+    logger.info("Creating ListingAttribute: attributeId={}, attributeName={}, value={}, listingId={}",
+            attribute.getId(),
+            attribute.getAttributeName(),
+            listingAttribute.getValue(),
+            listing.getId());
 
     return new ListingAttribute()
             .setAttribute(attribute)
             .setListing(listing)
             .setAttributeValue(listingAttribute.getValue());
   }
+
 }

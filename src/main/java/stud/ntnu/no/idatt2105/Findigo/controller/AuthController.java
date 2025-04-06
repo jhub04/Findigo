@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthRequest;
-import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.service.UserService;
 
 import java.util.Map;
@@ -45,7 +44,7 @@ public class AuthController {
           @ApiResponse(responseCode = "409", description = "User with the given username already exists")
   })
   @PostMapping("/register")
-  public ResponseEntity<String> register(@RequestBody @Validated RegisterRequest registerRequest) {
+  public ResponseEntity<String> register(@RequestBody @Validated AuthRequest registerRequest) {
     logger.info("Auth: Attempting to register user with username '{}'", registerRequest.getUsername());
     String registerStatus = userService.register(registerRequest);
     logger.info("Auth: User registered successfully with username '{}'", registerRequest.getUsername());

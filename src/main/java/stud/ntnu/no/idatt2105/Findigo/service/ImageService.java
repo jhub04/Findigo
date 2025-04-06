@@ -120,4 +120,27 @@ public class ImageService {
       throw new EntityOperationException(CustomErrorMessage.IMAGE_DOWNLOAD_FAILED);
     }
   }
+
+  public int deleteImageFromListing(long listingId, int imageIndex) {
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    List<ListingImageUrls> listingImageUrls = new ArrayList<>(listingImageRepository.findByListingId(listingId));
+
+    if (imageIndex < 0 || imageIndex >= listingImageUrls.size()) {
+      logger.warn("Invalid image index {} for listing ID {}. Total images: {}", imageIndex, listingId, listingImageUrls.size());
+      throw new IllegalArgumentException("Image index cannot be negative or greater than the amount of images (" + listingImageUrls.size() + "), imageIndex is " + imageIndex);
+    }
+
+    try {
+      Path imagePath = Paths.get(listingImageUrls.get(imageIndex).getImageUrl());
+      Files.deleteIfExists(imagePath);
+      logger.info("Deleted image at index {} for listing ID {}", imageIndex, listingId);
+    } catch (IOException e) {
+      logger.error("Failed to delete image for listing ID {}", listingId, e);
+      throw new EntityOperationException(CustomErrorMessage.IMAGE_DELETE_FAILED);
+    }
+
+    return listingImageRepository.findByListingId(listingId).size();
+  }
 }

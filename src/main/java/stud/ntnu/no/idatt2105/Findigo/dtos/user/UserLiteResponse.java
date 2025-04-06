@@ -34,5 +34,5 @@ public class UserLiteResponse {
    * The phone number of the user.
    */
   @Schema(description = "Phone number of the user", example = "12345678")
-  private Long phoneNumber;
+  private String phoneNumber;
 }
