@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +18,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.auth.AuthResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.auth.RegisterRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.ListingMapper;
+import stud.ntnu.no.idatt2105.Findigo.dtos.user.MyUserRequest;
 import stud.ntnu.no.idatt2105.Findigo.entities.FavoriteListings;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.UserMapper;
@@ -141,7 +141,7 @@ public class UserService {
    *
    * @param request the new user details
    */
-  public void editMyUserDetails(UserRequest request) {
+  public void editMyUserDetails(MyUserRequest request) {
     User currentUser = securityUtil.getCurrentUser();
 
     if (!currentUser.getUsername().equals(request.getUsername()) &&
