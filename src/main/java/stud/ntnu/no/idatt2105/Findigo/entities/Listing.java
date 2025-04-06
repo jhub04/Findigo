@@ -83,6 +83,10 @@ public class Listing {
   @Column(name = "date_created", updatable = false)
   private Date dateCreated;
 
+  @Column(name = "listing_status")
+  @Enumerated(EnumType.STRING)
+  private ListingStatus listingStatus = ListingStatus.ACTIVE;
+
   /**
    * The category this listing belongs to.
    */
