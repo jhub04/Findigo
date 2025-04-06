@@ -212,10 +212,13 @@ public class ListingService {
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
     User currentUser = securityUtil.getCurrentUser();
 
-    List<Listing> listingsToFilter = filterListingsRequest.getQuery() != null
-            ? listingRepository.findByCategoryIdAndUser_IdNot(filterListingsRequest.getCategoryId(),
-        currentUser.getId())
-            : listingRepository.findAllByUser_IdNot(currentUser.getId());
+    List<Listing> listingsToFilter;
+    if (filterListingsRequest.getCategoryId() != null) {
+      listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNot(
+          filterListingsRequest.getCategoryId(), currentUser.getId());
+    } else {
+      listingsToFilter = listingRepository.findAllByUser_IdNot(currentUser.getId());
+    }
 
     Stream<Listing> stream = listingsToFilter.stream();
 
