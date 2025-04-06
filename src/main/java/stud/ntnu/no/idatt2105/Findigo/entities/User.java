@@ -66,7 +66,7 @@ public class User implements UserDetails {
    * Phone number of the user.
    */
   @Column
-  private Long phoneNumber;
+  private String phoneNumber;
 
   /**
    * List of listings created by the user.

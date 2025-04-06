@@ -158,6 +158,7 @@ public class UserService {
 
     currentUser.setUsername(request.getUsername());
     currentUser.setPassword(passwordEncoder.encode(request.getPassword()));
+    currentUser.setPhoneNumber(request.getPhoneNumber());
 
     userRepository.save(currentUser);
     logger.info("User ID {} details updated", currentUser.getId());
@@ -178,6 +179,7 @@ public class UserService {
     }
 
     user.setUsername(request.getUsername());
+    user.setPhoneNumber(request.getPhoneNumber());
 
     if (request.getPassword() != null && !request.getPassword().isBlank()) {
       user.setPassword(passwordEncoder.encode(request.getPassword()));

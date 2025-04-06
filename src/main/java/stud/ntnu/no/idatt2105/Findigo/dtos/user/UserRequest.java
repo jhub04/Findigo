@@ -42,7 +42,7 @@ public class UserRequest {
    */
   @NotNull(message = "Phone number cannot be null")
   @Schema(description = "The phone number of the user", example = "12345678")
-  private Long phoneNumber;
+  private String phoneNumber;
 
   /**
    * The set of roles assigned to the user.

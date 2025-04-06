@@ -21,7 +21,7 @@ public class MyUserRequest {
   @Schema(description = "The password of the user", example = "securePassword123")
   private String password;
 
-  @NotNull(message = "Phone number cannot be null")
+  @NotBlank(message = "Phone number cannot be null")
   @Schema(description = "The phone number of the user", example = "12345678")
-  private Long phoneNumber;
+  private String phoneNumber;
 }
