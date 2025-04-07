@@ -154,6 +154,7 @@ public class ImageService {
     try {
       Path imagePath = Paths.get(listingImageUrls.get(imageIndex).getImageUrl());
       Files.deleteIfExists(imagePath);
+      listingImageRepository.delete(listingImageUrls.get(imageIndex));
       logger.info("Deleted image at index {} for listing ID {}", imageIndex, listingId);
     } catch (IOException e) {
       logger.error("Failed to delete image for listing ID {}", listingId, e);
