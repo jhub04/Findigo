@@ -171,6 +171,7 @@ public class UserController {
   @Operation(summary = "Get sold listings", description = "Fetches all sold listings created by the current user.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successfully fetched user's listings")
+
   })
   @GetMapping("/me/soldListings")
   public ResponseEntity<List<ListingResponse>> getMySoldListings() {
