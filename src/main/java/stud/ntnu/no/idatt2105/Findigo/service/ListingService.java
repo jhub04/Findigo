@@ -369,4 +369,33 @@ public class ListingService {
     logger.info("Listing ID {} marked as archived", listingId);
   }
 
+  /**
+   * Marks a listing as active.
+   *
+   * @param listingId The ID of the listing to mark as active.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
+   * @throws IllegalStateException if the listing is already active or sold.
+   */
+  public void markListingAsActive(long listingId) {
+    Listing activeListing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    if (!securityUtil.isListingOwner(activeListing)) {
+      logger.warn("Access denied: User does not own listing ID {}", listingId);
+      throw new AccessDeniedException("You do not own this listing");
+    }
+
+    if (activeListing.getListingStatus() == ListingStatus.ACTIVE || activeListing.getListingStatus() == ListingStatus.SOLD) {
+      logger.warn("Listing ID {} is already active or sold", listingId);
+      throw new IllegalStateException("Listing is already active or sold");
+    }
+
+    activeListing.setListingStatus(ListingStatus.ACTIVE);
+    listingRepository.save(activeListing);
+
+    logger.info("Listing ID {} marked as active", listingId);
+  }
+
+
 }

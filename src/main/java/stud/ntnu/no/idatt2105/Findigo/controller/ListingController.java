@@ -269,6 +269,27 @@ public class ListingController {
     return ResponseEntity.noContent().build();
   }
 
+  /**
+   * Marks a listing as active.
+   *
+   * @param listingId the ID of the listing to mark as active
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @Operation(summary = "Mark listing as active", description = "Marks a listing as active")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Listing activated successfully"),
+      @ApiResponse(responseCode = "404", description = "Listing not found")
+  })
+  @PutMapping("/activate/{listingId}")
+  public ResponseEntity<?> markListingAsActive(@PathVariable long listingId) {
+    logger.info("Marking listing with ID {} as active", listingId);
+    listingService.markListingAsActive(listingId);
+    logger.info("Listing with ID {} marked as active", listingId);
+    return ResponseEntity.noContent().build();
+  }
+
+
+
 
 
 
