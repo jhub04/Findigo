@@ -164,7 +164,7 @@ public class ImageServiceTest {
 
   @Test
   public void testUploadImageInvalidFilename() {
-    MultipartFile file = new MockMultipartFile("file?", "tes?t.jpg", "image/jpeg", "test".getBytes());
+    MultipartFile file = new MockMultipartFile("file?/", "tes/?t.jpg", "image/jpeg", "test".getBytes());
     assertThrows(IllegalArgumentException.class, () -> {
       imageService.uploadImageToListing(listing.getId(), file);;
     });
