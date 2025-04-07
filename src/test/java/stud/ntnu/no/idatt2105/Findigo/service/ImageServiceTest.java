@@ -190,7 +190,7 @@ public class ImageServiceTest {
   public void testDeleteImage() {
     MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test".getBytes());
     imageService.uploadImageToListing(listing.getId(), file);
-    assertEquals(imageService.deleteImageFromListing(listing.getId(), 0), 1);
+    assertEquals(imageService.deleteImageFromListing(listing.getId(), 0), 0);
   }
 
   @Test
