@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import stud.ntnu.no.idatt2105.Findigo.repository.SaleRepository;
 
 /**
  * Service class for managing listings.
@@ -47,6 +48,7 @@ public class ListingService {
   private final SecurityUtil securityUtil;
   private final RecommendationService recommendationService;
   private final ListingMapper listingMapper;
+  private final SaleRepository saleRepository;
 
   /**
    * Adds a new listing for the currently authenticated user.
@@ -336,6 +338,8 @@ public class ListingService {
     Sale sale = new Sale()
         .setListing(soldListing)
         .setSalePrice(soldListing.getPrice());
+
+    saleRepository.save(sale);
 
     return SaleMapper.toDto(sale);
   }
