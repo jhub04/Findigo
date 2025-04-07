@@ -94,6 +94,12 @@ public class User implements UserDetails {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   private Set<UserRoles> userRoles = new HashSet<>();
 
+  @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Message> sentMessages = new ArrayList<>();
+
+  @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Message> receivedMessages = new ArrayList<>();
+
   /**
    * Returns the authorities granted to the user.
    * Converts {@link Role} enums to Spring Security's {@link GrantedAuthority}.
