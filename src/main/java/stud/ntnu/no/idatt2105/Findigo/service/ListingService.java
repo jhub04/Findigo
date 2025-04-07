@@ -146,7 +146,9 @@ public class ListingService {
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
     logger.info("category got{}", category);
 
-    listing.getListingAttributes().clear();
+    logger.info("listing attributes {}", listing.getListingAttributes());
+    listing.getListingAttributes().clear();//TODO this doesnt clear?
+    logger.info("listing attributes {}", listing.getListingAttributes());
 
     listing.setBriefDescription(request.getBriefDescription())
         .setFullDescription(request.getFullDescription())
