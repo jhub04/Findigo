@@ -65,6 +65,11 @@ public class ImageService {
       throw new AccessDeniedException("Current logged in user (" + currentUser.getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
     }
 
+    if (file == null || file.isEmpty()) {
+      logger.warn("File is null or empty for listing ID {}", listingId);
+      throw new IllegalArgumentException("File cannot be null or empty");
+    }
+
     try {
       Path directoryPath = Paths.get(picturesPath + listingId + "/");
       Files.createDirectories(directoryPath);
@@ -81,7 +86,7 @@ public class ImageService {
       logger.info("Image uploaded successfully for listing ID {}: {}", listingId, currentImagePath);
 
     } catch (IOException e) {
-      logger.error("Failed to upload image for listing ID {}", listingId, e);
+      logger.error("Failed to upload image for listing ID {}, error {}", listingId, e);
       throw new EntityOperationException(CustomErrorMessage.IMAGE_UPLOAD_FAILED);
     }
 
@@ -121,10 +126,24 @@ public class ImageService {
     }
   }
 
+  /**
+   * Deletes a specific image from a listing by its index.
+   *
+   * @param listingId the ID of the listing
+   * @param imageIndex the index of the image to delete
+   * @return the number of images remaining in the listing
+   * @throws IllegalArgumentException if the image index is invalid
+   * @throws EntityOperationException if the image could not be deleted
+   * @throws AppEntityNotFoundException if the listing does not exist
+   */
   public int deleteImageFromListing(long listingId, int imageIndex) {
     Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
+    if (!securityUtil.isListingOwner(listing)) {
+      logger.warn("Access denied: User {} attempted to delete image from listing owned by user {}", userService.getCurrentUser().getId(), listing.getUser().getId());
+      throw new AccessDeniedException("Current logged in user (" + userService.getCurrentUser().getId() + ") does not match user (" + listing.getUser().getId() + ") of listing with ID " + listingId);
+    }
     List<ListingImageUrls> listingImageUrls = new ArrayList<>(listingImageRepository.findByListingId(listingId));
 
     if (imageIndex < 0 || imageIndex >= listingImageUrls.size()) {

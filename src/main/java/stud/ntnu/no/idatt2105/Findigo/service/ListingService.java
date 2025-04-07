@@ -57,7 +57,6 @@ public class ListingService {
    */
   @Transactional
   public ListingResponse addListing(ListingRequest req) {
-    //GOOD
     User currentUser = securityUtil.getCurrentUser();
     logger.info("Creating listing for user ID {}", currentUser.getId());
 
