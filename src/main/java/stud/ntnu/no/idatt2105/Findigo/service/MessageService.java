@@ -119,9 +119,10 @@ public class MessageService {
    * @return A list of {@link MessageResponse} objects representing the newest messages.
    * @throws AccessDeniedException if the user ID does not match the authenticated user.
    */
+  @Transactional
   public List<MessageResponse> getNewestMessages(long userID) {
-    User currentUser = userService.getUserById(userID);
-
+    User currentUser = userRepository.findByUsername(getAuthenticatedUsername())
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
     if (!currentUser.getId().equals(userID)) {
       logger.warn("Access denied: Requested userId {} does not match current user {}", userID, currentUser.getId());
       throw new AccessDeniedException("Requested userId (" + userID + ") does not match current user (" + currentUser.getId() + ")");

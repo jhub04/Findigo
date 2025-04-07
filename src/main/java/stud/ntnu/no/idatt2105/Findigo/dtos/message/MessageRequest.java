@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Data Transfer Object (DTO) for sending a message request.
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @AllArgsConstructor
+@Accessors(chain = true)
 @NoArgsConstructor
 @Schema(description = "DTO for sending a message from one user to another.")
 public class MessageRequest {
