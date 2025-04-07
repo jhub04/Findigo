@@ -379,4 +379,9 @@ public class UserService {
   public List<ListingResponse> getMySoldListings() {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
+
+  public User getUserByUsername(String username) {
+    return userRepository.findByUsername(username)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+  }
 }

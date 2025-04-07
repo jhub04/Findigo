@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * DTO for authentication request.
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 @Schema(description = "Request object containing user credentials for authentication.")
 public class AuthRequest {
 
