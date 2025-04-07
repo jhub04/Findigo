@@ -20,6 +20,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingImageRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
@@ -165,7 +166,7 @@ public class ImageServiceTest {
   @Test
   public void testUploadImageInvalidFilename() {
     MultipartFile file = new MockMultipartFile("file?/", "tes/?t.jpg", "image/jpeg", "test".getBytes());
-    assertThrows(IllegalArgumentException.class, () -> {
+    assertThrows(EntityOperationException.class, () -> {
       imageService.uploadImageToListing(listing.getId(), file);;
     });
 

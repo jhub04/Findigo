@@ -85,7 +85,7 @@ public class ImageService {
 
       logger.info("Image uploaded successfully for listing ID {}: {}", listingId, currentImagePath);
 
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.error("Failed to upload image for listing ID {}, error {}", listingId, e);
       throw new EntityOperationException(CustomErrorMessage.IMAGE_UPLOAD_FAILED);
     }
