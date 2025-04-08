@@ -21,20 +21,10 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Copy JAR to VM
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
-          source: target/*.jar
-          target: /home/student/apps/backend/Findigo/target
+      - name: Copy JAR locally (on VM)
+        run: |
+          cp target/*.jar /home/student/apps/backend/Findigo/target
 
-      - name: Restart backend service via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_KEY }}
-          script: |
-            sudo systemctl restart backend
+      - name: Restart backend service
+        run: |
+          sudo systemctl restart backend
