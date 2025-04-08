@@ -9,6 +9,12 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Checkout latest master with full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: master
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -20,10 +26,12 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -DskipTests
+        working-directory: ~/actions-runner/_work/Findigo/Findigo
 
-      - name: Copy JAR locally (on VM)
-        run: |
-          cp target/*.jar /home/student/apps/backend/Findigo/target
+      - name: Copy JAR to app directory
+        run: cp target/*.jar /home/student/apps/backend/Findigo/target/
+        working-directory: ~/actions-runner/_work/Findigo/Findigo
+
 
       - name: Restart backend service
         run: |
