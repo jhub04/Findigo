@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -103,10 +104,9 @@ public class User implements UserDetails {
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     System.out.println("Getting authorities for user: " + username);
-    List<SimpleGrantedAuthority> authorities = userRoles.stream()
+    return userRoles.stream()
             .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
             .toList();
-    return authorities;
   }
 
   /**
