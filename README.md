@@ -42,7 +42,7 @@ More ...
 <img width="766" alt="Screenshot 2025-04-06 at 19 17 28" src="https://github.com/user-attachments/assets/65784c97-7c08-44ab-b9ed-95d9f4732622" />
 
 
-## Running the application in development 
+## Running the Application for Development 
 #### Prerequisites 
 - JDK 21
 - Maven 
@@ -60,4 +60,48 @@ cd Findigo
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
+## Deployment
+Findigo is deployed at https://idatt2105-09.idi.ntnu.no, hosted on a dedicated virtual machine within the NTNU network. The application will remain online until the administrator at NTNU shuts it down.
+
+#### Hosting Environment
+The project is deployed on an Ubuntu-based virtual machine using the following stack:
+- Backend: Spring Boot (Java 21, Maven)
+- Frontend: Vue 3 (Vite)
+- Database: MySQL 8
+- Web Server / Reverse Proxy: Nginx
+- Deployment Automation: GitHub Actions (CI/CD)
+
+#### Setup Process
+1. Connected to the Virtual Machine via ssh
+2. Installed Required Dependencies
+    - OpenJDK 21
+    - Maven
+    - Node.js (v20+)
+    - MySQL Server
+    - Nginx
+3. Cloned the repositories using a GitHub personal access token [(PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+
+#### Backend Deployment
+1. Built the application into a self-contained JAR
+2. Ran the JAR manually
+3. Set up a systemd service for automatic startup and easier management
+
+#### Frontend Deployment
+1. Installed required dependencies
+2. Built the project
+3. Deployed the static build files to Nginx's root directory
+
+#### Nginx Configuration
+Nginx was configured to:
+- Serve the built static files from `/var/www/html`
+- Reverse proxy `/api/` requests to the Spring Boot backend running on `https://localhost:8443`
+- Support HTTPS (via the backend's self-signed SSL keystore)
+
+#### Spring Profiles
+The backend uses Spring profiles to separate dev and prod configurations:
+
+- `application-dev.properties` is used during local development (e.g., using `mvn spring-boot:run -Dspring-boot.run.profiles=dev`)
+- `application-prod.properties` is used on the VM server
+- Common config is stored in `application.properties`
 
