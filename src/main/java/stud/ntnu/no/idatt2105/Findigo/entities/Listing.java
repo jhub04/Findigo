@@ -1,10 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -19,7 +16,8 @@ import java.util.List;
  * and can contain custom attributes and images.
  * </p>
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Accessors(chain = true)
 @NoArgsConstructor

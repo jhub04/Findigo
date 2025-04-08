@@ -39,6 +39,7 @@ public class CategoryService {
    *
    * @return a list of {@link CategoryResponse} objects representing all available categories
    */
+  @Transactional
   public List<CategoryResponse> getAllCategories() {
     logger.info("Fetching all categories");
     List<CategoryResponse> categories = categoryRepository.findAll().stream()

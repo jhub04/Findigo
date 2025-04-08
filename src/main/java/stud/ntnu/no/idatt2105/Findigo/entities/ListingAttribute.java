@@ -1,9 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 /**
@@ -12,7 +10,8 @@ import lombok.experimental.Accessors;
  * Stores the specific value of an attribute for a given listing.
  * </p>
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Accessors(chain = true)
 @AllArgsConstructor

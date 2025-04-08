@@ -92,11 +92,21 @@ public class ListingController {
   @GetMapping("/category/{categoryId}")
   public ResponseEntity<List<ListingResponse>> getListingsByCategory(
           @Parameter(description = "The ID of the category", example = "1") @PathVariable Long categoryId) {
-    //TODO paginate... kalles denne på i frontend når man henter lisitngs i kategori på main page?
+    //TODO paginate
     logger.info("Fetching listings in category with ID {}", categoryId);
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
     logger.info("Fetched {} listings in category with ID {}", listings.size(), categoryId);
     return ResponseEntity.ok(listings);
+  }
+
+  @GetMapping("category/{categoryId}/{pageNumber}")
+  public ResponseEntity<Page<ListingResponse>> getListingsByCategoryPaginated(
+          @Parameter(description = "The ID of the category", example = "1") @PathVariable Long categoryId,
+          @Parameter(description = "The page number to retrieve") @PathVariable int pageNumber) {
+    logger.info("Fetching listings in category with ID {}", categoryId);
+    Page<ListingResponse> listingsPage = listingService.getListingsInCategoryPaginated(categoryId, pageNumber - 1, pageSize);
+    logger.info("Fetched {} listings in category with ID {}", listingsPage.getContent().size(), categoryId);
+    return ResponseEntity.ok(listingsPage);
   }
 
   /**
@@ -268,6 +278,27 @@ public class ListingController {
     logger.info("Listing with ID {} marked as archived", listingId);
     return ResponseEntity.noContent().build();
   }
+
+  /**
+   * Marks a listing as active.
+   *
+   * @param listingId the ID of the listing to mark as active
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @Operation(summary = "Mark listing as active", description = "Marks a listing as active")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Listing activated successfully"),
+      @ApiResponse(responseCode = "404", description = "Listing not found")
+  })
+  @PutMapping("/activate/{listingId}")
+  public ResponseEntity<?> markListingAsActive(@PathVariable long listingId) {
+    logger.info("Marking listing with ID {} as active", listingId);
+    listingService.markListingAsActive(listingId);
+    logger.info("Listing with ID {} marked as active", listingId);
+    return ResponseEntity.noContent().build();
+  }
+
+
 
 
 

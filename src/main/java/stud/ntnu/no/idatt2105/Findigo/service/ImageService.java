@@ -3,6 +3,7 @@ package stud.ntnu.no.idatt2105.Findigo.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,7 +40,8 @@ public class ImageService {
   /**
    * The base path where listing images are stored.
    */
-  private final String picturesPath = "src/main/resources/pictures/listing";
+  @Value("${picturesPath}")
+  private String picturesPath;
   private final ListingRepository listingRepository;
   private final UserService userService;
   private final SecurityUtil securityUtil;
@@ -154,6 +156,7 @@ public class ImageService {
     try {
       Path imagePath = Paths.get(listingImageUrls.get(imageIndex).getImageUrl());
       Files.deleteIfExists(imagePath);
+      listingImageRepository.delete(listingImageUrls.get(imageIndex));
       logger.info("Deleted image at index {} for listing ID {}", imageIndex, listingId);
     } catch (IOException e) {
       logger.error("Failed to delete image for listing ID {}", listingId, e);

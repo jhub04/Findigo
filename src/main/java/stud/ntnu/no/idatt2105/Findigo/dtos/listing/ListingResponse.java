@@ -11,6 +11,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 
 import java.util.Date;
 import java.util.List;
+import stud.ntnu.no.idatt2105.Findigo.entities.ListingStatus;
 
 /**
  * Data Transfer Object (DTO) representing a listing response.
@@ -79,6 +80,12 @@ public class ListingResponse {
    */
   @Schema(description = "Creation date of the listing (ISO 8601 format)", example = "2024-04-05T12:00:00Z")
   private Date dateCreated;
+
+  /**
+   * The status of the listing. Either ACTIVE, ARCHIVED or SOLD
+   */
+  @Schema(description = "Status of the listing", example = "ACTIVE")
+  private ListingStatus listingStatus;
 
   /**
    * The category associated with the listing.

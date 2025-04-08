@@ -26,6 +26,7 @@ import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
+import stud.ntnu.no.idatt2105.Findigo.repository.SaleRepository;
 
 /**
  * Service class for managing listings.
@@ -46,6 +47,7 @@ public class ListingService {
   private final SecurityUtil securityUtil;
   private final RecommendationService recommendationService;
   private final ListingMapper listingMapper;
+  private final SaleRepository saleRepository;
 
   /**
    * Adds a new listing for the currently authenticated user.
@@ -77,6 +79,7 @@ public class ListingService {
    * @return A list of {@link ListingResponse} objects containing listing details.
    * @throws NoSuchElementException if there are no listings associated with the given category.
    */
+  @Transactional
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
     logger.info("Fetching listings for category ID {}", categoryID);
 
@@ -86,10 +89,32 @@ public class ListingService {
   }
 
   /**
+   * Retrieves a paginated list of listings in a specific category.
+   *
+   *
+   * @param categoryID The category id of the category whose listings are to be retrieved.
+   * @param page The page number to retrieve.
+   * @param size The number of listings per page.
+   * @return A {@link Page} of {@link ListingResponse} objects containing listing details.
+   */
+  @Transactional
+  public Page<ListingResponse> getListingsInCategoryPaginated(Long categoryID, int page, int size) {
+    logger.info("Fetching listings for category ID {}", categoryID);
+
+    Page<Listing> listings = listingRepository.findListingsByCategoryIdAndListingStatus(
+        categoryID, ListingStatus.ACTIVE, PageRequest.of(page, size));
+
+    return new PageImpl<>(listings.getContent().stream()
+        .map(listingMapper::toDto)
+        .collect(Collectors.toList()), listings.getPageable(), listings.getTotalElements());
+  }
+
+  /**
    * Retrieves all listings excluding the current user's own listings.
    *
    * @return A list of {@link ListingResponse} objects.
    */
+  @Transactional
   public List<ListingResponse> getAllListings() {
     long currentUserId = securityUtil.getCurrentUser().getId();
     logger.info("Fetching all listings excluding user ID {}", currentUserId);
@@ -108,6 +133,7 @@ public class ListingService {
    * @return A {@link ListingResponse} of the listing.
    * @throws AppEntityNotFoundException if the listing does not exist.
    */
+  @Transactional
   public ListingResponse getListingById(Long id) {
     logger.info("Fetching listing by ID {}", id);
 
@@ -128,6 +154,7 @@ public class ListingService {
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    * @throws AccessDeniedException      if the current user does not own the listing.
    */
+  @Transactional
   public ListingResponse editMyListing(Long listingId, ListingRequest request) {
     logger.info("updating with request {}", request);
     Listing listing = listingRepository.findById(listingId)
@@ -143,7 +170,9 @@ public class ListingService {
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
     logger.info("category got{}", category);
 
+    logger.info("listing attributes {}", listing.getListingAttributes());
     listing.getListingAttributes().clear();
+    logger.info("listing attributes {}", listing.getListingAttributes());
 
     listing.setBriefDescription(request.getBriefDescription())
         .setFullDescription(request.getFullDescription())
@@ -183,6 +212,7 @@ public class ListingService {
    * @return A {@link ListingResponse} containing the updated details.
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    */
+  @Transactional
   public ListingResponse editListingAsAdmin(Long listingId, ListingRequest request) {
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
@@ -190,14 +220,20 @@ public class ListingService {
     Category category = categoryRepository.findById(request.getCategoryId())
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
+    listing.getListingAttributes().clear();
+
     listing.setBriefDescription(request.getBriefDescription())
         .setFullDescription(request.getFullDescription())
         .setLatitude(request.getLatitude())
         .setLongitude(request.getLongitude())
+        .setPrice(request.getPrice())
+        .setAddress(request.getAddress())
+        .setPostalCode(request.getPostalCode())
         .setCategory(category)
-        .setListingAttributes(request.getAttributes().stream()
-            .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
-            .toList());
+        .getListingAttributes().addAll(
+            request.getAttributes().stream()
+                .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
+                .toList());
 
     Listing updatedListing = listingRepository.save(listing);
 
@@ -254,6 +290,7 @@ public class ListingService {
    * @param filterListingsRequest The request containing filter criteria.
    * @return A {@link Page} of {@link ListingResponse} objects matching the filter criteria.
    */
+  @Transactional
   public Page<ListingResponse> getFilteredListings(int page, int size, FilterListingsRequest filterListingsRequest) {
     List<ListingResponse> filteredListings = getAllFilteredListings(filterListingsRequest);
 
@@ -274,6 +311,7 @@ public class ListingService {
    * @param filterListingsRequest The request containing filter criteria.
    * @return A list of {@link ListingResponse} objects matching the filter criteria.
    */
+  @Transactional
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
     User currentUser = securityUtil.getCurrentUser();
 
@@ -336,6 +374,8 @@ public class ListingService {
         .setListing(soldListing)
         .setSalePrice(soldListing.getPrice());
 
+    saleRepository.save(sale);
+
     return SaleMapper.toDto(sale);
   }
 
@@ -366,5 +406,34 @@ public class ListingService {
 
     logger.info("Listing ID {} marked as archived", listingId);
   }
+
+  /**
+   * Marks a listing as active.
+   *
+   * @param listingId The ID of the listing to mark as active.
+   * @throws AppEntityNotFoundException if the listing does not exist.
+   * @throws AccessDeniedException if the current user does not own the listing.
+   * @throws IllegalStateException if the listing is already active or sold.
+   */
+  public void markListingAsActive(long listingId) {
+    Listing activeListing = listingRepository.findById(listingId)
+        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    if (!securityUtil.isListingOwner(activeListing)) {
+      logger.warn("Access denied: User does not own listing ID {}", listingId);
+      throw new AccessDeniedException("You do not own this listing");
+    }
+
+    if (activeListing.getListingStatus() == ListingStatus.ACTIVE || activeListing.getListingStatus() == ListingStatus.SOLD) {
+      logger.warn("Listing ID {} is already active or sold", listingId);
+      throw new IllegalStateException("Listing is already active or sold");
+    }
+
+    activeListing.setListingStatus(ListingStatus.ACTIVE);
+    listingRepository.save(activeListing);
+
+    logger.info("Listing ID {} marked as active", listingId);
+  }
+
 
 }

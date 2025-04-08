@@ -35,8 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ActiveProfiles("test")
 public class ImageServiceTest {
   @Autowired
-  private ListingImageRepository listingImageRepository;
-  @Autowired
   private ImageService imageService;
   @Autowired
   private UserService userService;
@@ -44,8 +42,6 @@ public class ImageServiceTest {
   private ListingService listingService;
   @Autowired
   private CategoryService categoryService;
-  @Autowired
-  private ListingRepository listingRepository;
   @Autowired
   private UserRepository userRepository;
   @Autowired
@@ -190,7 +186,7 @@ public class ImageServiceTest {
   public void testDeleteImage() {
     MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test".getBytes());
     imageService.uploadImageToListing(listing.getId(), file);
-    assertEquals(imageService.deleteImageFromListing(listing.getId(), 0), 1);
+    assertEquals(imageService.deleteImageFromListing(listing.getId(), 0), 0);
   }
 
   @Test
