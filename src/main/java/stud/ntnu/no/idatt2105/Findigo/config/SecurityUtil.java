@@ -8,6 +8,7 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UnauthorizedOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 
 /**
@@ -47,9 +48,18 @@ public class SecurityUtil {
    *
    * @return {@code true} if the user has the ADMIN role, {@code false} otherwise
    */
-  public boolean isAdmin() {
+  private boolean isAdmin() {
     return getCurrentUser().getUserRoles().stream()
             .anyMatch(role -> role.getRole().toString().equals("ROLE_ADMIN"));
+  }
+
+  /**
+   * Throws exception if the current user is not an admin.
+   */
+  public void checkAdminAccess() {
+    if (!isAdmin()) {
+      throw new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION);
+    }
   }
 
   /**
