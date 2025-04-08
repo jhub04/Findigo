@@ -26,11 +26,12 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -DskipTests
-        working-directory: ~/actions-runner/_work/Findigo/Findigo
+        working-directory: /home/student/actions-runner/_work/Findigo/Findigo
 
       - name: Copy JAR to app directory
         run: cp target/*.jar /home/student/apps/backend/Findigo/target/
-        working-directory: ~/actions-runner/_work/Findigo/Findigo
+        working-directory: /home/student/actions-runner/_work/Findigo/Findigo
+
 
 
       - name: Restart backend service
