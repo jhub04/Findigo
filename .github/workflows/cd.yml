@@ -24,6 +24,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Copy keystore into resources before build
+        run: |
+          cp /home/student/apps/backend/Findigo/src/main/resources/keystore.jks src/main/resources/
+        working-directory: /home/student/actions-runner/_work/Findigo/Findigo
+
       - name: Build with Maven
         run: mvn clean package -DskipTests
         working-directory: /home/student/actions-runner/_work/Findigo/Findigo
