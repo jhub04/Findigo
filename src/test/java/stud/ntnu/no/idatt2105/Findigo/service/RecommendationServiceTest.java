@@ -46,8 +46,6 @@ public class RecommendationServiceTest {
   private CategoryService categoryService;
   private User user1;
   private User user2;
-  private User user3;
-  private User user4;
   private long category1Id;
   private ListingResponse listing;
   @Autowired
@@ -69,13 +67,6 @@ public class RecommendationServiceTest {
     AuthRequest registerRequest2 = new AuthRequest().setUsername("user2").setPassword("password123");
     userService.register(registerRequest2);
     user2 = userService.getUserByUsername("user2");
-
-    AuthRequest registerRequest3 = new AuthRequest().setUsername("user3").setPassword("password123");
-    userService.register(registerRequest3);
-    user3 = userService.getUserByUsername("user3");
-    AuthRequest registerRequest4 = new AuthRequest().setUsername("user4").setPassword("password123");
-    userService.register(registerRequest4);
-    user4 = userService.getUserByUsername("user4");
 
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
 

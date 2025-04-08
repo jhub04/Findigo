@@ -26,29 +26,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ActiveProfiles("test")
 public class MessageServiceTest {
   @Autowired
-  private ListingImageRepository listingImageRepository;
-  @Autowired
-  private ImageService imageService;
-  @Autowired
   private UserService userService;
-  @Autowired
-  private ListingService listingService;
-  @Autowired
-  private CategoryService categoryService;
-  @Autowired
-  private ListingRepository listingRepository;
   @Autowired
   private UserRepository userRepository;
   @Autowired
   private MessageRepository messageRepository;
   @Autowired
   private MessageService messageService;
-  private long category1Id;
-  private ListingResponse listing;
   private User user1;
   private User user2;
   private User user3;
   private User user4;
+
+  public MessageServiceTest() {
+  }
+
   @BeforeEach
   public void setUp() {
     messageRepository.deleteAll();

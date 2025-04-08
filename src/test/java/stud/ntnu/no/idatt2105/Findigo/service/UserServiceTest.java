@@ -37,11 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 public class UserServiceTest {
   @Autowired
-  private JWTUtil jwtUtil;
-  @Autowired
   private SaleRepository saleRepository;
-  @Autowired
-  private RecommendationService recommendationService;
   @Autowired
   private AttributeService attributeService;
   @Autowired
