@@ -6,6 +6,7 @@ target/
 /src/main/resources/pictures
 /src/main/resources/keystore.jks
 /src/main/resources/picturesTest
+/logs
 
 ### STS ###
 .apt_generated
