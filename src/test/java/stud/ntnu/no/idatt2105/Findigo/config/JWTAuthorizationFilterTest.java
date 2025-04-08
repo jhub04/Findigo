@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.test.context.ActiveProfiles;
 import stud.ntnu.no.idatt2105.Findigo.service.CustomUserDetailsService;
 
 import jakarta.servlet.FilterChain;
@@ -22,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@ActiveProfiles("test")
+@SpringBootTest
 public class JWTAuthorizationFilterTest {
 
   private JWTAuthorizationFilter jwtAuthorizationFilter;
