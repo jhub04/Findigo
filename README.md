@@ -42,12 +42,11 @@ More ...
 <img width="766" alt="Screenshot 2025-04-06 at 19 17 28" src="https://github.com/user-attachments/assets/65784c97-7c08-44ab-b9ed-95d9f4732622" />
 
 
-## Running the application (Uncomplete)
-NB! See [Findigo-Frontend](https://github.com/jhub04/Findigo-Frontend) for how to run the frontend
+## Running the application in development 
 #### Prerequisites 
 - JDK 21
 - Maven 
-- Docker
+- MySQL
 
 1. Clone the repository
 ```bash
@@ -57,8 +56,8 @@ git clone https://github.com/jhub04/Findigo.git
 ```bash
 cd Findigo
 ```
-3. Run the springboot executable
+3. Run the application with development configuration
 ```bash
-mvn spring-boot:run 
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
