@@ -25,4 +25,12 @@ public interface BrowseHistoryRepository extends JpaRepository<BrowseHistory, Lo
    * @return a list of {@link BrowseHistory} entries matching the criteria
    */
   List<BrowseHistory> findByUserAndCreatedAtAfter(User user, Date cutoffDate);
+
+  /**
+   * Retrieves all browse history entries for a given user.
+   *
+   * @param user the user whose browse history is to be retrieved
+   * @return a list of {@link BrowseHistory} entries for the specified user
+   */
+  List<BrowseHistory> findByUser(User user);
 }

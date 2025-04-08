@@ -112,6 +112,7 @@ public class UserService {
    *
    * @return list of user responses
    */
+  @Transactional
   public List<UserResponse> getAllUsers() {
     return userRepository.findAll().stream()
             .map(userMapper::toDTO)
@@ -135,6 +136,7 @@ public class UserService {
    * @param id the user ID
    * @return the user response DTO
    */
+  @Transactional()
   public UserResponse getUserDtoById(Long id) {
     User user = getUserById(id);
     return userMapper.toDTO(user);
@@ -145,6 +147,7 @@ public class UserService {
    *
    * @param request the new user details
    */
+  @Transactional
   public void editMyUserDetails(MyUserRequest request) {
     User currentUser = securityUtil.getCurrentUser();
 
@@ -152,6 +155,10 @@ public class UserService {
             userRepository.existsByUsername(request.getUsername())) {
       logger.error("Username '{}' already exists", request.getUsername());
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
+    }
+
+    if (request.getPassword() == null || request.getPassword().isBlank()) {
+      throw new IllegalArgumentException("Password cannot be null or empty");
     }
 
     currentUser.setUsername(request.getUsername());
@@ -228,6 +235,7 @@ public class UserService {
    * @param id the user ID
    * @return list of listing responses
    */
+  @Transactional
   public List<ListingResponse> getUserListings(Long id) {
     User user = getUserById(id);
     return getListingsUtil(user);
@@ -239,6 +247,7 @@ public class UserService {
    * @param listingId the listing ID
    * @return the listing response
    */
+  @Transactional
   public ListingResponse addFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
@@ -258,6 +267,7 @@ public class UserService {
    * @param listingId the listing ID
    * @return the listing response
    */
+  @Transactional
   public ListingResponse deleteFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
@@ -299,6 +309,7 @@ public class UserService {
    *
    * @return the user response DTO
    */
+  @Transactional
   public UserResponse getCurrentDtoUser() {
     return userMapper.toDTO(getCurrentUser());
   }
@@ -363,6 +374,7 @@ public class UserService {
    *
    * @return list of listing responses
    */
+  @Transactional
   public List<ListingResponse> getFavorites() {
     User currentUser = getCurrentUser();
 
@@ -372,10 +384,21 @@ public class UserService {
             .toList();
   }
 
+  /**
+   * Retrieves the current user's archived listings.
+   * @return list of listing responses
+   */
+  @Transactional
   public List<ListingResponse> getMyArchivedListings() {
     return getMyListingWithStatus(ListingStatus.ARCHIVED);
   }
 
+  /**
+   * Retrieves the current user's sold listings.
+   *
+   * @return list of listing responses
+   */
+  @Transactional
   public List<ListingResponse> getMySoldListings() {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
