@@ -31,6 +31,9 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyEx
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -112,6 +115,7 @@ public class UserService {
    *
    * @return list of user responses
    */
+  @Transactional
   public List<UserResponse> getAllUsers() {
     return userRepository.findAll().stream()
             .map(userMapper::toDTO)
@@ -135,6 +139,7 @@ public class UserService {
    * @param id the user ID
    * @return the user response DTO
    */
+  @Transactional()
   public UserResponse getUserDtoById(Long id) {
     User user = getUserById(id);
     return userMapper.toDTO(user);
@@ -145,6 +150,7 @@ public class UserService {
    *
    * @param request the new user details
    */
+  @Transactional
   public void editMyUserDetails(MyUserRequest request) {
     User currentUser = securityUtil.getCurrentUser();
 
@@ -152,6 +158,10 @@ public class UserService {
             userRepository.existsByUsername(request.getUsername())) {
       logger.error("Username '{}' already exists", request.getUsername());
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
+    }
+
+    if (request.getPassword() == null || request.getPassword().isBlank()) {
+      throw new IllegalArgumentException("Password cannot be null or empty");
     }
 
     currentUser.setUsername(request.getUsername());
@@ -228,6 +238,7 @@ public class UserService {
    * @param id the user ID
    * @return list of listing responses
    */
+  @Transactional
   public List<ListingResponse> getUserListings(Long id) {
     User user = getUserById(id);
     return getListingsUtil(user);
@@ -239,6 +250,7 @@ public class UserService {
    * @param listingId the listing ID
    * @return the listing response
    */
+  @Transactional
   public ListingResponse addFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
@@ -258,6 +270,7 @@ public class UserService {
    * @param listingId the listing ID
    * @return the listing response
    */
+  @Transactional
   public ListingResponse deleteFavorite(long listingId) {
     User currentUser = getCurrentUser();
     Listing listing = listingRepository.findById(listingId)
@@ -299,6 +312,7 @@ public class UserService {
    *
    * @return the user response DTO
    */
+  @Transactional
   public UserResponse getCurrentDtoUser() {
     return userMapper.toDTO(getCurrentUser());
   }
@@ -363,6 +377,7 @@ public class UserService {
    *
    * @return list of listing responses
    */
+  @Transactional
   public List<ListingResponse> getFavorites() {
     User currentUser = getCurrentUser();
 
@@ -372,10 +387,21 @@ public class UserService {
             .toList();
   }
 
+  /**
+   * Retrieves the current user's archived listings.
+   * @return list of listing responses
+   */
+  @Transactional
   public List<ListingResponse> getMyArchivedListings() {
     return getMyListingWithStatus(ListingStatus.ARCHIVED);
   }
 
+  /**
+   * Retrieves the current user's sold listings.
+   *
+   * @return list of listing responses
+   */
+  @Transactional
   public List<ListingResponse> getMySoldListings() {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
@@ -383,5 +409,34 @@ public class UserService {
   public User getUserByUsername(String username) {
     return userRepository.findByUsername(username)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+  }
+
+  /**
+   * Seeds test users into the database for e2e testing.
+   */
+  public void seedTestUsers() {
+    Instant fixedTime = Instant.parse("2023-01-01T00:00:00Z");
+
+    User user = new User();
+    user.setUsername("testuser");
+    user.setPassword(passwordEncoder.encode("1234"));
+    user.setPhoneNumber("12345678");
+    user.setCreatedAt(Date.from(fixedTime));
+    user.setUpdatedAt(Date.from(fixedTime));
+
+    UserRoles role = new UserRoles();
+    role.setUser(user);
+    role.setRole(Role.ROLE_USER);
+
+    user.getUserRoles().add(role);
+
+    userRepository.save(user);
+  }
+
+  /**
+   * Clears all users from the database, used for testing purposes.
+   */
+  public void clearAll() {
+    userRepository.deleteAll();
   }
 }

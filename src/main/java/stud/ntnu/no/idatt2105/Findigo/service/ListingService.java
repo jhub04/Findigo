@@ -49,6 +49,8 @@ public class ListingService {
   private final RecommendationService recommendationService;
   private final ListingMapper listingMapper;
   private final SaleRepository saleRepository;
+  private final UserService userService;
+
 
   /**
    * Adds a new listing for the currently authenticated user.
@@ -80,6 +82,7 @@ public class ListingService {
    * @return A list of {@link ListingResponse} objects containing listing details.
    * @throws NoSuchElementException if there are no listings associated with the given category.
    */
+  @Transactional
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
     logger.info("Fetching listings for category ID {}", categoryID);
 
@@ -93,6 +96,7 @@ public class ListingService {
    *
    * @return A list of {@link ListingResponse} objects.
    */
+  @Transactional
   public List<ListingResponse> getAllListings() {
     long currentUserId = securityUtil.getCurrentUser().getId();
     logger.info("Fetching all listings excluding user ID {}", currentUserId);
@@ -111,6 +115,7 @@ public class ListingService {
    * @return A {@link ListingResponse} of the listing.
    * @throws AppEntityNotFoundException if the listing does not exist.
    */
+  @Transactional
   public ListingResponse getListingById(Long id) {
     logger.info("Fetching listing by ID {}", id);
 
@@ -131,6 +136,7 @@ public class ListingService {
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    * @throws AccessDeniedException      if the current user does not own the listing.
    */
+  @Transactional
   public ListingResponse editMyListing(Long listingId, ListingRequest request) {
     logger.info("updating with request {}", request);
     Listing listing = listingRepository.findById(listingId)
@@ -147,7 +153,7 @@ public class ListingService {
     logger.info("category got{}", category);
 
     logger.info("listing attributes {}", listing.getListingAttributes());
-    listing.getListingAttributes().clear();//TODO this doesnt clear?
+    listing.getListingAttributes().clear();
     logger.info("listing attributes {}", listing.getListingAttributes());
 
     listing.setBriefDescription(request.getBriefDescription())
@@ -188,6 +194,7 @@ public class ListingService {
    * @return A {@link ListingResponse} containing the updated details.
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    */
+  @Transactional
   public ListingResponse editListingAsAdmin(Long listingId, ListingRequest request) {
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
@@ -195,14 +202,20 @@ public class ListingService {
     Category category = categoryRepository.findById(request.getCategoryId())
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
+    listing.getListingAttributes().clear();
+
     listing.setBriefDescription(request.getBriefDescription())
         .setFullDescription(request.getFullDescription())
         .setLatitude(request.getLatitude())
         .setLongitude(request.getLongitude())
+        .setPrice(request.getPrice())
+        .setAddress(request.getAddress())
+        .setPostalCode(request.getPostalCode())
         .setCategory(category)
-        .setListingAttributes(request.getAttributes().stream()
-            .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
-            .toList());
+        .getListingAttributes().addAll(
+            request.getAttributes().stream()
+                .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
+                .toList());
 
     Listing updatedListing = listingRepository.save(listing);
 
@@ -259,6 +272,7 @@ public class ListingService {
    * @param filterListingsRequest The request containing filter criteria.
    * @return A {@link Page} of {@link ListingResponse} objects matching the filter criteria.
    */
+  @Transactional
   public Page<ListingResponse> getFilteredListings(int page, int size, FilterListingsRequest filterListingsRequest) {
     List<ListingResponse> filteredListings = getAllFilteredListings(filterListingsRequest);
 
@@ -279,6 +293,7 @@ public class ListingService {
    * @param filterListingsRequest The request containing filter criteria.
    * @return A list of {@link ListingResponse} objects matching the filter criteria.
    */
+  @Transactional
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
     User currentUser = securityUtil.getCurrentUser();
 
@@ -402,5 +417,69 @@ public class ListingService {
     logger.info("Listing ID {} marked as active", listingId);
   }
 
+  @Transactional
+  public void seedTestListingsFor(String username, Long carCategoryId, Long houseCategoryId) {
+    User user = userService.getUserByUsername(username);
 
+    Category cars = categoryRepository.findById(carCategoryId).orElseThrow();
+    Category house = categoryRepository.findById(houseCategoryId).orElseThrow();
+
+    Listing listing1 = new Listing()
+        .setBriefDescription("En rask bil")
+        .setFullDescription("Denne bilen er kun til testformål")
+        .setLatitude(63.422)
+        .setLongitude(10.394)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(10000)
+        .setUser(user)
+        .setCategory(cars)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    Listing listing2 = new Listing()
+        .setBriefDescription("Et koselig testhus")
+        .setFullDescription("Dette huset er for å teste markører på kartet")
+        .setLatitude(63.430)
+        .setLongitude(10.395)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(2500000)
+        .setUser(user)
+        .setCategory(house)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    Listing listing3 = new Listing()
+        .setBriefDescription("En annen testbil")
+        .setFullDescription("Denne bilen er kun til testformål")
+        .setLatitude(63.422)
+        .setLongitude(10.394)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(10000)
+        .setUser(user)
+        .setCategory(cars)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    Listing listing4 = new Listing()
+        .setBriefDescription("En annen testhus")
+        .setFullDescription("Dette huset er for å teste markører på kartet")
+        .setLatitude(63.430)
+        .setLongitude(10.395)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(2500000)
+        .setUser(user)
+        .setCategory(house)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    listingRepository.save(listing1);
+    listingRepository.save(listing2);
+    listingRepository.save(listing3);
+    listingRepository.save(listing4);
+  }
+
+  @Transactional
+  public void clearAll() {
+    listingRepository.deleteAll();
+  }
 }
