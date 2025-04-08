@@ -48,7 +48,7 @@ public class UserService {
   private final UserRolesRepository  userRolesRepository;
   private final JWTUtil jwtUtil;
   private final CustomUserDetailsService userDetailsService;
-  private final ListingRepository listingRepository; // TODO: Avoid using listingRepository in UserService
+  private final ListingRepository listingRepository;
   private final FavoriteListingsRepository favoriteListingsRepository;
   private final SecurityUtil securityUtil;
   private final UserMapper userMapper;

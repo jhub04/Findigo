@@ -58,4 +58,6 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    */
   Page<Listing> findByCategoryAndIdNotIn(Category category, Set<Long> ids, Pageable pageable);
   List<Listing> findByCategoryIdAndUser_IdNotAndListingStatus(Long categoryId, Long userId, ListingStatus listingStatus);
+  Page<Listing> findListingsByCategoryIdAndListingStatus(Long categoryId, ListingStatus status, Pageable pageable);
+
 }
