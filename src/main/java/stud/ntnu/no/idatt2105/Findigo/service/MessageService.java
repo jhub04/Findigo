@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.MessageMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
@@ -32,7 +33,7 @@ import java.util.*;
 public class MessageService {
 
   private static final Logger logger = LogManager.getLogger(MessageService.class);
-
+  private final SecurityUtil securityUtil;
   private final MessageRepository messageRepository;
   private final UserRepository userRepository;
   private final UserService userService;
@@ -47,7 +48,7 @@ public class MessageService {
    * @throws AccessDeniedException if the authenticated user does not match the sender.
    */
   public MessageResponse sendMessage(MessageRequest messageRequest) {
-    UserDetails currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User currentUser = securityUtil.getCurrentUser();
     User sender = userRepository.findById(messageRequest.getFromUserId())
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
 
