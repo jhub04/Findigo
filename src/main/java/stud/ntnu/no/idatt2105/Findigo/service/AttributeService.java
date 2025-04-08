@@ -1,5 +1,6 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,6 +54,7 @@ public class AttributeService {
    * @return the {@link Attribute} entity if found
    * @throws AppEntityNotFoundException if the attribute is not found
    */
+  @Transactional
   public Attribute getAttributeById(long attributeId) {
     logger.info("Fetching attribute with ID {}", attributeId);
     return attributeRepository.findById(attributeId)
@@ -88,6 +90,7 @@ public class AttributeService {
    * @throws EditedValueUnchangedException if the new name is the same as the existing name
    * @throws AppEntityNotFoundException    if the attribute is not found
    */
+  @Transactional
   public void editAttribute(Long attributeId, AttributeRequest request) {
     logger.info("Editing attribute with ID {}", attributeId);
     Attribute attribute = getAttributeById(attributeId);
