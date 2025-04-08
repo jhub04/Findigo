@@ -25,14 +25,13 @@ import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Service class for managing listings.
  * <p>
  * Provides functionalities for creating, retrieving, updating, and deleting listings,
- * including operations specific to categories and user-based filtering.
+ * including operations specific to categorize and user-based filtering.
  * </p>
  */
 @Service
