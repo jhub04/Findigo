@@ -80,6 +80,7 @@ public class ListingService {
    * @return A list of {@link ListingResponse} objects containing listing details.
    * @throws NoSuchElementException if there are no listings associated with the given category.
    */
+  @Transactional
   public List<ListingResponse> getListingsInCategory(Long categoryID) {
     logger.info("Fetching listings for category ID {}", categoryID);
 
@@ -93,6 +94,7 @@ public class ListingService {
    *
    * @return A list of {@link ListingResponse} objects.
    */
+  @Transactional
   public List<ListingResponse> getAllListings() {
     long currentUserId = securityUtil.getCurrentUser().getId();
     logger.info("Fetching all listings excluding user ID {}", currentUserId);
@@ -111,6 +113,7 @@ public class ListingService {
    * @return A {@link ListingResponse} of the listing.
    * @throws AppEntityNotFoundException if the listing does not exist.
    */
+  @Transactional
   public ListingResponse getListingById(Long id) {
     logger.info("Fetching listing by ID {}", id);
 
@@ -131,6 +134,7 @@ public class ListingService {
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    * @throws AccessDeniedException      if the current user does not own the listing.
    */
+  @Transactional
   public ListingResponse editMyListing(Long listingId, ListingRequest request) {
     logger.info("updating with request {}", request);
     Listing listing = listingRepository.findById(listingId)
@@ -147,7 +151,7 @@ public class ListingService {
     logger.info("category got{}", category);
 
     logger.info("listing attributes {}", listing.getListingAttributes());
-    listing.getListingAttributes().clear();//TODO this doesnt clear?
+    listing.getListingAttributes().clear();
     logger.info("listing attributes {}", listing.getListingAttributes());
 
     listing.setBriefDescription(request.getBriefDescription())
@@ -188,6 +192,7 @@ public class ListingService {
    * @return A {@link ListingResponse} containing the updated details.
    * @throws AppEntityNotFoundException if the listing or category does not exist.
    */
+  @Transactional
   public ListingResponse editListingAsAdmin(Long listingId, ListingRequest request) {
     Listing listing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
@@ -195,14 +200,20 @@ public class ListingService {
     Category category = categoryRepository.findById(request.getCategoryId())
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
+    listing.getListingAttributes().clear();
+
     listing.setBriefDescription(request.getBriefDescription())
         .setFullDescription(request.getFullDescription())
         .setLatitude(request.getLatitude())
         .setLongitude(request.getLongitude())
+        .setPrice(request.getPrice())
+        .setAddress(request.getAddress())
+        .setPostalCode(request.getPostalCode())
         .setCategory(category)
-        .setListingAttributes(request.getAttributes().stream()
-            .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
-            .toList());
+        .getListingAttributes().addAll(
+            request.getAttributes().stream()
+                .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
+                .toList());
 
     Listing updatedListing = listingRepository.save(listing);
 
@@ -259,6 +270,7 @@ public class ListingService {
    * @param filterListingsRequest The request containing filter criteria.
    * @return A {@link Page} of {@link ListingResponse} objects matching the filter criteria.
    */
+  @Transactional
   public Page<ListingResponse> getFilteredListings(int page, int size, FilterListingsRequest filterListingsRequest) {
     List<ListingResponse> filteredListings = getAllFilteredListings(filterListingsRequest);
 
@@ -279,6 +291,7 @@ public class ListingService {
    * @param filterListingsRequest The request containing filter criteria.
    * @return A list of {@link ListingResponse} objects matching the filter criteria.
    */
+  @Transactional
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
     User currentUser = securityUtil.getCurrentUser();
 
