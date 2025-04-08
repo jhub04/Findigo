@@ -34,8 +34,6 @@ public class CategoryServiceTest {
     categoryRepository.deleteAll();
     CategoryRequest categoryRequest = new CategoryRequest("category1");
     category1Id = categoryService.createCategory(categoryRequest).getId();
-    AttributeRequest attributeRequest = new AttributeRequest("att1", "string", category1Id);
-    AttributeRequest attributeRequest2 = new AttributeRequest("att2", "string", category1Id);
   }
 
   @Test
