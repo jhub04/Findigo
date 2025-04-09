@@ -46,10 +46,7 @@ The project utilizes the following technologies:
 - **Map View:** Users get to see listings marked on a real map and filter them with advanced search
 - **Messaging:** Users can send messages to each other to negotiate or inquire on listed items
 - **Admin functionality:** Admin users can do administrate actions such as adding, modifying, and deleting categories and listings
-- **Internationalization:** The application has support for multiple languages
-- A user can reserve an item?
-
-More ...
+- **Internationalization:** The application has support language support for English, Norwegian, Spanish, as well as Nepali and Urdu
 
 ## System Architecture
 <img width="766" alt="Screenshot 2025-04-06 at 19 17 28" src="https://github.com/user-attachments/assets/65784c97-7c08-44ab-b9ed-95d9f4732622" />
@@ -92,6 +89,8 @@ cd Findigo
   ```
   
    or configure your run configuration to use the spring dev profile in your chosen IDE.
+
+You can find the swagger API documentation [here] (add link to swagger docs)
 
 #### Admin user credentials (use on login)
 - Username: admin
