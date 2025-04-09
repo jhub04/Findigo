@@ -92,11 +92,21 @@ public class ListingController {
   @GetMapping("/category/{categoryId}")
   public ResponseEntity<List<ListingResponse>> getListingsByCategory(
           @Parameter(description = "The ID of the category", example = "1") @PathVariable Long categoryId) {
-    //TODO paginate... kalles denne på i frontend når man henter lisitngs i kategori på main page?
+    //TODO paginate
     logger.info("Fetching listings in category with ID {}", categoryId);
     List<ListingResponse> listings = listingService.getListingsInCategory(categoryId);
     logger.info("Fetched {} listings in category with ID {}", listings.size(), categoryId);
     return ResponseEntity.ok(listings);
+  }
+
+  @GetMapping("category/{categoryId}/{pageNumber}")
+  public ResponseEntity<Page<ListingResponse>> getListingsByCategoryPaginated(
+          @Parameter(description = "The ID of the category", example = "1") @PathVariable Long categoryId,
+          @Parameter(description = "The page number to retrieve") @PathVariable int pageNumber) {
+    logger.info("Fetching listings in category with ID {}", categoryId);
+    Page<ListingResponse> listingsPage = listingService.getListingsInCategoryPaginated(categoryId, pageNumber - 1, pageSize);
+    logger.info("Fetched {} listings in category with ID {}", listingsPage.getContent().size(), categoryId);
+    return ResponseEntity.ok(listingsPage);
   }
 
   /**

@@ -42,12 +42,11 @@ More ...
 <img width="766" alt="Screenshot 2025-04-06 at 19 17 28" src="https://github.com/user-attachments/assets/65784c97-7c08-44ab-b9ed-95d9f4732622" />
 
 
-## Running the application (Uncomplete)
-NB! See [Findigo-Frontend](https://github.com/jhub04/Findigo-Frontend) for how to run the frontend
+## Running the Application for Development 
 #### Prerequisites 
 - JDK 21
 - Maven 
-- Docker
+- MySQL
 
 1. Clone the repository
 ```bash
@@ -57,8 +56,52 @@ git clone https://github.com/jhub04/Findigo.git
 ```bash
 cd Findigo
 ```
-3. Run the springboot executable
+3. Run the application with development configuration
 ```bash
-mvn spring-boot:run 
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
+## Deployment
+Findigo is deployed at https://idatt2105-09.idi.ntnu.no, hosted on a dedicated virtual machine within the NTNU network. The application will remain online until the administrator at NTNU shuts it down.
+
+#### <u>Hosting Environment</u>
+The project is deployed on an Ubuntu-based virtual machine using the following stack:
+- Backend: Spring Boot (Java 21, Maven)
+- Frontend: Vue 3 (Vite)
+- Database: MySQL 8
+- Web Server / Reverse Proxy: Nginx
+- Deployment Automation: GitHub Actions (CI/CD)
+
+#### <u>Setup Process</u>
+1. Connected to the Virtual Machine via ssh
+2. Installed Required Dependencies
+    - OpenJDK 21
+    - Maven
+    - Node.js (v20+)
+    - MySQL Server
+    - Nginx
+3. Cloned the repositories using a GitHub personal access token [(PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+
+#### <u>Backend Deployment</u>
+1. Built the application into a self-contained JAR
+2. Ran the JAR manually
+3. Set up a systemd service for automatic startup and easier management
+
+#### <u>Frontend Deployment</u>
+1. Installed required dependencies
+2. Built the project
+3. Deployed the static build files to Nginx's root directory
+
+#### <u>Nginx Configuration</u>
+Nginx was configured to:
+- Serve the built static files from `/var/www/html`
+- Reverse proxy `/api/` requests to the Spring Boot backend running on `https://localhost:8443`
+- Support HTTPS (via the backend's self-signed SSL keystore)
+
+#### <u>Spring Profiles</u>
+The backend uses Spring profiles to separate dev and prod configurations:
+
+- `application-dev.properties` is used during local development (e.g., using `mvn spring-boot:run -Dspring-boot.run.profiles=dev`)
+- `application-prod.properties` is used on the VM server
+- Common config is stored in `application.properties`
 

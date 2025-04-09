@@ -92,6 +92,27 @@ public class ListingService {
   }
 
   /**
+   * Retrieves a paginated list of listings in a specific category.
+   *
+   *
+   * @param categoryID The category id of the category whose listings are to be retrieved.
+   * @param page The page number to retrieve.
+   * @param size The number of listings per page.
+   * @return A {@link Page} of {@link ListingResponse} objects containing listing details.
+   */
+  @Transactional
+  public Page<ListingResponse> getListingsInCategoryPaginated(Long categoryID, int page, int size) {
+    logger.info("Fetching listings for category ID {}", categoryID);
+
+    Page<Listing> listings = listingRepository.findListingsByCategoryIdAndListingStatus(
+        categoryID, ListingStatus.ACTIVE, PageRequest.of(page, size));
+
+    return new PageImpl<>(listings.getContent().stream()
+        .map(listingMapper::toDto)
+        .collect(Collectors.toList()), listings.getPageable(), listings.getTotalElements());
+  }
+
+  /**
    * Retrieves all listings excluding the current user's own listings.
    *
    * @return A list of {@link ListingResponse} objects.

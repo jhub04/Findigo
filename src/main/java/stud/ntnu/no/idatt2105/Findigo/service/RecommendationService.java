@@ -1,5 +1,6 @@
 package stud.ntnu.no.idatt2105.Findigo.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,8 +52,8 @@ public class RecommendationService {
    * @param size the number of listings per page
    * @return a paginated {@link Page} of recommended listings
    */
+  @Transactional()
   public Page<ListingResponse> getRecommendedListings(int page, int size) {
-    //TODO what to do if the user has no browse history?
     User user = securityUtil.getCurrentUser();
 
     LocalDate tenDaysAgo = LocalDate.now().minusDays(10);
