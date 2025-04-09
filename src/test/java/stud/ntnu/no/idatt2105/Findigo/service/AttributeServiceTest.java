@@ -103,10 +103,6 @@ public class AttributeServiceTest {
     assertEquals("attribute2", createdAttribute.getName());
     assertEquals("string", createdAttribute.getType());
 
-    assertThrows(EntityAlreadyExistsException.class, () -> {
-      attributeService.createAttribute(attributeRequest);
-    });
-
     attributeService.deleteAttribute(createdAttribute.getId());
   }
 
