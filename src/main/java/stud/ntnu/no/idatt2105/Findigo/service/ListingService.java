@@ -55,7 +55,7 @@ public class ListingService {
 
   private void checkAccessToListing(Listing listing) {
     if (!(securityUtil.isListingOwner(listing) || securityUtil.isAdmin())) {
-      throw new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION);
+      throw new AccessDeniedException(CustomErrorMessage.UNAUTHORIZED_OPERATION.getMessage());
     }
   }
 

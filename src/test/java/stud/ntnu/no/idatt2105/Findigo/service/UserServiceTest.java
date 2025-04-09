@@ -24,6 +24,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserLiteResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.user.UserResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.entities.UserRoles;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
 import stud.ntnu.no.idatt2105.Findigo.repository.*;
@@ -50,6 +51,8 @@ public class UserServiceTest {
   private UserRepository userRepository;
   @Autowired
   private CategoryService categoryService;
+  @Autowired
+  UserRolesRepository userRolesRepository;
   private User user1;
   private User user2;
   private User user3;
@@ -68,12 +71,18 @@ public class UserServiceTest {
     userRepository.deleteAll();
     categoryRepository.deleteAll();
 
+    // Registrer user1 og gi admin-rolle
     AuthRequest registerRequest1 = new AuthRequest();
     registerRequest1.setUsername("existingUser");
     registerRequest1.setPassword("password123");
     userService.register(registerRequest1);
     user1 = userService.getUserByUsername("existingUser");
+    UserRoles user1Role = new UserRoles();
+    user1Role.setUser(user1);
+    user1Role.setRole(Role.ROLE_ADMIN);
+    userRolesRepository.save(user1Role);
 
+    // Registrer user2, user3, user4
     AuthRequest registerRequest2 = new AuthRequest().setUsername("user2").setPassword("password123");
     userService.register(registerRequest2);
     user2 = userService.getUserByUsername("user2");
@@ -81,12 +90,15 @@ public class UserServiceTest {
     AuthRequest registerRequest3 = new AuthRequest().setUsername("user3").setPassword("password123");
     userService.register(registerRequest3);
     user3 = userService.getUserByUsername("user3");
+
     AuthRequest registerRequest4 = new AuthRequest().setUsername("user4").setPassword("password123");
     userService.register(registerRequest4);
     user4 = userService.getUserByUsername("user4");
 
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+    // Sett user1 (admin) i SecurityContext før admin-operasjoner
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
 
+    // Opprett kategori og attributter
     CategoryRequest categoryRequest = new CategoryRequest("category1");
     category1Id = categoryService.createCategory(categoryRequest).getId();
 
@@ -97,38 +109,43 @@ public class UserServiceTest {
     AttributeResponse attributeResponse2 = attributeService.createAttribute(attributeRequest2);
 
     listingAttributeRequest = new ListingAttributeRequest()
-        .setAttributeId(attributeResponse1.getId())
-        .setValue("value1");
+            .setAttributeId(attributeResponse1.getId())
+            .setValue("value1");
     ListingAttributeRequest listingAttributeRequest2 = new ListingAttributeRequest()
-        .setAttributeId(attributeResponse2.getId())
-        .setValue("value2");
+            .setAttributeId(attributeResponse2.getId())
+            .setValue("value2");
+
+    // Bytt til user2 og opprett listing
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
 
     ListingRequest listingRequest = new ListingRequest()
-        .setAddress("Test Address")
-        .setBriefDescription("Test Description")
-        .setFullDescription("Test Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(1500.00)
-        .setCategoryId(category1Id)
-        .setPostalCode("3012")
-        .setAttributes(List.of(listingAttributeRequest, listingAttributeRequest2));
-    listing = listingService.addListing(listingRequest); //Will be made by user 2
+            .setAddress("Test Address")
+            .setBriefDescription("Test Description")
+            .setFullDescription("Test Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(1500.00)
+            .setCategoryId(category1Id)
+            .setPostalCode("3012")
+            .setAttributes(List.of(listingAttributeRequest, listingAttributeRequest2));
+    listing = listingService.addListing(listingRequest); // Will be made by user 2
 
+    // Bytt til user1 (admin) og opprett listing
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
 
     ListingRequest listingRequest2 = new ListingRequest()
-        .setAddress("Test Address")
-        .setBriefDescription("Test Description")
-        .setFullDescription("Test Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(1500.00)
-        .setCategoryId(category1Id)
-        .setPostalCode("3012")
-        .setAttributes(List.of(listingAttributeRequest, listingAttributeRequest2));
-    listing2 = listingService.addListing(listingRequest2); //Will be made by user 1
+            .setAddress("Test Address")
+            .setBriefDescription("Test Description")
+            .setFullDescription("Test Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(1500.00)
+            .setCategoryId(category1Id)
+            .setPostalCode("3012")
+            .setAttributes(List.of(listingAttributeRequest, listingAttributeRequest2));
+    listing2 = listingService.addListing(listingRequest2); // Will be made by user 1
   }
+
 
   @Test
   public void testGetUserByUsername() {
