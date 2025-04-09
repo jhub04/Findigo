@@ -132,4 +132,11 @@ public class CategoryService {
     categoryRepository.delete(category);
     logger.info("Category with ID {} deleted successfully", categoryId);
   }
+
+  @Transactional
+  public void clearAll() {
+    logger.info("Clearing all categories");
+    categoryRepository.deleteAll();
+    logger.info("All categories cleared successfully");
+  }
 }

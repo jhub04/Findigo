@@ -49,6 +49,8 @@ public class ListingService {
   private final RecommendationService recommendationService;
   private final ListingMapper listingMapper;
   private final SaleRepository saleRepository;
+  private final UserService userService;
+
 
   /**
    * Adds a new listing for the currently authenticated user.
@@ -436,5 +438,69 @@ public class ListingService {
     logger.info("Listing ID {} marked as active", listingId);
   }
 
+  @Transactional
+  public void seedTestListingsFor(String username, Long carCategoryId, Long houseCategoryId) {
+    User user = userService.getUserByUsername(username);
 
+    Category cars = categoryRepository.findById(carCategoryId).orElseThrow();
+    Category house = categoryRepository.findById(houseCategoryId).orElseThrow();
+
+    Listing listing1 = new Listing()
+        .setBriefDescription("En rask bil")
+        .setFullDescription("Denne bilen er kun til testformål")
+        .setLatitude(63.422)
+        .setLongitude(10.394)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(10000)
+        .setUser(user)
+        .setCategory(cars)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    Listing listing2 = new Listing()
+        .setBriefDescription("Et koselig testhus")
+        .setFullDescription("Dette huset er for å teste markører på kartet")
+        .setLatitude(63.430)
+        .setLongitude(10.395)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(2500000)
+        .setUser(user)
+        .setCategory(house)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    Listing listing3 = new Listing()
+        .setBriefDescription("En annen testbil")
+        .setFullDescription("Denne bilen er kun til testformål")
+        .setLatitude(63.422)
+        .setLongitude(10.394)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(10000)
+        .setUser(user)
+        .setCategory(cars)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    Listing listing4 = new Listing()
+        .setBriefDescription("En annen testhus")
+        .setFullDescription("Dette huset er for å teste markører på kartet")
+        .setLatitude(63.430)
+        .setLongitude(10.395)
+        .setAddress("Elgsetergata 2")
+        .setPostalCode("7030")
+        .setPrice(2500000)
+        .setUser(user)
+        .setCategory(house)
+        .setListingStatus(ListingStatus.ACTIVE);
+
+    listingRepository.save(listing1);
+    listingRepository.save(listing2);
+    listingRepository.save(listing3);
+    listingRepository.save(listing4);
+  }
+
+  @Transactional
+  public void clearAll() {
+    listingRepository.deleteAll();
+  }
 }

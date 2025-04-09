@@ -31,6 +31,9 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyEx
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -406,5 +409,34 @@ public class UserService {
   public User getUserByUsername(String username) {
     return userRepository.findByUsername(username)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+  }
+
+  /**
+   * Seeds test users into the database for e2e testing.
+   */
+  public void seedTestUsers() {
+    Instant fixedTime = Instant.parse("2023-01-01T00:00:00Z");
+
+    User user = new User();
+    user.setUsername("testuser");
+    user.setPassword(passwordEncoder.encode("1234"));
+    user.setPhoneNumber("12345678");
+    user.setCreatedAt(Date.from(fixedTime));
+    user.setUpdatedAt(Date.from(fixedTime));
+
+    UserRoles role = new UserRoles();
+    role.setUser(user);
+    role.setRole(Role.ROLE_USER);
+
+    user.getUserRoles().add(role);
+
+    userRepository.save(user);
+  }
+
+  /**
+   * Clears all users from the database, used for testing purposes.
+   */
+  public void clearAll() {
+    userRepository.deleteAll();
   }
 }
