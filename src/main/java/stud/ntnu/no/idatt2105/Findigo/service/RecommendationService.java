@@ -146,10 +146,14 @@ public class RecommendationService {
    * @param listing the {@link Listing} entity to add to browsing history
    */
   public void addListingToBrowseHistory(Listing listing) {
+    if (!securityUtil.isAuthenticated()) {
+      return; // Ikke logget inn, ikke prøv å lagre historikk
+    }
+
     User currentUser = securityUtil.getCurrentUser();
     BrowseHistory browseHistory = new BrowseHistory()
-        .setUser(currentUser)
-        .setListing(listing);
+            .setUser(currentUser)
+            .setListing(listing);
     browseHistoryRepository.save(browseHistory);
   }
 }

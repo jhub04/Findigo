@@ -31,6 +31,22 @@ public class SecurityUtil {
   private final UserRepository userRepository;
 
   /**
+   * Checks if there is an authenticated user in the security context.
+   *
+   * <p>This method verifies that the authentication object is not null,
+   * is marked as authenticated, and that the principal is not anonymous.</p>
+   *
+   * @return {@code true} if a user is authenticated, {@code false} otherwise
+   */
+  public boolean isAuthenticated() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication != null &&
+            authentication.isAuthenticated() &&
+            !"anonymousUser".equals(authentication.getPrincipal());
+  }
+
+
+  /**
    * Returns the current authenticated user if available, otherwise empty.
    *
    * @return an Optional containing the user, or empty if not authenticated
