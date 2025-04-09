@@ -3,6 +3,8 @@ name: Deploy Spring Boot Backend
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   deploy:
@@ -34,11 +36,11 @@ jobs:
         working-directory: /home/student/actions-runner/_work/Findigo/Findigo
 
       - name: Copy JAR to app directory
+        if: github.event_name == 'push'
         run: cp target/*.jar /home/student/apps/backend/Findigo/target/
         working-directory: /home/student/actions-runner/_work/Findigo/Findigo
 
-
-
       - name: Restart backend service
+        if: github.event_name == 'push'
         run: |
           sudo systemctl restart backend
