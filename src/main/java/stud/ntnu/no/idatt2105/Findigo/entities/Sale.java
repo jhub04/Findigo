@@ -34,7 +34,7 @@ public class Sale {
   /**
    * The listing that was sold.
    */
-  @ManyToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "listing_id", nullable = false)
   private Listing listing;
 

@@ -31,6 +31,9 @@ import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyEx
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -287,6 +290,8 @@ public class UserService {
    * @return the user lite response
    */
   public UserLiteResponse createUser(AdminUserRequest request) {
+    securityUtil.checkAdminAccess();
+
     if (userRepository.existsByUsername(request.getUsername())) {
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
@@ -403,8 +408,38 @@ public class UserService {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
 
+  /**
+   * Retrieves the current user's sold listings.
+   *
+   * @return list of listing responses
+   */
   public User getUserByUsername(String username) {
     return userRepository.findByUsername(username)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+  }
+
+  /**
+   * Seeds test users into the database for e2e testing.
+   */
+  public void seedTestUsers() {
+    User user = new User();
+    user.setUsername("testuser");
+    user.setPassword(passwordEncoder.encode("1234"));
+    user.setPhoneNumber("12345678");
+
+    UserRoles role = new UserRoles();
+    role.setUser(user);
+    role.setRole(Role.ROLE_USER);
+
+    user.getUserRoles().add(role);
+
+    userRepository.save(user);
+  }
+
+  /**
+   * Clears all users from the database, used for testing purposes.
+   */
+  public void clearAll() {
+    userRepository.deleteAll();
   }
 }

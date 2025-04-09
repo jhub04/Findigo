@@ -18,13 +18,12 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
+import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.entities.UserRoles;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityOperationException;
-import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
-import stud.ntnu.no.idatt2105.Findigo.repository.ListingImageRepository;
-import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
-import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+import stud.ntnu.no.idatt2105.Findigo.repository.*;
 
 import java.util.List;
 
@@ -52,10 +51,15 @@ public class ImageServiceTest {
   private ListingResponse listing;
   private User user1;
   private User user2;
+  @Autowired
+  private UserRolesRepository userRolesRepository;
+
   @BeforeEach
   void setUp() {
     categoryRepository.deleteAll();
     userRepository.deleteAll();
+    userRolesRepository.deleteAll();
+
     AuthRequest registerRequest1 = new AuthRequest();
     registerRequest1.setUsername("existingUser");
     registerRequest1.setPassword("password123");
@@ -67,6 +71,17 @@ public class ImageServiceTest {
     user2 = userService.getUserByUsername("user2");
 
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
+
+    UserRoles user1Role = new UserRoles();
+    user1Role.setUser(user1);
+    user1Role.setRole(Role.ROLE_ADMIN);
+    userRolesRepository.save(user1Role);
+
+    UserRoles user2Role = new UserRoles();
+    user2Role.setUser(user2);
+    user2Role.setRole(Role.ROLE_ADMIN);
+    userRolesRepository.save(user2Role);
+
 
     CategoryRequest categoryRequest = new CategoryRequest("category1");
     category1Id = categoryService.createCategory(categoryRequest).getId();

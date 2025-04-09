@@ -5,11 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.attribute.AttributeResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.AttributeMapper;
 import stud.ntnu.no.idatt2105.Findigo.entities.Attribute;
 import stud.ntnu.no.idatt2105.Findigo.entities.Category;
+import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EditedValueUnchangedException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.EntityAlreadyExistsException;
@@ -32,6 +34,7 @@ public class AttributeService {
   private final CategoryService categoryService;
 
   private static final Logger logger = LogManager.getLogger(AttributeService.class);
+  private final SecurityUtil securityUtil;
 
   /**
    * Retrieves all attributes from the database and maps them to AttributeResponse DTOs.
@@ -69,10 +72,9 @@ public class AttributeService {
    * @throws EntityAlreadyExistsException if an attribute with the same name already exists
    */
   public AttributeResponse createAttribute(AttributeRequest request) {
+    securityUtil.checkAdminAccess();
+
     logger.info("Creating attribute with name {}", request.getName());
-    if (attributeRepository.existsByAttributeName(request.getName())) {
-      throw new EntityAlreadyExistsException(CustomErrorMessage.ATTRIBUTE_ALREADY_EXISTS);
-    }
 
     Category category = categoryService.getCategoryById(request.getCategoryId());
     Attribute attribute = AttributeMapper.toEntity(request, category);
@@ -92,6 +94,8 @@ public class AttributeService {
    */
   @Transactional
   public void editAttribute(Long attributeId, AttributeRequest request) {
+    securityUtil.checkAdminAccess();
+
     logger.info("Editing attribute with ID {}", attributeId);
     Attribute attribute = getAttributeById(attributeId);
 
@@ -114,6 +118,8 @@ public class AttributeService {
    * @throws AppEntityNotFoundException if the attribute is not found
    */
   public void deleteAttribute(Long attributeId) {
+    securityUtil.checkAdminAccess();
+
     logger.info("Deleting attribute with ID {}", attributeId);
     if (!attributeRepository.existsById(attributeId)) {
       throw new AppEntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND);
