@@ -1,128 +1,131 @@
-package stud.ntnu.no.idatt2105.Findigo.entities;
+  package stud.ntnu.no.idatt2105.Findigo.entities;
 
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.Accessors;
-import org.hibernate.annotations.CreationTimestamp;
+  import jakarta.persistence.*;
+  import lombok.*;
+  import lombok.experimental.Accessors;
+  import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-/**
- * Entity representing a listing in the system.
- * <p>
- * Each listing is created by a user, belongs to a specific category,
- * and can contain custom attributes and images.
- * </p>
- */
-@Getter
-@Setter
-@Entity
-@Accessors(chain = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "listing")
-@ToString(exclude = {"category", "user", "listingAttributes", "imageUrls", "browseHistories", "favoriteListings"})
-public class Listing {
+  import java.util.ArrayList;
+  import java.util.Date;
+  import java.util.List;
 
   /**
-   * Unique identifier for the listing.
+   * Entity representing a listing in the system.
+   * <p>
+   * Each listing is created by a user, belongs to a specific category,
+   * and can contain custom attributes and images.
+   * </p>
    */
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Getter
+  @Setter
+  @Entity
+  @Accessors(chain = true)
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Table(name = "listing")
+  @ToString(exclude = {"category", "user", "listingAttributes", "imageUrls", "browseHistories", "favoriteListings"})
+  public class Listing {
 
-  /**
-   * Short description or summary of the listing.
-   */
-  @Column(nullable = false)
-  private String briefDescription;
+    /**
+     * Unique identifier for the listing.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  /**
-   * Detailed description of the listing.
-   */
-  @Column(nullable = false)
-  private String fullDescription;
+    /**
+     * Short description or summary of the listing.
+     */
+    @Column(nullable = false)
+    private String briefDescription;
 
-  /**
-   * Longitude of the listing location.
-   */
-  @Column(nullable = false)
-  private double longitude;
+    /**
+     * Detailed description of the listing.
+     */
+    @Column(nullable = false)
+    private String fullDescription;
 
-  /**
-   * Latitude of the listing location.
-   */
-  @Column(nullable = false)
-  private double latitude;
+    /**
+     * Longitude of the listing location.
+     */
+    @Column(nullable = false)
+    private double longitude;
 
-  /**
-   * Price of the listing.
-   */
-  @Column(nullable = false)
-  private double price;
+    /**
+     * Latitude of the listing location.
+     */
+    @Column(nullable = false)
+    private double latitude;
 
-  /**
-   * Address of the listing.
-   */
-  @Column(nullable = false)
-  private String address;
+    /**
+     * Price of the listing.
+     */
+    @Column(nullable = false)
+    private double price;
 
-  /**
-   * Postal code of the listing.
-   */
-  @Column(nullable = false)
-  private String postalCode;
+    /**
+     * Address of the listing.
+     */
+    @Column(nullable = false)
+    private String address;
 
-  /**
-   * Timestamp of when the listing was created.
-   * Automatically populated at creation.
-   */
-  @CreationTimestamp
-  @Column(name = "date_created", updatable = false)
-  private Date dateCreated;
+    /**
+     * Postal code of the listing.
+     */
+    @Column(nullable = false)
+    private String postalCode;
 
-  @Column(name = "listing_status")
-  @Enumerated(EnumType.STRING)
-  private ListingStatus listingStatus = ListingStatus.ACTIVE;
+    /**
+     * Timestamp of when the listing was created.
+     * Automatically populated at creation.
+     */
+    @CreationTimestamp
+    @Column(name = "date_created", updatable = false)
+    private Date dateCreated;
 
-  /**
-   * The category this listing belongs to.
-   */
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "category_id", nullable = false)
-  private Category category;
+    @Column(name = "listing_status")
+    @Enumerated(EnumType.STRING)
+    private ListingStatus listingStatus = ListingStatus.ACTIVE;
 
-  /**
-   * The user who created the listing.
-   */
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "userId", nullable = false)
-  private User user;
+    /**
+     * The category this listing belongs to.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
-  /**
-   * List of attributes associated with this listing.
-   * These are custom fields defined per category.
-   */
-  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ListingAttribute> listingAttributes = new ArrayList<>();
+    /**
+     * The user who created the listing.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
+    private User user;
 
-  /**
-   * List of image URLs associated with this listing.
-   */
-  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ListingImageUrls> imageUrls = new ArrayList<>();
+    /**
+     * List of attributes associated with this listing.
+     * These are custom fields defined per category.
+     */
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ListingAttribute> listingAttributes = new ArrayList<>();
 
-  /**
-   * Browsing history entries associated with this listing.
-   */
-  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<BrowseHistory> browseHistories = new ArrayList<>();
+    /**
+     * List of image URLs associated with this listing.
+     */
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ListingImageUrls> imageUrls = new ArrayList<>();
 
-  /**
-   * Favourites associated with this listing.
-   */
-  @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FavoriteListings> favoriteListings = new ArrayList<>();
-}
+    /**
+     * Browsing history entries associated with this listing.
+     */
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BrowseHistory> browseHistories = new ArrayList<>();
+
+    /**
+     * Favourites associated with this listing.
+     */
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteListings> favoriteListings = new ArrayList<>();
+
+    @OneToOne(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Sale sale;
+  }
