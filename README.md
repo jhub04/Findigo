@@ -3,6 +3,10 @@ Findigo is a full-stack application developed with Vue.js and Spring Boot.
 The project was developed as the final assesment in the course IDATT2105 Fullstack-Applikasjonsutvikling
 for the spring semester of 2025 at NTNU.
 
+Link to the hosted Findigo: https://idatt2105-09.idi.ntnu.no 
+
+**NB!** This repository contains the backend source code. You can find the frontend source code [here](https://github.com/jhub04/Findigo-Frontend.git)
+
 ## The team
 - Aryan Malekian
 - Scott Langum du Plessis
@@ -19,9 +23,7 @@ e-commerce platform for users to buy, sell and look at items.
 The project utilizes the following technologies:
 - Frontend: Vue 3 with Node.js
 - Backend: Springboot V3 with Maven and Java 21
-- Database: MySQL V8 for runtime and H2 for tests
-
-You can find the swagger API documentation [here] (add link to swagger docs)
+- Database: MySQL V8 for production and development, and H2 for tests
 
 ## Features
 - **Secure login:** Users can securely log in, register, and update their account details
@@ -42,11 +44,19 @@ More ...
 <img width="766" alt="Screenshot 2025-04-06 at 19 17 28" src="https://github.com/user-attachments/assets/65784c97-7c08-44ab-b9ed-95d9f4732622" />
 
 
-## Running the Application for Development 
+## Setup for Development and Test Environments
 #### Prerequisites 
 - JDK 21
 - Maven 
 - MySQL
+
+#### Spring Profiles
+The backend uses Spring profiles to separate dev, test and prod configurations:
+
+- `application-dev.properties` is used during local development
+- `application-prod.properties` is used for deployment on the VM server
+- `application-test.properties` is used for testing the development environment
+- Common config is stored in `application.properties`
 
 1. Clone the repository
 ```bash
@@ -56,12 +66,19 @@ git clone https://github.com/jhub04/Findigo.git
 ```bash
 cd Findigo
 ```
-3. Run the application with development configuration
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
+3. Run the application:
+- Running the application for development
+   ```bash
+   mvn spring-boot:run -Dspring-boot.run.profiles=dev
+   ```
+- Running the application for testing:
+   ```bash
+  mvn spring-boot:run -Dspring-boot.run.profiles=test
+  ```
+  
+   or configure your run configuration to use the spring dev profile in your chosen IDE. 
 
-## Deployment
+## Continuous Deployment
 Findigo is deployed at https://idatt2105-09.idi.ntnu.no, hosted on a dedicated virtual machine within the NTNU network. The application will remain online until the administrator at NTNU shuts it down.
 
 #### <u>Hosting Environment</u>
@@ -72,36 +89,15 @@ The project is deployed on an Ubuntu-based virtual machine using the following s
 - Web Server / Reverse Proxy: Nginx
 - Deployment Automation: GitHub Actions (CI/CD)
 
-#### <u>Setup Process</u>
-1. Connected to the Virtual Machine via ssh
-2. Installed Required Dependencies
-    - OpenJDK 21
-    - Maven
-    - Node.js (v20+)
-    - MySQL Server
-    - Nginx
-3. Cloned the repositories using a GitHub personal access token [(PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
-#### <u>Backend Deployment</u>
-1. Built the application into a self-contained JAR
-2. Ran the JAR manually
-3. Set up a systemd service for automatic startup and easier management
 
-#### <u>Frontend Deployment</u>
-1. Installed required dependencies
-2. Built the project
-3. Deployed the static build files to Nginx's root directory
+#### <u>Self-hosted runners</u>
+We created self-hosted runner for both of the repos, so that it was possible to communicate with the NTNU virtual machine from Github.
+The continuous deployment workflows were configured to:
+- Backend: Build the backend application into a self-contained JAR and set up a systemd service for automatic startup and easier management.
+- Frontend: Deployed the static build files to Nginx's root directory.  
 
-#### <u>Nginx Configuration</u>
-Nginx was configured to:
-- Serve the built static files from `/var/www/html`
-- Reverse proxy `/api/` requests to the Spring Boot backend running on `https://localhost:8443`
-- Support HTTPS (via the backend's self-signed SSL keystore)
 
-#### <u>Spring Profiles</u>
-The backend uses Spring profiles to separate dev and prod configurations:
 
-- `application-dev.properties` is used during local development (e.g., using `mvn spring-boot:run -Dspring-boot.run.profiles=dev`)
-- `application-prod.properties` is used on the VM server
-- Common config is stored in `application.properties`
+
 

@@ -127,7 +127,7 @@ public class ListingController {
           @RequestBody ListingRequest request) {
     logger.info("Editing listing with ID {}", listingId);
     logger.info("Request attributes: {}", request.getAttributes());
-    ListingResponse listingResponse = listingService.editMyListing(listingId, request);
+    ListingResponse listingResponse = listingService.editListing(listingId, request);
     logger.info("Listing with ID {} successfully edited", listingId);
     return ResponseEntity.ok(listingResponse);
   }
@@ -195,6 +195,28 @@ public class ListingController {
     return ResponseEntity.ok(recommendedListingsPage);
   }
 
+  /**
+   * Retrieves public listings for unauthenticated users, paginated.
+   *
+   * @param pageNumber the page number
+   * @return paginated public listings
+   */
+  @Operation(summary = "Get public listings", description = "Fetches a paginated list of public listings for unauthenticated users")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Public listings fetched successfully"),
+          @ApiResponse(responseCode = "404", description = "No public listings found")
+  })
+  @GetMapping("/public/{pageNumber}")
+  public ResponseEntity<Page<ListingResponse>> getPublicListings(
+          @Parameter(description = "The page number to retrieve") @PathVariable int pageNumber) {
+    logger.info("Getting public listings, page " + pageNumber);
+    Page<ListingResponse> publicListingsPage = recommendationService.getPublicListings(pageNumber - 1, pageSize);
+    logger.info("Public listings fetched: ");
+    for (ListingResponse listing : publicListingsPage.getContent()) {
+      logger.info("Listing ID: " + listing.getId() + ", Description: " + listing.getBriefDescription());
+    }
+    return ResponseEntity.ok(publicListingsPage);
+  }
 
   /**
    * Retrieves all listings filtered by the provided criteria.

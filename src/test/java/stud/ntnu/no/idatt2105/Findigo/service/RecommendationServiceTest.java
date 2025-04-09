@@ -15,9 +15,7 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
-import stud.ntnu.no.idatt2105.Findigo.entities.BrowseHistory;
-import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
-import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import stud.ntnu.no.idatt2105.Findigo.repository.*;
 
 import java.util.List;
@@ -44,6 +42,8 @@ public class RecommendationServiceTest {
   private UserRepository userRepository;
   @Autowired
   private CategoryService categoryService;
+  @Autowired
+  UserRolesRepository userRolesRepository;
   private User user1;
   private User user2;
   private long category1Id;
@@ -58,18 +58,26 @@ public class RecommendationServiceTest {
     userRepository.deleteAll();
     categoryRepository.deleteAll();
 
+    // Opprett user1 og gi admin-rolle
     AuthRequest registerRequest1 = new AuthRequest();
     registerRequest1.setUsername("existingUser");
     registerRequest1.setPassword("password123");
     userService.register(registerRequest1);
     user1 = userService.getUserByUsername("existingUser");
+    UserRoles user1Role = new UserRoles();
+    user1Role.setUser(user1);
+    user1Role.setRole(Role.ROLE_ADMIN);
+    userRolesRepository.save(user1Role);
 
+    // Opprett user2
     AuthRequest registerRequest2 = new AuthRequest().setUsername("user2").setPassword("password123");
     userService.register(registerRequest2);
     user2 = userService.getUserByUsername("user2");
 
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+    // Sett user1 som admin i SecurityContext før admin-operasjoner
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
 
+    // Opprett kategori og attributter (admin kreves)
     CategoryRequest categoryRequest = new CategoryRequest("category1");
     category1Id = categoryService.createCategory(categoryRequest).getId();
 
@@ -79,25 +87,31 @@ public class RecommendationServiceTest {
     AttributeResponse attributeResponse1 = attributeService.createAttribute(attributeRequest);
     AttributeResponse attributeResponse2 = attributeService.createAttribute(attributeRequest2);
 
+    // Sett tilbake user2 etter admin-arbeid
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+
+    // Nå kan user2 lage listing
     listingAttributeRequest = new ListingAttributeRequest()
-        .setAttributeId(attributeResponse1.getId())
-        .setValue("value1");
+            .setAttributeId(attributeResponse1.getId())
+            .setValue("value1");
     ListingAttributeRequest listingAttributeRequest2 = new ListingAttributeRequest()
-        .setAttributeId(attributeResponse2.getId())
-        .setValue("value2");
+            .setAttributeId(attributeResponse2.getId())
+            .setValue("value2");
 
     ListingRequest listingRequest = new ListingRequest()
-        .setAddress("Test Address")
-        .setBriefDescription("Test Description")
-        .setFullDescription("Test Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(1500.00)
-        .setCategoryId(category1Id)
-        .setPostalCode("3012")
-        .setAttributes(List.of(listingAttributeRequest, listingAttributeRequest2));
-    listing = listingService.addListing(listingRequest); //Will be made by user 2
+            .setAddress("Test Address")
+            .setBriefDescription("Test Description")
+            .setFullDescription("Test Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(1500.00)
+            .setCategoryId(category1Id)
+            .setPostalCode("3012")
+            .setAttributes(List.of(listingAttributeRequest, listingAttributeRequest2));
+
+    listing = listingService.addListing(listingRequest); // Will be made by user 2
   }
+
 
   @Test
   public void testGetRecommendedListingsWithNoBrowsingHistory() {
