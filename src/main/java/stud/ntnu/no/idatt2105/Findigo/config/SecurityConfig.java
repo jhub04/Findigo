@@ -101,7 +101,12 @@ public class SecurityConfig {
                             "/api/auth/logout",
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
-                            "/swagger-ui.html"
+                            "/swagger-ui.html",
+                            "/api/listings/public/**",
+                            "/api/images/**",
+                            "/api/listings/**",
+                            "/api/users/**",
+                            "/api/categories/**"
                     ).permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()

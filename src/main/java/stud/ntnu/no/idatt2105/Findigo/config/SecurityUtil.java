@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,8 @@ import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UnauthorizedOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+
+import java.util.Optional;
 
 /**
  * Utility class for security-related operations.
@@ -28,19 +31,33 @@ public class SecurityUtil {
   private final UserRepository userRepository;
 
   /**
+   * Returns the current authenticated user if available, otherwise empty.
+   *
+   * @return an Optional containing the user, or empty if not authenticated
+   */
+  public Optional<User> getCurrentUserIfAuthenticated() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null ||
+            !authentication.isAuthenticated() ||
+            "anonymousUser".equals(authentication.getPrincipal())) {
+      return Optional.empty();
+    }
+
+    String username = authentication.getName();
+    return userRepository.findByUsername(username);
+  }
+
+
+  /**
    * Retrieves the currently authenticated user from the security context.
    *
    * @return the authenticated {@link User}
    * @throws RuntimeException if the user is not found in the repository
    */
   public User getCurrentUser() {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = (principal instanceof UserDetails userDetails)
-            ? userDetails.getUsername()
-            : principal.toString();
-
-    return userRepository.findByUsername(username)
-            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+    return getCurrentUserIfAuthenticated()
+            .orElseThrow(() -> new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION));
   }
 
   /**
@@ -48,7 +65,7 @@ public class SecurityUtil {
    *
    * @return {@code true} if the user has the ADMIN role, {@code false} otherwise
    */
-  private boolean isAdmin() {
+  public boolean isAdmin() {
     return getCurrentUser().getUserRoles().stream()
             .anyMatch(role -> role.getRole().toString().equals("ROLE_ADMIN"));
   }

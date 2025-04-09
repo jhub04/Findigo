@@ -287,6 +287,8 @@ public class UserService {
    * @return the user lite response
    */
   public UserLiteResponse createUser(AdminUserRequest request) {
+    securityUtil.checkAdminAccess();
+
     if (userRepository.existsByUsername(request.getUsername())) {
       throw new EntityAlreadyExistsException(CustomErrorMessage.USERNAME_ALREADY_EXISTS);
     }
