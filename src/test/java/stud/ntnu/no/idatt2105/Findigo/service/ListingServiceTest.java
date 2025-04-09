@@ -16,7 +16,6 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.sale.SaleResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.ListingStatus;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
@@ -207,13 +206,13 @@ public class ListingServiceTest {
   }
 
   @Test
-  public void testEditMyListing() {
+  public void testEditListing() {
     assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editMyListing(99999L, new ListingRequest()); // Invalid ID
+      listingService.editListing(99999L, new ListingRequest()); // Invalid ID
     });
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
     assertThrows(AccessDeniedException.class, () -> {
-      listingService.editMyListing(listing.getId(), new ListingRequest()); // Not the owner
+      listingService.editListing(listing.getId(), new ListingRequest()); // Not the owner
     });
 
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
@@ -228,10 +227,10 @@ public class ListingServiceTest {
         .setPostalCode("3012")
         .setAttributes(List.of(listingAttributeRequest));
     assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editMyListing(listing.getId(), listingRequest); // Invalid category ID
+      listingService.editListing(listing.getId(), listingRequest); // Invalid category ID
     });
     listingRequest.setCategoryId(category1Id);
-    ListingResponse updatedListing = listingService.editMyListing(listing.getId(), listingRequest);
+    ListingResponse updatedListing = listingService.editListing(listing.getId(), listingRequest);
     assertEquals(listing.getId(), updatedListing.getId());
     assertEquals(listingRequest.getAddress(), updatedListing.getAddress());
     assertEquals(listingRequest.getBriefDescription(), updatedListing.getBriefDescription());
@@ -241,7 +240,7 @@ public class ListingServiceTest {
   @Test
   public void testEditListingAsAdmin() {
     assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editMyListing(99999L, new ListingRequest()); // Invalid ID
+      listingService.editListing(99999L, new ListingRequest()); // Invalid ID
     });
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user3, null, user3.getAuthorities()));
     ListingRequest listingRequest = new ListingRequest()

@@ -20,11 +20,13 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.sale.SaleResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.*;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UnauthorizedOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.CategoryRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.ListingRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Stream;
 import stud.ntnu.no.idatt2105.Findigo.repository.SaleRepository;
 
@@ -48,6 +50,13 @@ public class ListingService {
   private final RecommendationService recommendationService;
   private final ListingMapper listingMapper;
   private final SaleRepository saleRepository;
+
+  private void checkAccessToListing(Listing listing) {
+    if (!(securityUtil.isListingOwner(listing) || securityUtil.isAdmin())) {
+      throw new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION);
+    }
+  }
+
 
   /**
    * Adds a new listing for the currently authenticated user.
@@ -106,7 +115,7 @@ public class ListingService {
 
     return new PageImpl<>(listings.getContent().stream()
         .map(listingMapper::toDto)
-        .collect(Collectors.toList()), listings.getPageable(), listings.getTotalElements());
+        .toList(), listings.getPageable(), listings.getTotalElements());
   }
 
   /**
@@ -116,14 +125,22 @@ public class ListingService {
    */
   @Transactional
   public List<ListingResponse> getAllListings() {
-    long currentUserId = securityUtil.getCurrentUser().getId();
-    logger.info("Fetching all listings excluding user ID {}", currentUserId);
+    List<Listing> listings;
 
-    List<Listing> listings = listingRepository.findAllByUser_IdNotAndListingStatus(currentUserId, ListingStatus.ACTIVE);
+    Optional<User> currentUser = securityUtil.getCurrentUserIfAuthenticated();
+
+    if (currentUser.isPresent()) {
+      long currentUserId = currentUser.get().getId();
+      logger.info("Fetching listings excluding user ID {}", currentUserId);
+      listings = listingRepository.findAllByUser_IdNotAndListingStatus(currentUserId, ListingStatus.ACTIVE);
+    } else {
+      logger.info("Fetching listings for anonymous user");
+      listings = listingRepository.findAllByListingStatus(ListingStatus.ACTIVE);
+    }
 
     return listings.stream()
-        .map(listingMapper::toDto)
-        .toList();
+            .map(listingMapper::toDto)
+            .toList();
   }
 
   /**
@@ -155,131 +172,60 @@ public class ListingService {
    * @throws AccessDeniedException      if the current user does not own the listing.
    */
   @Transactional
-  public ListingResponse editMyListing(Long listingId, ListingRequest request) {
-    logger.info("updating with request {}", request);
-    Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+  public ListingResponse editListing(Long listingId, ListingRequest request) {
+    logger.info("Attempting to edit listing with ID {}", listingId);
 
-    logger.info("listing retrieved {}", listing);
-    if (!securityUtil.isListingOwner(listing)) {
-      logger.warn("Access denied: User does not own listing ID {}", listingId);
-      throw new AccessDeniedException("You do not own this listing");
-    }
+    Listing listing = listingRepository.findById(listingId)
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+
+    checkAccessToListing(listing);
 
     Category category = categoryRepository.findById(request.getCategoryId())
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
-    logger.info("category got{}", category);
-
-    logger.info("listing attributes {}", listing.getListingAttributes());
-    listing.getListingAttributes().clear();
-    logger.info("listing attributes {}", listing.getListingAttributes());
-
-    listing.setBriefDescription(request.getBriefDescription())
-        .setFullDescription(request.getFullDescription())
-        .setLatitude(request.getLatitude())
-        .setLongitude(request.getLongitude())
-        .setCategory(category)
-        .setPrice(request.getPrice())
-        .setPostalCode(request.getPostalCode())
-        .setAddress(request.getAddress())
-        .getListingAttributes().addAll(
-            request.getAttributes().stream()
-                .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
-                .toList());
-    logger.info("NEW listing attributes {}", listing.getListingAttributes());
-
-    Listing updatedListing;
-    logger.info("new listing{}", listing);
-    try {
-      updatedListing = listingRepository.save(listing);
-      logger.info("Listing updated successfully with ID {}", listingId);
-    } catch (Exception e) {
-      logger.error("error in updating listing " + e.getMessage());
-      throw e;
-    }
-    ListingResponse listingResponse = listingMapper.toDto(updatedListing);
-    logger.info("Listing response {}", listingResponse);
-    return listingResponse;
-  }
-
-  /**
-   * Edits an existing listing as an administrator.
-   * <p>
-   * Admins can edit any listing, regardless of ownership.
-   *
-   * @param listingId The ID of the listing to edit.
-   * @param request   The updated listing details.
-   * @return A {@link ListingResponse} containing the updated details.
-   * @throws AppEntityNotFoundException if the listing or category does not exist.
-   */
-  @Transactional
-  public ListingResponse editListingAsAdmin(Long listingId, ListingRequest request) {
-    Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
-
-    Category category = categoryRepository.findById(request.getCategoryId())
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
 
     listing.getListingAttributes().clear();
 
     listing.setBriefDescription(request.getBriefDescription())
-        .setFullDescription(request.getFullDescription())
-        .setLatitude(request.getLatitude())
-        .setLongitude(request.getLongitude())
-        .setPrice(request.getPrice())
-        .setAddress(request.getAddress())
-        .setPostalCode(request.getPostalCode())
-        .setCategory(category)
-        .getListingAttributes().addAll(
-            request.getAttributes().stream()
-                .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
-                .toList());
+            .setFullDescription(request.getFullDescription())
+            .setLatitude(request.getLatitude())
+            .setLongitude(request.getLongitude())
+            .setPrice(request.getPrice())
+            .setAddress(request.getAddress())
+            .setPostalCode(request.getPostalCode())
+            .setCategory(category)
+            .getListingAttributes().addAll(
+                    request.getAttributes().stream()
+                            .map(attr -> listingAttributeMapper.fromRequestToEntity(attr, listing))
+                            .toList());
 
     Listing updatedListing = listingRepository.save(listing);
 
-    logger.info("Admin updated listing successfully with ID {}", listingId);
+    logger.info("Listing updated successfully with ID {}", listingId);
     return listingMapper.toDto(updatedListing);
   }
 
   /**
    * Deletes a listing by its ID.
+   * <p>
+   * Users can delete their own listings. Admins can delete any listing.
    *
    * @param listingId The ID of the listing to delete.
    * @throws AppEntityNotFoundException if the listing does not exist.
-   * @throws AccessDeniedException      if the current user does not own the listing.
+   * @throws UnauthorizedOperationException if the user is not authorized to delete the listing.
    */
+  @Transactional
   public void deleteListing(long listingId) {
-    logger.info("Deleting listing with ID {}", listingId);
+    logger.info("Attempting to delete listing with ID {}", listingId);
 
     Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
+            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    if (!securityUtil.isListingOwner(listing)) {
-      logger.warn("Access denied: User does not own listing ID {}", listingId);
-      throw new AccessDeniedException("You do not own this listing");
-    }
+    checkAccessToListing(listing);
 
     listingRepository.deleteById(listingId);
     logger.info("Listing deleted successfully with ID {}", listingId);
   }
 
-  /**
-   * Deletes a listing by its ID as an administrator.
-   * <p>
-   * Admins can delete any listing, regardless of ownership.
-   *
-   * @param listingId The ID of the listing to delete.
-   * @throws AppEntityNotFoundException if the listing does not exist.
-   */
-  public void deleteListingAsAdmin(long listingId) {
-    logger.info("Admin: Deleting listing with ID {}", listingId);
-
-    Listing listing = listingRepository.findById(listingId)
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
-
-    listingRepository.deleteById(listingId);
-    logger.info("Admin: Listing deleted successfully with ID {}", listingId);
-  }
 
 
   /**
@@ -313,14 +259,15 @@ public class ListingService {
    */
   @Transactional
   public List<ListingResponse> getAllFilteredListings(FilterListingsRequest filterListingsRequest) {
-    User currentUser = securityUtil.getCurrentUser();
+    Optional<User> currentUser = securityUtil.getCurrentUserIfAuthenticated();
+    long excludeUserId = currentUser.map(User::getId).orElse(-1L);
 
     List<Listing> listingsToFilter;
     if (filterListingsRequest.getCategoryId() != null) {
       listingsToFilter = listingRepository.findByCategoryIdAndUser_IdNotAndListingStatus(
-          filterListingsRequest.getCategoryId(), currentUser.getId(), ListingStatus.ACTIVE);
+          filterListingsRequest.getCategoryId(), excludeUserId, ListingStatus.ACTIVE);
     } else {
-      listingsToFilter = listingRepository.findAllByUser_IdNotAndListingStatus(currentUser.getId(), ListingStatus.ACTIVE);
+      listingsToFilter = listingRepository.findAllByUser_IdNotAndListingStatus(excludeUserId, ListingStatus.ACTIVE);
     }
 
     Stream<Listing> stream = listingsToFilter.stream();
@@ -391,10 +338,7 @@ public class ListingService {
     Listing archivedListing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    if (!securityUtil.isListingOwner(archivedListing)) {
-      logger.warn("Access denied: User does not own listing ID {}", listingId);
-      throw new AccessDeniedException("You do not own this listing");
-    }
+    checkAccessToListing(archivedListing);
 
     if (archivedListing.getListingStatus() == ListingStatus.ARCHIVED || archivedListing.getListingStatus() == ListingStatus.SOLD) {
       logger.warn("Listing ID {} is already archived or sold", listingId);
@@ -419,10 +363,7 @@ public class ListingService {
     Listing activeListing = listingRepository.findById(listingId)
         .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.LISTING_NOT_FOUND));
 
-    if (!securityUtil.isListingOwner(activeListing)) {
-      logger.warn("Access denied: User does not own listing ID {}", listingId);
-      throw new AccessDeniedException("You do not own this listing");
-    }
+    checkAccessToListing(activeListing);
 
     if (activeListing.getListingStatus() == ListingStatus.ACTIVE || activeListing.getListingStatus() == ListingStatus.SOLD) {
       logger.warn("Listing ID {} is already active or sold", listingId);
@@ -434,6 +375,4 @@ public class ListingService {
 
     logger.info("Listing ID {} marked as active", listingId);
   }
-
-
 }
