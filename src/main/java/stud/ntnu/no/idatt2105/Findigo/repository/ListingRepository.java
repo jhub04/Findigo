@@ -45,6 +45,7 @@ public interface ListingRepository extends JpaRepository<Listing, Long> {
    * @return a list of listings not created by the specified user
    */
   List<Listing> findAllByUser_IdNotAndListingStatus(long id, ListingStatus listingStatus);
+  List<Listing> findAllByListingStatus(ListingStatus listingStatus);
   List<Listing> findByCategoryAndIdNotInAndListingStatus(Category category, Set<Long> ids, ListingStatus listingStatus);
 
   /**

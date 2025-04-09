@@ -14,6 +14,8 @@ import stud.ntnu.no.idatt2105.Findigo.entities.UserRoles;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRolesRepository;
 
+import java.util.List;
+
 /**
  * Mapper class responsible for converting {@link User} entities into {@link UserResponse} and {@link UserLiteResponse} DTOs,
  * and vice versa.
@@ -41,6 +43,9 @@ public class UserMapper {
    */
   public UserResponse toDTO(User user) {
     logger.debug("Mapping User entity with id {} to UserResponse DTO", user.getId());
+    List<String> roles = user.getUserRoles().stream()
+            .map(userRole -> userRole.getRole().name())
+            .toList();
 
     return new UserResponse(
             user.getId(),
@@ -48,7 +53,8 @@ public class UserMapper {
             user.getPhoneNumber(),
             user.getListings().stream()
                     .map(listingMapper::toDto)
-                    .toList()
+                    .toList(),
+            roles
     );
   }
 

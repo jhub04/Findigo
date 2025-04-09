@@ -47,6 +47,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
           throws ServletException, IOException {
 
+
+
     // Skip filtering for authentication endpoints
     if (request.getRequestURI().startsWith("/api/auth/")) {
       logger.debug("Skipping JWT filter for authentication endpoint: " + request.getRequestURI());
@@ -65,6 +67,10 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     }
 
     String username = jwtUtil.extractUsername(token);
+
+    logger.info("Token username: " + username);
+    logger.info("User authorities: " + userDetailsService.loadUserByUsername(username).getAuthorities());
+
 
     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       UserDetails userDetails = userDetailsService.loadUserByUsername(username);

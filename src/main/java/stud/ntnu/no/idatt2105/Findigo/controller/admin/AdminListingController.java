@@ -65,7 +65,7 @@ public class AdminListingController {
           @Validated @RequestBody ListingRequest request
   ) {
     logger.info("Admin: Updating listing with ID {}", listingId);
-    ListingResponse updatedListing = listingService.editListingAsAdmin(listingId, request);
+    ListingResponse updatedListing = listingService.editListing(listingId, request);
     logger.info("Admin: Listing updated with ID {}", listingId);
     return ResponseEntity.ok(updatedListing);
   }
@@ -90,7 +90,7 @@ public class AdminListingController {
           @PathVariable Long listingId
   ) {
     logger.info("Admin: Deleting listing with ID {}", listingId);
-    listingService.deleteListingAsAdmin(listingId);
+    listingService.deleteListing(listingId);
     logger.info("Admin: Listing deleted with ID {}", listingId);
     return ResponseEntity.ok("Listing successfully deleted");
   }

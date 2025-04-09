@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import stud.ntnu.no.idatt2105.Findigo.config.SecurityUtil;
 import stud.ntnu.no.idatt2105.Findigo.dtos.mappers.MessageMapper;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.message.MessageResponse;
@@ -37,6 +38,7 @@ public class MessageService {
   private final UserRepository userRepository;
   private final UserService userService;
   private final MessageMapper messageMapper;
+  private final SecurityUtil securityUtil;
 
   /**
    * Sends a message from one user to another.
@@ -47,7 +49,7 @@ public class MessageService {
    * @throws AccessDeniedException if the authenticated user does not match the sender.
    */
   public MessageResponse sendMessage(MessageRequest messageRequest) {
-    UserDetails currentUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User currentUser = securityUtil.getCurrentUser();
     User sender = userRepository.findById(messageRequest.getFromUserId())
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
 
@@ -85,9 +87,7 @@ public class MessageService {
   @Transactional
   public List<MessageResponse> getAllMessagesBetween(long userId1, long userId2) {
     // TODO: Paginate response for efficiency
-    User currentUser = userRepository.findByUsername(getAuthenticatedUsername())
-            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
-
+    User currentUser = securityUtil.getCurrentUser();
     if (!Objects.equals(currentUser.getId(), userId1) && !Objects.equals(currentUser.getId(), userId2)) {
       logger.warn("Access denied: Current user {} is not part of conversation {} <-> {}", currentUser.getId(), userId1, userId2);
       throw new AccessDeniedException("Neither of the given userIds (" + userId1 + ", " + userId2 + ") match the current user (" + currentUser.getId() + ")");
@@ -121,8 +121,7 @@ public class MessageService {
    */
   @Transactional
   public List<MessageResponse> getNewestMessages(long userID) {
-    User currentUser = userRepository.findByUsername(getAuthenticatedUsername())
-        .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+    User currentUser = securityUtil.getCurrentUser();
     if (!currentUser.getId().equals(userID)) {
       logger.warn("Access denied: Requested userId {} does not match current user {}", userID, currentUser.getId());
       throw new AccessDeniedException("Requested userId (" + userID + ") does not match current user (" + currentUser.getId() + ")");
@@ -172,14 +171,5 @@ public class MessageService {
 
     messages.sort(Comparator.comparing(Message::getSentAt));
     return messages;
-  }
-
-  /**
-   * Retrieves the username of the currently authenticated user.
-   *
-   * @return the username as a {@link String}.
-   */
-  private String getAuthenticatedUsername() {
-    return ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
   }
 }
