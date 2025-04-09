@@ -14,7 +14,6 @@ import stud.ntnu.no.idatt2105.Findigo.service.ListingService;
 @RestController
 @RequestMapping("/api/test")
 public class TestDataController {
-
   private final UserService userService;
   private final ListingService listingService;
   private final CategoryService categoryService;
@@ -27,12 +26,21 @@ public class TestDataController {
     this.categoryService = categoryService;
   }
 
+
+  /**
+   * Set a user in the database with user permissions for e2e testing
+   * @return A ResponseEntity with a success message
+   */
   @PostMapping("/seed")
   public ResponseEntity<?> seedUser() {
     userService.seedTestUsers();
     return ResponseEntity.ok("Database seeded with test data.");
   }
 
+  /**
+   * Clears the test database for e2e tests
+   * @return A ResponseEntity with a success message
+   */
   @PostMapping("/reset")
   public ResponseEntity<?> resetDatabase() {
     listingService.clearAll();
@@ -40,6 +48,12 @@ public class TestDataController {
     userService.clearAll();
     return ResponseEntity.ok("Database reset to initial state.");
   }
+
+  /**
+   * Initializes the database for e2e testing. Adds a user, category and listing to test database.
+   *
+   * @return A ResponseEntity with a success message.
+   */
 
   @PostMapping("/init")
   public ResponseEntity<?> initTestData() {
@@ -53,9 +67,4 @@ public class TestDataController {
 
     return ResponseEntity.ok("Test database initialized with user, categories, and listings.");
   }
-
-
-
-
-
 }
