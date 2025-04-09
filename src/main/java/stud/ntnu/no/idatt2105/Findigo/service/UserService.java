@@ -406,6 +406,11 @@ public class UserService {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
 
+  /**
+   * Retrieves the current user's sold listings.
+   *
+   * @return list of listing responses
+   */
   public User getUserByUsername(String username) {
     return userRepository.findByUsername(username)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
@@ -415,14 +420,10 @@ public class UserService {
    * Seeds test users into the database for e2e testing.
    */
   public void seedTestUsers() {
-    Instant fixedTime = Instant.parse("2023-01-01T00:00:00Z");
-
     User user = new User();
     user.setUsername("testuser");
     user.setPassword(passwordEncoder.encode("1234"));
     user.setPhoneNumber("12345678");
-    user.setCreatedAt(Date.from(fixedTime));
-    user.setUpdatedAt(Date.from(fixedTime));
 
     UserRoles role = new UserRoles();
     role.setUser(user);
