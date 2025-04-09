@@ -70,9 +70,6 @@ public class AttributeService {
    */
   public AttributeResponse createAttribute(AttributeRequest request) {
     logger.info("Creating attribute with name {}", request.getName());
-    if (attributeRepository.existsByAttributeName(request.getName())) {
-      throw new EntityAlreadyExistsException(CustomErrorMessage.ATTRIBUTE_ALREADY_EXISTS);
-    }
 
     Category category = categoryService.getCategoryById(request.getCategoryId());
     Attribute attribute = AttributeMapper.toEntity(request, category);
