@@ -125,4 +125,7 @@
      */
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FavoriteListings> favoriteListings = new ArrayList<>();
+
+    @OneToOne(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Sale sale;
   }
