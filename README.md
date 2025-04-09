@@ -14,7 +14,18 @@ Link to the hosted Findigo: https://idatt2105-09.idi.ntnu.no
 - Mikael Stray Frøyshov
 
 ## Table of contents
-...
+1. [Overview](#Overview)
+2. [Features](#Features)
+3. [System Architecture](#System-Architecture)
+4. [ER Diagram](#ER-Diagram)
+5. [Setup for Development and Test Environments](#Setup-for-Development-and-Test-Environments)
+      1. [Prerequisites](#Prerequisites)
+      2. [Spring Profiles](#Spring-Profiles)
+      3. [Setup](#Setup)
+      4. [Admin user credentials (use on login)](#Admin-user-credentials-(use-on-login))
+6. [Continuous Deployment](#Continuous-Deployment)
+      1. [Hosting Environment](#Hosting-Environment)
+      2. [Self-hosted runners](#Self-hosted-runners)
 
 ## Overview
 The project is a full-stack webapplication aiming to provide a user-friendly
@@ -43,6 +54,9 @@ More ...
 ## System Architecture
 <img width="766" alt="Screenshot 2025-04-06 at 19 17 28" src="https://github.com/user-attachments/assets/65784c97-7c08-44ab-b9ed-95d9f4732622" />
 
+## ER Diagram
+![image](https://github.com/user-attachments/assets/929c96d5-c4ca-493f-8daf-72255e64a709)
+
 
 ## Setup for Development and Test Environments
 #### Prerequisites 
@@ -58,6 +72,7 @@ The backend uses Spring profiles to separate dev, test and prod configurations:
 - `application-test.properties` is used for testing the development environment
 - Common config is stored in `application.properties`
 
+#### Setup
 1. Clone the repository
 ```bash
 git clone https://github.com/jhub04/Findigo.git
@@ -76,7 +91,11 @@ cd Findigo
   mvn spring-boot:run -Dspring-boot.run.profiles=test
   ```
   
-   or configure your run configuration to use the spring dev profile in your chosen IDE. 
+   or configure your run configuration to use the spring dev profile in your chosen IDE.
+
+#### Admin user credentials (use on login)
+- Username: admin
+- Password: admin123
 
 ## Continuous Deployment
 Findigo is deployed at https://idatt2105-09.idi.ntnu.no, hosted on a dedicated virtual machine within the NTNU network. The application will remain online until the administrator at NTNU shuts it down.
