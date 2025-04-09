@@ -1,6 +1,7 @@
 package stud.ntnu.no.idatt2105.Findigo.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,10 @@ import stud.ntnu.no.idatt2105.Findigo.entities.Listing;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
 import stud.ntnu.no.idatt2105.Findigo.exception.CustomErrorMessage;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
+import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.UnauthorizedOperationException;
 import stud.ntnu.no.idatt2105.Findigo.repository.UserRepository;
+
+import java.util.Optional;
 
 /**
  * Utility class for security-related operations.
@@ -27,19 +31,49 @@ public class SecurityUtil {
   private final UserRepository userRepository;
 
   /**
+   * Checks if there is an authenticated user in the security context.
+   *
+   * <p>This method verifies that the authentication object is not null,
+   * is marked as authenticated, and that the principal is not anonymous.</p>
+   *
+   * @return {@code true} if a user is authenticated, {@code false} otherwise
+   */
+  public boolean isAuthenticated() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication != null &&
+            authentication.isAuthenticated() &&
+            !"anonymousUser".equals(authentication.getPrincipal());
+  }
+
+
+  /**
+   * Returns the current authenticated user if available, otherwise empty.
+   *
+   * @return an Optional containing the user, or empty if not authenticated
+   */
+  public Optional<User> getCurrentUserIfAuthenticated() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null ||
+            !authentication.isAuthenticated() ||
+            "anonymousUser".equals(authentication.getPrincipal())) {
+      return Optional.empty();
+    }
+
+    String username = authentication.getName();
+    return userRepository.findByUsername(username);
+  }
+
+
+  /**
    * Retrieves the currently authenticated user from the security context.
    *
    * @return the authenticated {@link User}
    * @throws RuntimeException if the user is not found in the repository
    */
   public User getCurrentUser() {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = (principal instanceof UserDetails userDetails)
-            ? userDetails.getUsername()
-            : principal.toString();
-
-    return userRepository.findByUsername(username)
-            .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));
+    return getCurrentUserIfAuthenticated()
+            .orElseThrow(() -> new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION));
   }
 
   /**
@@ -50,6 +84,15 @@ public class SecurityUtil {
   public boolean isAdmin() {
     return getCurrentUser().getUserRoles().stream()
             .anyMatch(role -> role.getRole().toString().equals("ROLE_ADMIN"));
+  }
+
+  /**
+   * Throws exception if the current user is not an admin.
+   */
+  public void checkAdminAccess() {
+    if (!isAdmin()) {
+      throw new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION);
+    }
   }
 
   /**

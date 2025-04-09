@@ -121,6 +121,22 @@ public class RecommendationService {
     return new PageImpl<>(pagedListingResponses, PageRequest.of(page, size), allRecommendedListings.size());
   }
 
+  @Transactional
+  public Page<ListingResponse> getPublicListings(int page, int size) {
+    List<Listing> listings = listingRepository.findAllByListingStatus(ListingStatus.ACTIVE);
+
+    int start = Math.min(page * size, listings.size());
+    int end = Math.min(start + size, listings.size());
+
+    List<Listing> pagedListings = listings.subList(start, end);
+    List<ListingResponse> responses = pagedListings.stream()
+            .map(listingMapper::toDto)
+            .toList();
+
+    return new PageImpl<>(responses, PageRequest.of(page, size), listings.size());
+  }
+
+
   /**
    * Adds a listing to the browsing history of the current user.
    * <p>
@@ -130,10 +146,14 @@ public class RecommendationService {
    * @param listing the {@link Listing} entity to add to browsing history
    */
   public void addListingToBrowseHistory(Listing listing) {
+    if (!securityUtil.isAuthenticated()) {
+      return; // Ikke logget inn, ikke prøv å lagre historikk
+    }
+
     User currentUser = securityUtil.getCurrentUser();
     BrowseHistory browseHistory = new BrowseHistory()
-        .setUser(currentUser)
-        .setListing(listing);
+            .setUser(currentUser)
+            .setListing(listing);
     browseHistoryRepository.save(browseHistory);
   }
 }

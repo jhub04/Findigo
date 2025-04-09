@@ -16,9 +16,10 @@ import stud.ntnu.no.idatt2105.Findigo.dtos.category.CategoryRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.FilterListingsRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingRequest;
 import stud.ntnu.no.idatt2105.Findigo.dtos.listing.ListingResponse;
-import stud.ntnu.no.idatt2105.Findigo.dtos.sale.SaleResponse;
 import stud.ntnu.no.idatt2105.Findigo.entities.ListingStatus;
+import stud.ntnu.no.idatt2105.Findigo.entities.Role;
 import stud.ntnu.no.idatt2105.Findigo.entities.User;
+import stud.ntnu.no.idatt2105.Findigo.entities.UserRoles;
 import stud.ntnu.no.idatt2105.Findigo.exception.customExceptions.AppEntityNotFoundException;
 import stud.ntnu.no.idatt2105.Findigo.repository.*;
 
@@ -40,6 +41,9 @@ public class ListingServiceTest {
   @Autowired
   private ListingService listingService;
   @Autowired
+  private UserRolesRepository userRolesRepository;
+
+  @Autowired
   private ListingRepository listingRepository;
   @Autowired
   private UserService userService;
@@ -60,20 +64,32 @@ public class ListingServiceTest {
 
   @BeforeEach
   public void setUp() {
+    userRolesRepository.deleteAll();
     saleRepository.deleteAll();
     listingRepository.deleteAll();
     userRepository.deleteAll();
     categoryRepository.deleteAll();
+
 
     AuthRequest registerRequest1 = new AuthRequest();
     registerRequest1.setUsername("existingUser");
     registerRequest1.setPassword("password123");
     userService.register(registerRequest1);
     user1 = userService.getUserByUsername("existingUser");
+    UserRoles user1Role = new UserRoles();
+    user1Role.setUser(user1);
+    user1Role.setRole(Role.ROLE_ADMIN);
+    userRolesRepository.save(user1Role);
+
 
     AuthRequest registerRequest2 = new AuthRequest().setUsername("user2").setPassword("password123");
     userService.register(registerRequest2);
     user2 = userService.getUserByUsername("user2");
+    UserRoles user2Role = new UserRoles();
+    user2Role.setUser(user2);
+    user2Role.setRole(Role.ROLE_USER);
+    userRolesRepository.save(user2Role);
+
 
     AuthRequest registerRequest3 = new AuthRequest().setUsername("user3").setPassword("password123");
     userService.register(registerRequest3);
@@ -82,35 +98,45 @@ public class ListingServiceTest {
     userService.register(registerRequest4);
     user4 = userService.getUserByUsername("user4");
 
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+    // Først: Sett admin user1 i SecurityContext før admin-operasjoner
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
 
+// Opprett kategori (admin kreves)
     CategoryRequest categoryRequest = new CategoryRequest("category1");
     category1Id = categoryService.createCategory(categoryRequest).getId();
 
+// Opprett attributter (admin kreves)
     AttributeRequest attributeRequest = new AttributeRequest("att1", "string", category1Id);
     AttributeRequest attributeRequest2 = new AttributeRequest("att2", "string", category1Id);
 
     AttributeResponse attributeResponse1 = attributeService.createAttribute(attributeRequest);
     AttributeResponse attributeResponse2 = attributeService.createAttribute(attributeRequest2);
 
+// Bytt tilbake til user2 etter admin-arbeid
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+
+// Nå kan user2 lage listing
     listingAttributeRequest = new ListingAttributeRequest()
-        .setAttributeId(attributeResponse1.getId())
-        .setValue("value1");
+            .setAttributeId(attributeResponse1.getId())
+            .setValue("value1");
+
     ListingAttributeRequest listingAttributeRequest2 = new ListingAttributeRequest()
-        .setAttributeId(attributeResponse2.getId())
-        .setValue("value2");
+            .setAttributeId(attributeResponse2.getId())
+            .setValue("value2");
 
     ListingRequest listingRequest = new ListingRequest()
-        .setAddress("Test Address")
-        .setBriefDescription("Test Description")
-        .setFullDescription("Test Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(1500.00)
-        .setCategoryId(category1Id)
-        .setPostalCode("3012")
-        .setAttributes(new ArrayList<>(List.of(listingAttributeRequest, listingAttributeRequest2)));
-    listing = listingService.addListing(listingRequest); //Will be made by user 2
+            .setAddress("Test Address")
+            .setBriefDescription("Test Description")
+            .setFullDescription("Test Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(1500.00)
+            .setCategoryId(category1Id)
+            .setPostalCode("3012")
+            .setAttributes(new ArrayList<>(List.of(listingAttributeRequest, listingAttributeRequest2)));
+
+    listing = listingService.addListing(listingRequest);
+    //Will be made by user 2
   }
 
   @Test
@@ -207,114 +233,89 @@ public class ListingServiceTest {
   }
 
   @Test
-  public void testEditMyListing() {
+  public void testEditListing() {
+    // Invalid listingId
     assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editMyListing(99999L, new ListingRequest()); // Invalid ID
-    });
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
-    assertThrows(AccessDeniedException.class, () -> {
-      listingService.editMyListing(listing.getId(), new ListingRequest()); // Not the owner
+      listingService.editListing(99999L, new ListingRequest());
     });
 
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
-    ListingRequest listingRequest = new ListingRequest()
-        .setAddress("New Address")
-        .setBriefDescription("New Description")
-        .setFullDescription("New Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(2000.00)
-        .setCategoryId(99999L)
-        .setPostalCode("3012")
-        .setAttributes(List.of(listingAttributeRequest));
-    assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editMyListing(listing.getId(), listingRequest); // Invalid category ID
-    });
-    listingRequest.setCategoryId(category1Id);
-    ListingResponse updatedListing = listingService.editMyListing(listing.getId(), listingRequest);
-    assertEquals(listing.getId(), updatedListing.getId());
-    assertEquals(listingRequest.getAddress(), updatedListing.getAddress());
-    assertEquals(listingRequest.getBriefDescription(), updatedListing.getBriefDescription());
-    assertEquals(listingRequest.getFullDescription(), updatedListing.getFullDescription());
-  }
-
-  @Test
-  public void testEditListingAsAdmin() {
-    assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editMyListing(99999L, new ListingRequest()); // Invalid ID
-    });
+    // Not owner of listing
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user3, null, user3.getAuthorities()));
-    ListingRequest listingRequest = new ListingRequest()
-        .setAddress("New Address again")
-        .setBriefDescription("New Description again")
-        .setFullDescription("New Full Description again")
-        .setLatitude(66.4305)
-        .setLongitude(60.3951)
-        .setPrice(200.00)
-        .setCategoryId(9999L)
-        .setPostalCode("3012")
-        .setAttributes(new ArrayList<>(List.of(listingAttributeRequest)));
-    assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.editListingAsAdmin(listing.getId(), listingRequest); // Invalid category ID
+
+    ListingRequest validRequest = new ListingRequest()
+            .setAddress("Test Address")
+            .setBriefDescription("Test Description")
+            .setFullDescription("Test Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(1500.00)
+            .setCategoryId(category1Id)
+            .setPostalCode("3012")
+            .setAttributes(List.of(listingAttributeRequest));
+
+    assertThrows(AccessDeniedException.class, () -> {
+      listingService.editListing(listing.getId(), validRequest);
     });
-    listingRequest.setCategoryId(category1Id);
-    ListingResponse updatedListing = listingService.editListingAsAdmin(listing.getId(), listingRequest);
-    assertEquals(listing.getId(), updatedListing.getId());
-    assertEquals(listingRequest.getAddress(), updatedListing.getAddress());
-    assertEquals(listingRequest.getBriefDescription(), updatedListing.getBriefDescription());
-    assertEquals(listingRequest.getFullDescription(), updatedListing.getFullDescription());
+
+    // Invalid category
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+
+    ListingRequest invalidCategoryRequest = new ListingRequest()
+            .setAddress("New Address")
+            .setBriefDescription("New Description")
+            .setFullDescription("New Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(2000.00)
+            .setCategoryId(99999L)
+            .setPostalCode("3012")
+            .setAttributes(List.of(listingAttributeRequest));
+
+    assertThrows(AppEntityNotFoundException.class, () -> {
+      listingService.editListing(listing.getId(), invalidCategoryRequest);
+    });
+
+    // Successful edit
+    ListingRequest editRequest = new ListingRequest()
+            .setAddress("New Address")
+            .setBriefDescription("New Description")
+            .setFullDescription("New Full Description")
+            .setLatitude(63.4305)
+            .setLongitude(10.3951)
+            .setPrice(2000.00)
+            .setCategoryId(category1Id)
+            .setPostalCode("3012")
+            .setAttributes(List.of(listingAttributeRequest));
+
+    ListingResponse updatedListing = listingService.editListing(listing.getId(), editRequest);
+    assertEquals(editRequest.getAddress(), updatedListing.getAddress());
+    assertEquals(editRequest.getBriefDescription(), updatedListing.getBriefDescription());
+    assertEquals(editRequest.getFullDescription(), updatedListing.getFullDescription());
   }
 
   @Test
   public void testDeleteListing() {
+    // Invalid ID
     assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.deleteListing(99999L); // Invalid ID
-    });
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
-    assertThrows(AccessDeniedException.class, () -> {
-      listingService.deleteListing(listing.getId()); // Not the owner
+      listingService.deleteListing(99999L);
     });
 
-    ListingRequest listingRequest2 = new ListingRequest()
-        .setAddress("Test Address")
-        .setBriefDescription("Test Description")
-        .setFullDescription("Test Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(1500.00)
-        .setCategoryId(category1Id)
-        .setPostalCode("3012")
-        .setAttributes(List.of(listingAttributeRequest));
-    listing2 = listingService.addListing(listingRequest2); //Will be made by user 1
-    listingService.deleteListing(listing2.getId());
-    assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.getListingById(listing2.getId()); // Invalid ID
-    });
-  }
-
-  @Test
-  public void testDeleteListingAsAdmin() {
-    assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.deleteListingAsAdmin(9999999L); // Invalid ID
-    });
+    // Not owner
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user3, null, user3.getAuthorities()));
-    ListingRequest listingRequest2 = new ListingRequest()
-        .setAddress("Test Address")
-        .setBriefDescription("Test Description")
-        .setFullDescription("Test Full Description")
-        .setLatitude(63.4305)
-        .setLongitude(10.3951)
-        .setPrice(1500.00)
-        .setCategoryId(category1Id)
-        .setPostalCode("3012")
-        .setAttributes(List.of(listingAttributeRequest));
-    listing2 = listingService.addListing(listingRequest2); //Will be made by user 3
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
-    listingService.deleteListingAsAdmin(listing2.getId());
+
+    assertThrows(AccessDeniedException.class, () -> {
+      listingService.deleteListing(listing.getId());
+    });
+
+    // Successful deletion
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user2, null, user2.getAuthorities()));
+    listingService.deleteListing(listing.getId());
+
     assertThrows(AppEntityNotFoundException.class, () -> {
-      listingService.getListingById(listing2.getId()); // Invalid ID
+      listingService.getListingById(listing.getId());
     });
   }
+
 
   @Test
   public void testGetFilteredListingInvalidPageData() {
@@ -383,14 +384,15 @@ public class ListingServiceTest {
 
   @Test
   public void testArchiveAndSellListingInvalidUser() {
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user1, null, user1.getAuthorities()));
+    // Not owner
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(user3, null, user3.getAuthorities()));
+
     assertThrows(AccessDeniedException.class, () -> {
-      listingService.markListingAsArchived(listing.getId()); // Not the owner
+      listingService.markListingAsArchived(listing.getId());
     });
 
     assertThrows(AccessDeniedException.class, () -> {
-      listingService.markListingAsActive(listing.getId()); // Not the owner
+      listingService.markListingAsActive(listing.getId());
     });
   }
-
 }

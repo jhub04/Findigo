@@ -43,4 +43,10 @@ public class UserResponse {
    */
   @Schema(description = "List of listings created by the user")
   private List<ListingResponse> listings;
+
+  /**
+   * List with roles associated with the user
+   */
+  @Schema(description = "Roles assigned to the user", example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]")
+  private List<String> roles;
 }
