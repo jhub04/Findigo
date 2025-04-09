@@ -406,6 +406,11 @@ public class UserService {
     return getMyListingWithStatus(ListingStatus.SOLD);
   }
 
+  /**
+   * Retrieves the current user's sold listings.
+   *
+   * @return list of listing responses
+   */
   public User getUserByUsername(String username) {
     return userRepository.findByUsername(username)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.USERNAME_NOT_FOUND));

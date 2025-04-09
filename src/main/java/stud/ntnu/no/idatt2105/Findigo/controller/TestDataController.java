@@ -1,5 +1,8 @@
 package stud.ntnu.no.idatt2105.Findigo.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,11 @@ public class TestDataController {
    * Set a user in the database with user permissions for e2e testing
    * @return A ResponseEntity with a success message
    */
+  @Operation(summary = "Seed test users", description = "Adds test users to the database.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Test users seeded successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @PostMapping("/seed")
   public ResponseEntity<?> seedUser() {
     userService.seedTestUsers();
@@ -41,6 +49,11 @@ public class TestDataController {
    * Clears the test database for e2e tests
    * @return A ResponseEntity with a success message
    */
+  @Operation(summary = "Reset test database", description = "Clears all data from the test database.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Test database reset successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @PostMapping("/reset")
   public ResponseEntity<?> resetDatabase() {
     listingService.clearAll();
@@ -54,7 +67,11 @@ public class TestDataController {
    *
    * @return A ResponseEntity with a success message.
    */
-
+  @Operation(summary = "Initialize test database", description = "Adds a user, category, and listing to the test database.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Test database initialized successfully"),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
   @PostMapping("/init")
   public ResponseEntity<?> initTestData() {
     userService.clearAll();

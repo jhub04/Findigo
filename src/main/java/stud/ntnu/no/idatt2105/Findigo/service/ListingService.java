@@ -438,6 +438,13 @@ public class ListingService {
     logger.info("Listing ID {} marked as active", listingId);
   }
 
+  /**
+   * Seeds test listings for a specific user.
+   *
+   * @param username the username of the test user
+   * @param carCategoryId the ID of the car category
+   * @param houseCategoryId the ID of the house category
+   */
   @Transactional
   public void seedTestListingsFor(String username, Long carCategoryId, Long houseCategoryId) {
     User user = userService.getUserByUsername(username);
