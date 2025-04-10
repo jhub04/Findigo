@@ -70,6 +70,8 @@ The backend uses Spring profiles to separate dev, test and prod configurations:
 - Common config is stored in `application.properties`
 
 #### Setup
+You need to make sure you have the right environmental variables, as well as the correct keystore.jks file. You need to get this from another developer. 
+
 1. Clone the repository
 ```bash
 git clone https://github.com/jhub04/Findigo.git
