@@ -90,8 +90,10 @@ cd Findigo
   
    or configure your run configuration to use the spring dev profile in your chosen IDE.
 
-You can find the swagger API documentation [here] (add link to swagger docs)
+You can find the swagger API documentation [here](https://localhost:8443/swagger-ui/index.html) (dev or prod backend has to be running locally)
 
+#### Running tests
+Open the root folder of the project and type ```bash mvn test``` in the terminal
 #### Admin user credentials (use on login)
 - Username: admin
 - Password: admin123
