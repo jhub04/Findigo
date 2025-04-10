@@ -87,15 +87,6 @@ public class SecurityUtil {
   }
 
   /**
-   * Throws exception if the current user is not an admin.
-   */
-  public void checkAdminAccess() {
-    if (!isAdmin()) {
-      throw new UnauthorizedOperationException(CustomErrorMessage.UNAUTHORIZED_OPERATION);
-    }
-  }
-
-  /**
    * Checks if the provided user matches the currently authenticated user.
    *
    * @param user the user to compare with the current user
