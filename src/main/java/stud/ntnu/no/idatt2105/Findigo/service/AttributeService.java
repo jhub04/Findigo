@@ -72,8 +72,6 @@ public class AttributeService {
    * @throws EntityAlreadyExistsException if an attribute with the same name already exists
    */
   public AttributeResponse createAttribute(AttributeRequest request) {
-    securityUtil.checkAdminAccess();
-
     logger.info("Creating attribute with name {}", request.getName());
 
     Category category = categoryService.getCategoryById(request.getCategoryId());
@@ -94,8 +92,6 @@ public class AttributeService {
    */
   @Transactional
   public void editAttribute(Long attributeId, AttributeRequest request) {
-    securityUtil.checkAdminAccess();
-
     logger.info("Editing attribute with ID {}", attributeId);
     Attribute attribute = getAttributeById(attributeId);
 
@@ -118,8 +114,6 @@ public class AttributeService {
    * @throws AppEntityNotFoundException if the attribute is not found
    */
   public void deleteAttribute(Long attributeId) {
-    securityUtil.checkAdminAccess();
-
     logger.info("Deleting attribute with ID {}", attributeId);
     if (!attributeRepository.existsById(attributeId)) {
       throw new AppEntityNotFoundException(CustomErrorMessage.ATTRIBUTE_NOT_FOUND);

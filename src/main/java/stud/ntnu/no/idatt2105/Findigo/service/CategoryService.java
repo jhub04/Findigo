@@ -85,8 +85,6 @@ public class CategoryService {
    * @throws EntityAlreadyExistsException if a category with the same name already exists
    */
   public CategoryResponse createCategory(CategoryRequest request) {
-    securityUtil.checkAdminAccess();
-
     logger.info("Creating category with name '{}'", request.getName());
     if (categoryRepository.existsByCategoryName(request.getName())) {
       throw new EntityAlreadyExistsException(CustomErrorMessage.CATEGORY_ALREADY_EXISTS);
@@ -107,8 +105,6 @@ public class CategoryService {
    * @throws AppEntityNotFoundException    if the category is not found
    */
   public void editCategory(Long categoryId, CategoryRequest request) {
-    securityUtil.checkAdminAccess();
-
     logger.info("Editing category with ID {}", categoryId);
     Category category = getCategoryById(categoryId);
 
@@ -132,8 +128,6 @@ public class CategoryService {
    */
   @Transactional
   public void deleteCategory(Long categoryId) {
-    securityUtil.checkAdminAccess();
-
     logger.info("Deleting category with ID {}", categoryId);
     Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new AppEntityNotFoundException(CustomErrorMessage.CATEGORY_NOT_FOUND));
